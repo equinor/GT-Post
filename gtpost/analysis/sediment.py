@@ -1,0 +1,239 @@
+import numba
+import numpy as np
+
+
+def get_d50input(sedfile, sedtype, rho_p, sedfile_line):
+    """calculate the d50 for sediment input:
+    if the sedtype is not mud, then directly read d50;
+    if the sedtype is mud, using stokes to calculate d50
+    """
+    d50input = []
+    rhof = 1000
+    mu = 0.001
+    g = 9.81
+    """
+        basic parameters for stokes equation:
+        rho_f = 1000 fluid density
+        rho_p: specific density, reading from sed_file
+        g:9.81
+        mu: 0.001 dynamic viscosity
+    """
+    # get the number of sediment fraction
+    for stype in range(len(sedtype)):
+        if sedtype[stype] == "mud":
+            linetoread = sedfile_line[stype] + 3
+            with open(sedfile) as fobj:
+                line = fobj.readlines()
+                svelocity = float(line[linetoread].split()[2])
+                d50c = np.sqrt(18 * mu * svelocity / g / (rho_p[stype] - rhof))
+                d50input.append(d50c)
+        if sedtype[stype] == "sand":
+            linetoread = sedfile_line[stype] + 2
+            with open(sedfile) as fobj:
+                line = fobj.readlines()
+                d50c = float(line[linetoread].split()[2])
+                d50input.append(d50c)
+    return d50input
+
+
+def calculate_stratigraphy(dmsedcum, bed_level):
+    msedcum = np.cumsum(np.squeeze(np.asarray(dmsedcum)), axis=0)
+    bl = np.squeeze(np.asarray(-bed_level))
+    for it in range(np.shape(bl)[0] - 2, -1, -1):
+        bl_now = np.squeeze(bl[it, :, :])
+        bl_nextt = np.squeeze(bl[it + 1, :, :])
+        bl_now[bl_now > bl_nextt] = bl_nextt[bl_now > bl_nextt]
+        bl[it, :, :] = bl_now
+        for i_f in range(np.shape(msedcum)[1]):
+            msed_now = np.squeeze(np.squeeze(msedcum[it, i_f, :, :]))
+            msed_nextt = np.squeeze(np.squeeze(msedcum[it + 1, i_f, :, :]))
+            msed_now[msed_now > msed_nextt] = msed_nextt[msed_now > msed_nextt]
+            msedcum[it, i_f, :, :] = msed_now
+
+    dmsedcum_final = np.diff(msedcum, axis=0, prepend=0)
+    zcor = bl
+    return dmsedcum_final, zcor
+
+
+def calculate_fraction(rho_db, dmsedcum_final):
+    vfraction = np.zeros_like(dmsedcum_final)
+    old_err_state = np.seterr(divide="ignore", invalid="ignore")
+
+    # derive the volumetric sed flux by dividing by dry bed density
+    dvsedcum = np.zeros_like(dmsedcum_final)
+    for stype in range(np.shape(dvsedcum)[1]):
+        dvsedcum[:, stype, :, :] = dmsedcum_final[:, stype, :, :] / rho_db[stype]
+
+    dvsedcum[dmsedcum_final <= 0] = 0
+    sumsedvcum = np.sum(dvsedcum, axis=1)
+
+    for stype in range(np.shape(dvsedcum)[1]):
+        vfraction[:, stype, :, :] = np.divide(dvsedcum[:, stype, :, :], sumsedvcum)
+    vfraction[np.isnan(vfraction) == 1] = 0
+    #        # go back to original error state
+    np.seterr(**old_err_state)
+    return vfraction
+
+
+def calculate_sand_fraction(sedtype, vfraction):
+    vfrac = vfraction.copy()
+    for stype in range(np.shape(vfrac)[1]):
+        if sedtype[stype] == "mud":
+            vfrac[:, stype, :, :] = 0
+        else:
+            pass
+    return np.sum(vfrac, axis=1)
+
+
+def calculate_sorting(diameters, percentage2cal):
+    index10 = percentage2cal.index(10)
+    index16 = percentage2cal.index(16)
+    index84 = percentage2cal.index(84)
+    index90 = percentage2cal.index(90)
+    # using Folks 1968 for calculate sorting parameter. the indices are diameter value for percentage2cal
+
+    # TODO: Diamters in m moeten omgezet worden naar phi-schaal met  -np.log2()
+
+    sorting = (diameters[:, :, :, index84] - diameters[:, :, :, index16]) / 4 + (
+        diameters[:, :, :, index90] - diameters[:, :, :, index10]
+    ) / 6.6
+    return sorting
+
+
+@numba.njit
+def calculate_distribution(fraction_data, d50input):
+    # fraction_data = np.array([0.1,0.1,0.15,0.35,0.2,0.1], dtype=np.float32)
+    # Select only relevant xdata
+    xdata = d50input[fraction_data > 0]
+    xphi = -np.log2(1000 * xdata)
+    if len(xdata) > 0:
+        xdiff = np.diff(xphi)
+        xphi = np.hstack(
+            (
+                np.array([xphi[0] - 0.5], dtype=np.float32),
+                xphi[:-1] + (0.5 * xdiff),
+                np.array([xphi[-1] + 0.5], dtype=np.float32),
+            )
+        )
+        # cdf value
+        cdf = np.cumsum(fraction_data[fraction_data > 0])
+        cdf = np.hstack((np.array([0], dtype=np.float32), cdf))
+        # linear fit
+        xnew = np.arange(-1, 8, 0.1)
+        ynew = np.interp(xnew, xphi, cdf)
+        fraction_data = np.diff(ynew)
+        xnewd50 = (2 ** (-(xnew[1:]))) / 1000
+
+        if np.abs(np.sum(fraction_data) - 1) < 0.1:
+            # weighted distribution
+            minval = np.min(fraction_data[(fraction_data > 0.001).nonzero()])
+            amount = np.zeros(len(xnewd50), dtype=np.int32)
+
+            for i, d50 in enumerate(xnewd50):
+                amount[i] = np.int32(np.round(fraction_data[i] / minval))
+
+            total_samples = np.sum(amount)
+            cumsum_samples = np.cumsum(amount)
+            d50distributed = np.zeros(total_samples, dtype=np.float32)
+
+            for i, d50 in enumerate(xnewd50[:-2]):
+                d50distributed[cumsum_samples[i] : cumsum_samples[i + 1]] = np.full(
+                    cumsum_samples[i + 1] - cumsum_samples[i], d50
+                )
+
+            phidistributed = -np.log2(1000 * d50distributed)
+            phidistributed = phidistributed[np.isfinite(phidistributed)]
+
+            # Standard deviation of the sed distribution
+            averaged = np.nanmean(d50distributed)
+            averagep = np.nanmean(phidistributed)
+            distr_sdev = np.nanstd(phidistributed)
+            # Porosity based on empirical fit by Takebayashi & Fujita (2014)
+            poros = 0.38 * (
+                (3.7632 * (distr_sdev**-0.7552))
+                / (1 + (3.7632 * (distr_sdev**-0.7552)))
+            )
+            # Coefficient of variation of sed distribution
+            c_dp = distr_sdev / averagep
+            # Skewness of the sediment distribution
+            skw = (
+                (1 / len(d50distributed)) * np.sum((d50distributed - averaged) ** 3)
+            ) / (
+                ((1 / len(d50distributed)) * np.sum((d50distributed - averaged) ** 2))
+                ** (1.5)
+            )
+            # Turtuosity based on porosity after Ahmadi et al. (2011)
+            turt = np.sqrt(
+                ((2 * poros) / (3 * (1 - 1.209 * ((1 - poros) ** (2 / 3))))) + (1 / 3)
+            )
+            firstel = (averaged**2 * poros**3) / (72 * turt * ((1 - poros) ** 2))
+            secel = ((skw * c_dp + 3 * c_dp**2 + 1) ** 2) / ((1 + c_dp**2) ** 2)
+            perm = firstel * secel
+        else:
+            # This occurs if the sum of fractions is not equal to 1 with a tolerance of 0.01
+            perm = np.nan
+            poros = np.nan
+    else:
+        perm = np.nan
+        poros = np.nan
+        xnew = np.arange(-1, 8, 0.1)
+        ynew = np.full_like(xnew, np.nan)
+    return (ynew, xnew, poros, perm)
+
+
+@numba.njit
+def calculate_diameter(d50input, percentage2cal, vfraction):
+    if len(vfraction.shape) == 4:
+        nt, nlyr, nx, ny = vfraction.shape
+    # elif len(vfraction.shape)==3:
+    #     nlyr, nx, ny = vfraction.shape
+    #     nt = 1
+
+    diameters = np.zeros((nt, nx, ny, len(percentage2cal)))
+    porosity = np.zeros((nt, nx, ny))
+    permeability = np.zeros_like(porosity)
+    diameters[0] = np.nan
+    porosity[0] = np.nan
+    permeability[0] = np.nan
+    for it in range(nt - 1):
+        it += 1
+        for ix in range(nx):
+            for iy in range(ny):
+                fraction_data = vfraction[it, :, ix, iy]
+                # return the phi value needs to be changed back to meters
+                (
+                    cdf,
+                    xvalue,
+                    porosity[it, ix, iy],
+                    permeability[it, ix, iy],
+                ) = calculate_distribution(fraction_data, d50input)
+                # If poro/perm returns nan, find the last known value from previous time steps
+                # This is then still the poros/perm at the surface
+                # dmsedcum_final += 1
+                if np.isnan(porosity[it, ix, iy]):
+                    lastknown_idxs = (porosity[:, ix, iy] > 0.0).nonzero()[-1]
+                    if len(lastknown_idxs) != 0:
+                        porosity[it, ix, iy] = porosity[lastknown_idxs[-1], ix, iy]
+                        permeability[it, ix, iy] = permeability[
+                            lastknown_idxs[-1], ix, iy
+                        ]
+                for ipercen in range(len(percentage2cal)):
+                    diameters[it, ix, iy, ipercen] = 2 ** (
+                        -xvalue[np.argmin(np.abs(cdf - 0.01 * percentage2cal[ipercen]))]
+                    )
+                    # set diameter to zero if there is no deposition
+                    # because in the models, we don't have 2000mm,
+                    # if it is equals to 2000, then there it assigns to the value
+                    # below it
+                    if diameters[it, ix, iy, ipercen] == 2:
+                        if it > 0:
+                            diameters[it, ix, iy, ipercen] = diameters[
+                                it, ix, iy, ipercen
+                            ]
+                        else:
+                            diameters[it, ix, iy, ipercen] = 0
+                    else:
+                        pass
+    # print('stop')
+    # porosity[:,140,180]
+    return (diameters, porosity, permeability)
