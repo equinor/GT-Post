@@ -1,3 +1,4 @@
+from itertools import chain
 from pathlib import Path
 
 import matplotlib.patches as patches
@@ -33,10 +34,10 @@ class PlotBase:
         self.yticks_map = np.arange(0, len(self.model.dataset.M), 50)
 
         self.data = {
-            "d50": self.model.d50,
+            # "d50": self.model.d50,
             "architectural_elements": self.model.architectural_elements,
             "bed_level_change": self.model.bed_level_change,
-            "porosity": self.model.porosity,
+            # "porosity": self.model.porosity,
             "bottom_depth": self.model.bottom_depth,
         }
 
@@ -99,7 +100,7 @@ class PlotBase:
             self.ax = [ax1, ax2]
             self.cax = [cax1, cax2]
             dpi = self.fig.get_dpi()
-            self.fig.set_size_inches(1400.0 / float(dpi), 350.0 / float(dpi))
+            self.fig.set_size_inches(2000.0 / float(dpi), 800.0 / float(dpi))
 
         if self.figtype == "x-3panels":
             self.fig = plt.figure(dpi=72)
@@ -137,49 +138,62 @@ class PlotBase:
             self.fig.set_size_inches(2000.0 / float(dpi), 1000.0 / float(dpi))
 
     def draw_xsection(self, axis_idx, timestep, data, colormap):
-        patch_h = np.zeros(len(self.anchor_x))
-        patch_y = np.zeros_like(patch_h)
-
         axis = self.ax[axis_idx]
         caxis = self.cax[axis_idx]
 
         for i, x in enumerate(self.anchor_x):
             bed_chg = self.dh[timestep, i]
-            if bed_chg != 0.0:
-                if bed_chg < 0:
+            current_surface = self.anchor_y[timestep, i]
+            self.patches_per_position[i]
+            if bed_chg != 0:
+                if bed_chg < 0.0:
                     if colormap.type == "mappable":
                         color = colormap.mappable.to_rgba(data[timestep, i])
                     elif colormap.type == "categorical":
                         color = colormap.colors[data[timestep, i]]
-                elif bed_chg >= 0:
-                    color = (1.0, 1.0, 1.0, 1.0)
 
-                self.colorlist.append(color)
-                self.patchlist.append(
+                    self.patches_per_position[i].append(
+                        patches.Rectangle(
+                            xy=(x, current_surface),
+                            width=self.width,
+                            height=bed_chg,
+                            color=color,
+                            linewidth=0,
+                        )
+                    )
+
+                # Remove previous white patch
+                self.patches_per_position[i] = [
+                    p for p in self.patches_per_position[i] if p.get_height() < 0
+                ]
+                # Get patch bottoms to compare to current surface level. i.e. if bottom is
+                # above current surface level, remove patch altogether because it was eroded
+                patches_bottoms = [
+                    p.get_y() + p.get_height() for p in self.patches_per_position[i]
+                ]
+                self.patches_per_position[i] = [
+                    p
+                    for p, b in zip(self.patches_per_position[i], patches_bottoms)
+                    if b < current_surface
+                ]
+                # White patch to fill area above surface level up to top of figure
+                self.patches_per_position[i].append(
                     patches.Rectangle(
                         xy=(x, self.anchor_y[timestep, i]),
                         width=self.width,
-                        height=bed_chg,
-                        color=color,
+                        height=(self.ylim[1] - current_surface),
+                        color=(1.0, 1.0, 1.0, 1.0),
                         linewidth=0,
                     )
                 )
-                # self.patches_per_position[i].append(
-                #     patches.Rectangle(
-                #         xy=(x, self.anchor_y[timestep, i]),
-                #         width=self.width,
-                #         height=bed_chg,
-                #         color=color,
-                #         linewidth=0,
-                #     )
-                # )
 
-                # self.patches_per_position[i] = self.add_or_remove_patches(
-                #     self.patches_per_position[i]
-                # )
-
-        p = PatchCollection(self.patchlist)
-        p.set_color(self.colorlist)
+        selected_patches = list(
+            chain.from_iterable(
+                [value for key, value in self.patches_per_position.items()]
+            )
+        )
+        p = PatchCollection(selected_patches)
+        p.set_color([p.get_facecolor() for p in selected_patches])
         axis.add_collection(p)
         axis.plot(self.anchor_y[timestep, :])
 
@@ -202,14 +216,6 @@ class PlotBase:
         if colormap.type == "categorical":
             colorbar.set_ticks(colormap.ticks + 0.5)
             colorbar.set_ticklabels(colormap.labels)
-
-    def add_or_remove_patches(self, current_patchlist):
-        patches_y = [p.get_y() for p in current_patchlist]
-        patches_height = [p.get_height() for p in current_patchlist]
-        if patches_height[-1] < 0:
-            return current_patchlist
-        elif patches_height[-1] >= 0:
-            pass
 
     def draw_map(self, axis_idx, timestep, data, colormap):
         axis = self.ax[axis_idx]
@@ -300,7 +306,8 @@ class CrossSectionPlot(PlotBase):
         self.xlim = [self.anchor_x[0], self.anchor_x[-1]]
         self.ylim = [
             np.round(self.anchor_y.min() - 1),
-            np.round(self.anchor_y.max() + 1),
+            2
+            # np.round(self.anchor_y.max() + 1),
         ]
 
     def twopanel_xsection(self, variable_basemap, variable_xsect):
@@ -337,8 +344,10 @@ class CrossSectionPlot(PlotBase):
         colormap_base = self.colormaps[variable_basemap]
 
         self.figures = []
-        self.patchlist = []
-        self.colorlist = []
+        self.patchlist_1 = []
+        self.colorlist_1 = []
+        self.patchlist_2 = []
+        self.colorlist_2 = []
 
         self.patches_per_position = dict(
             zip(

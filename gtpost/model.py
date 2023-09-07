@@ -217,7 +217,7 @@ class ModelResult:
         - Detect depositional environments
         - Detect architectural elements
         """
-        self.compute_sediment_parameters()
+        # self.compute_sediment_parameters()
         self.detect_depositional_environments()
         self.detect_architectural_elements()
 
@@ -253,11 +253,11 @@ if __name__ == "__main__":
         if not output_folder.is_dir():
             Path.mkdir(output_folder)
 
-        mapplotter = plot.MapPlot(test)
-        mapplotter.twopanel_map("bottom_depth", "architectural_elements")
-        mapplotter.save_figures(output_folder, "maps_wd_ae")
+        # mapplotter = plot.MapPlot(test)
+        # mapplotter.twopanel_map("bottom_depth", "architectural_elements")
+        # mapplotter.save_figures(output_folder, "maps_wd_ae")
 
-        xsectplotter = plot.CrossSectionPlot(test, (100, 130), (280, 150))
+        xsectplotter = plot.CrossSectionPlot(test, (100, 130), (240, 140))
         xsectplotter.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",
