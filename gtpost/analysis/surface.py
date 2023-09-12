@@ -17,9 +17,10 @@ from gtpost.analysis import window_ops
 # constants
 delta_front_width = 12
 delta_front_min_sandfrac = 0.01
-channel_detection_sensitivity = -0.3
-mouthbar_critical_bl_change = -0.4
-mouthbar_minimal_bl_change = -0.1
+channel_detection_sensitivity = -0.35
+mouthbar_search_radius = 15
+mouthbar_critical_bl_change = -0.3
+mouthbar_minimal_bl_change = -0.0
 prodelta_minimal_depth = 5
 
 
@@ -71,9 +72,13 @@ def detect_depositional_environments(
             lower_edge = LineString(upper_edge)
 
         upper_edge = offset_curve(lower_edge, delta_front_width)
-        upper_edge = snap_linestring_to_polygon(
-            upper_edge, model_boundary, mouth_position
-        )
+        try:
+            upper_edge = snap_linestring_to_polygon(
+                upper_edge, model_boundary, mouth_position
+            )
+        except Exception:
+            lower_edge = LineString(init_coast)
+            upper_edge = LineString(init_coast)
 
         environments_t = delta_areas_from_boundaries(
             lower_edge, upper_edge, model_boundary, environments[t - 1, :, :]
@@ -206,7 +211,7 @@ def detect_elements(dep_env, channel_skeleton, bed_level_change):
     """
     archels = np.zeros_like(dep_env)
     mask = np.zeros_like(dep_env[0, :, :], dtype=np.bool_)
-    mb_kernel = np.ones((12, 12))
+    mb_kernel = np.ones((mouthbar_search_radius, mouthbar_search_radius))
     mb_recent = np.zeros_like(dep_env)
     for t in range(dep_env.shape[0] - 1):
         t += 1
@@ -223,7 +228,7 @@ def detect_elements(dep_env, channel_skeleton, bed_level_change):
         # Delta top = depositional environment delta top
         archels[t, :, :][dep_now == 1] = 1
 
-        # CHannels / Abandoned channels = depositional environment channels
+        # Channels / Abandoned channels = depositional environment channels
         archels[t, :, :][dep_now == 3] = 3
         archels[t, :, :][dep_now == 2] = 2
 
@@ -237,11 +242,14 @@ def detect_elements(dep_env, channel_skeleton, bed_level_change):
             delta_front, mb_kernel, mode="same", boundary="wrap"
         )
         mb_allowed_area = mask.copy()
-        mb_allowed_area[(mb_proximity_ch * mb_proximity_df) > 0] = True
+        mb_allowed_area[(mb_proximity_ch > 0) & dep_now == 4] = True
         mb_allowed_area = morphology.binary_closing(mb_allowed_area, morphology.disk(4))
 
         mouthbars = np.ma.masked_where(
-            (mb_allowed_area & (bed_chg_now < mouthbar_minimal_bl_change)),
+            (
+                (mb_allowed_area & (bed_chg_now < mouthbar_minimal_bl_change))
+                | (delta_front & (bed_chg_now < mouthbar_critical_bl_change))
+            ),
             mask,
         )
         if isinstance(mouthbars.mask, np.ndarray):

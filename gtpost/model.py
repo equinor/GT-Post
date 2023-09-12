@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 from pathlib import Path
 from typing import List, Union
 
@@ -11,9 +12,14 @@ from gtpost.analysis import sediment, surface
 from gtpost.io import export, read_d3d_input
 from gtpost.visualise import plot
 
+default_settings_file = (
+    Path(__file__).parents[1].joinpath(r"config\default_settings.ini")
+)
+
 
 class ModelResult:
     __slots__ = [
+        "config",
         "dataset",
         "sed_type",
         "rho_p",
@@ -43,7 +49,12 @@ class ModelResult:
         "architectural_elements",
     ]
 
-    def __init__(self, dataset: xr.Dataset, sedfile: Union[str, Path]):
+    def __init__(
+        self,
+        dataset: xr.Dataset,
+        sedfile: Union[str, Path],
+        settings_file: Union[str, Path] = default_settings_file,
+    ):
         """
         Delft3D ModelResult class. Used for postprocessing Delft3D GeoTool model
         results.
@@ -55,6 +66,8 @@ class ModelResult:
         sedfile : Pathlike
             Path to the D3D .sed file
         """
+        self.config = ConfigParser()
+        self.config = self.config.read(settings_file)
         self.dataset = dataset
         self.complete_dataset()
         (
@@ -65,7 +78,11 @@ class ModelResult:
         ) = read_d3d_input.read_sedfile(sedfile)
 
     @classmethod
-    def from_folder(cls, delft3d_folder: Union[str, Path]):
+    def from_folder(
+        cls,
+        delft3d_folder: Union[str, Path],
+        settings_file: Union[str, Path] = default_settings_file,
+    ):
         """
         Constructor for ModelResult class from Delft3D i/o folder
 
@@ -209,7 +226,7 @@ class ModelResult:
         self.sorting = sediment.calculate_sorting(self.diameters, percentage2cal)
         self.d50 = self.diameters[:, :, :, 3]
 
-    def postprocess(self):
+    def postprocess(self, settings_file):
         """
         Run all postprocess methods in order:
 
@@ -233,9 +250,7 @@ if __name__ == "__main__":
     d3d_folders = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling").glob("*")
 
     for d3d_folder in d3d_folders:
-        d3d_folder = Path(
-            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_010_1x4_triangle"
-        )
+        d3d_folder = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_035")
         folder_name = d3d_folder.stem
         output_folder = Path(
             f"n:\\Projects\\11209000\\11209074\\B. Measurements and calculations\\test_results\\{folder_name}"
@@ -243,7 +258,7 @@ if __name__ == "__main__":
 
         # try:
         test = ModelResult.from_folder(d3d_folder)
-        test.postprocess()
+        test.postprocess(None)
         # test.export_sediment_and_object_data(
         #     output_folder.joinpath(f"Sed_and_Obj_data.nc")
         # )
@@ -253,9 +268,9 @@ if __name__ == "__main__":
         if not output_folder.is_dir():
             Path.mkdir(output_folder)
 
-        # mapplotter = plot.MapPlot(test)
-        # mapplotter.twopanel_map("bottom_depth", "architectural_elements")
-        # mapplotter.save_figures(output_folder, "maps_wd_ae")
+        mapplotter = plot.MapPlot(test)
+        mapplotter.twopanel_map("bottom_depth", "architectural_elements")
+        mapplotter.save_figures(output_folder, "maps_wd_ae")
 
         xsectplotter = plot.CrossSectionPlot(test, (100, 130), (240, 140))
         xsectplotter.twopanel_xsection(
