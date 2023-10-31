@@ -9,7 +9,7 @@ from matplotlib.colors import ListedColormap
 
 import gtpost.utils as utils
 from gtpost.analysis import sediment, surface
-from gtpost.io import export, read_d3d_input
+from gtpost.io import export, read_d3d_input, ENCODINGS
 from gtpost.visualise import plot
 
 default_settings_file = (
@@ -31,6 +31,10 @@ class ModelResult:
         "mouth_river_width",
         "model_boundary",
         "bottom_depth",
+        "slope",
+        "foreset_depth",
+        "toeset_depth",
+        "df_average_width",
         "bed_level_change",
         "dep_env",
         "channels",
@@ -67,8 +71,13 @@ class ModelResult:
             Path to the D3D .sed file
         """
         self.config = ConfigParser()
-        self.config = self.config.read(settings_file)
-        self.dataset = dataset
+        self.config.read(settings_file)
+        self.dataset = dataset.isel(
+            time=slice(
+                int(self.config["general"]["start_timestep"]),
+                int(self.config["general"]["final_timestep"]),
+            )
+        )
         self.complete_dataset()
         (
             self.sed_type,
@@ -110,7 +119,7 @@ class ModelResult:
 
         dataset = xr.open_dataset(trimfile)
         if "flow2d3d" in dataset.attrs["source"].lower():
-            return cls(dataset, sedfile)
+            return cls(dataset, sedfile, settings_file)
         else:
             raise TypeError("File is not recognized as a Delft3D trim file")
 
@@ -135,7 +144,12 @@ class ModelResult:
             self.dataset["DPS"].values[1:, :, :] - self.dataset["DPS"].values[:-1, :, :]
         )
         self.dataset["MEAN_H1"] = self.dataset.MEAN_H1.where(self.dataset.MEAN_H1 > -50)
-        self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > 0).values
+        self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
+        self.slope = surface.slope(self.dataset["MEAN_H1"].values)
+        self.foreset_depth = utils.get_deltafront_contour_depth(
+            self.bottom_depth, self.slope, self.model_boundary
+        )
+        self.df_average_width = 10
 
     def detect_depositional_environments(self):
         """
@@ -156,9 +170,12 @@ class ModelResult:
         """
         # Initial detection of Delta top, Delta front and Prodelta
         dep_env = surface.detect_depositional_environments(
-            self.dataset["STD_SBUV"].values,
+            self.bottom_depth,  # + self.dataset["STD_SSUV"].values,
             self.mouth_position,
+            self.mouth_river_width,
             self.model_boundary,
+            self.foreset_depth,
+            self.df_average_width,
         )
         # Detection of channel network
         (
@@ -168,7 +185,11 @@ class ModelResult:
             self.channel_width,
             self.channel_depth,
         ) = surface.detect_channel_network(
-            self.dataset, dep_env, self.bed_level_change, self.dx
+            self.dataset,
+            dep_env,
+            self.bed_level_change,
+            self.dx,
+            self.config,
         )
         # Update of Delta front area to include the mouth of channels that connect to
         # the delta front (mouthbars are expected to form here)
@@ -191,7 +212,15 @@ class ModelResult:
         None (attribute architectural_elements is created)
         """
         self.architectural_elements = surface.detect_elements(
-            self.dep_env, self.channel_skeleton, self.bed_level_change
+            self.dep_env,
+            self.channels,
+            self.channel_skeleton,
+            self.channel_width,
+            self.bottom_depth,
+            self.bed_level_change,
+            self.sandfraction,
+            self.foreset_depth,
+            self.config,
         )
 
     def compute_sediment_parameters(self):
@@ -226,7 +255,7 @@ class ModelResult:
         self.sorting = sediment.calculate_sorting(self.diameters, percentage2cal)
         self.d50 = self.diameters[:, :, :, 3]
 
-    def postprocess(self, settings_file):
+    def postprocess(self):
         """
         Run all postprocess methods in order:
 
@@ -234,7 +263,7 @@ class ModelResult:
         - Detect depositional environments
         - Detect architectural elements
         """
-        # self.compute_sediment_parameters()
+        self.compute_sediment_parameters()
         self.detect_depositional_environments()
         self.detect_architectural_elements()
 
@@ -243,27 +272,24 @@ class ModelResult:
 
     def export_sediment_and_object_data(self, out_file):
         ds = export.create_sed_and_obj_dataset(self)
-        ds.to_netcdf(out_file)
+        ds.to_netcdf(out_file, engine="h5netcdf", encoding=ENCODINGS)
 
 
 if __name__ == "__main__":
     d3d_folders = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling").glob("*")
 
     for d3d_folder in d3d_folders:
-        d3d_folder = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_035")
+        d3d_folder = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_054")
         folder_name = d3d_folder.stem
         output_folder = Path(
             f"n:\\Projects\\11209000\\11209074\\B. Measurements and calculations\\test_results\\{folder_name}"
         )
 
-        # try:
         test = ModelResult.from_folder(d3d_folder)
-        test.postprocess(None)
+        test.postprocess()
         # test.export_sediment_and_object_data(
         #     output_folder.joinpath(f"Sed_and_Obj_data.nc")
         # )
-        # except Exception:
-        # continue
 
         if not output_folder.is_dir():
             Path.mkdir(output_folder)
@@ -272,99 +298,24 @@ if __name__ == "__main__":
         mapplotter.twopanel_map("bottom_depth", "architectural_elements")
         mapplotter.save_figures(output_folder, "maps_wd_ae")
 
-        xsectplotter = plot.CrossSectionPlot(test, (100, 130), (240, 140))
-        xsectplotter.twopanel_xsection(
+        xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (110, 155))
+        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
+        xsectplotter_xshore.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",
         )
-        xsectplotter.save_figures(output_folder, "archels")
+        xsectplotter_xshore.save_figures(output_folder, "archels_xshore")
 
-        xsectplotter.twopanel_xsection("d50", "d50")
-        xsectplotter.save_figures(output_folder, "d50")
+        xsectplotter_xshore.twopanel_xsection("d50", "d50")
+        xsectplotter_xshore.save_figures(output_folder, "d50_xshore")
 
-        # test plotting
-        alphas = [1, 0.5, 0.7, 0, 0.5, 0, 1]
-        alphas = [1, 1, 1, 1, 1, 1, 1]
-        cmap = ListedColormap(
-            colors=[
-                "snow",
-                "yellowgreen",
-                "peru",
-                "deepskyblue",
-                "yellow",
-                "turquoise",
-                "mediumblue",
-            ],
-            name="archels",
+        xsectplotter_lshore = plot.CrossSectionPlot(test, (10, 60), (70, 240))
+        xsectplotter_lshore = plot.CrossSectionPlot(test, (115, 80), (115, 220))
+        xsectplotter_lshore.twopanel_xsection(
+            "architectural_elements",
+            "architectural_elements",
         )
-        cmap = cmap(np.arange(cmap.N))
-        cmap[:, -1] = alphas
-        cmap = ListedColormap(cmap)
-        bounds = np.arange(8)
-        vals = bounds[:-1]
-        # norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+        xsectplotter_lshore.save_figures(output_folder, "archels_lshore")
 
-        for i in range(len(test.dataset.time)):
-            fig = plt.figure(figsize=(10, 10))
-            ax = fig.subplots()
-            # ax.imshow(
-            #     test.channel_width[100, :, :] * test.channel_skeleton[100, :, :],
-            #     cmap=plt.cm.YlGnBu,
-            #     vmin=0,
-            #     vmax=300,
-            # )
-            # ax.imshow(
-            #     test.dataset["STD_SBUV"].values[100, :, :],
-            #     cmap=plt.cm.YlGnBu,
-            #     vmin=0,
-            #     vmax=0.00004,
-            # )
-            # test.dataset.MEAN_H1[i, :, :].plot.imshow(
-            #     ax=ax, vmin=0, vmax=8, cmap=plt.cm.YlGnBu
-            # )
-            # ax.plot(test.lower_edge[i].xy[1], test.lower_edge[i].xy[0], color="yellow")
-            im = ax.imshow(
-                test.architectural_elements[i, :, :],
-                cmap=cmap,
-                interpolation="antialiased",
-                interpolation_stage="rgba",
-            )
-            ax.invert_yaxis()
-
-            ax.set_ylabel("Cross-shore direction (cells)")
-            im.set_clim(0, 7)
-
-            bbox = ax.get_position()
-            clbounds = bbox.bounds
-
-            ax.set_title("Architectural Elements", loc="left")
-            ax_cl = fig.add_axes([clbounds[0], clbounds[1] - 0.1, clbounds[2], 0.02])
-            cbar = fig.colorbar(
-                ax.images[0],
-                cax=ax_cl,
-                boundaries=bounds,
-                values=vals,
-                orientation="horizontal",
-            )
-            cbar.set_ticks(vals + 0.5)
-            cbar.set_ticklabels(["N/A", "AC", "CF", "DT", "MB", "DF", "PD"])
-            cbar.ax.tick_params()
-            # derive time
-            # seconds_since_ref = int(self.timeseries[timestep])
-            # date_image_name = self.date_time(seconds_since_ref=seconds_since_ref).strftime("%Y%m%d%H%M%S")
-            # self.time = date_image_name
-            ax.set_xlabel("Alongshore direction (cells)")
-            plt.savefig(output_folder.joinpath(f"{i:04}.png"))
-            plt.close()
-
-    print(f"{folder_name} done!")
-    plt.imshow(test.bottom_depth[100, :, :])
-    # (test.dataset.MAX_UV[100, :, :]).plot.imshow(vmin=0, vmax=1, alpha=1)
-    # (test.dataset.STD_SBUV[100, :, :] * test.dataset.STD_SSUV[100, :, :]).plot.imshow(
-    #     vmin=1e-14, vmax=1e-14, alpha=0.5
-    # )
-    # (test.dataset.MEAN_SBUV[100, :, :]).plot.imshow(vmin=0, vmax=1e-4, alpha=1)
-    # fig = plt.figure(figsize=(10, 10))
-    # ax = fig.subplots()
-    # ax.imshow(test.bed_level_change[100,:,:], vmin=-1, vmax=1)
-    # ax.invert_yaxis()
+        xsectplotter_lshore.twopanel_xsection("d50", "d50")
+        xsectplotter_lshore.save_figures(output_folder, "d50_lshore")

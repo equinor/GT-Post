@@ -1,5 +1,8 @@
 import numpy as np
-from shapely import LineString, Polygon, frechet_distance, length, total_bounds
+from rasterio.features import rasterize
+from shapely import buffer
+from shapely.geometry import LineString, Point, Polygon
+from shapely.ops import nearest_points
 from skimage import measure
 
 
@@ -17,7 +20,7 @@ def get_model_bound(dataset):
     Get position of initial coastline
     """
     contours = measure.find_contours(dataset.MEAN_H1[1, :, :].values, -999)
-    boundary = Polygon(contours[0])
+    boundary = Polygon(contours[0]).buffer(-1)
     return boundary
 
 
@@ -39,8 +42,59 @@ def get_mouth_midpoint(dataset):
 
 def get_river_width_at_mouth(dataset, mouth_midpoint):
     line = dataset.MEAN_H1[1, mouth_midpoint[1] - 1, :].values
-    width = len(line[line > 0])
+    left_side = np.argmax(line > 0)
+    right_side = len(line) - np.argmax(line[::-1] > 0)
+    width = right_side - left_side
     return width
+
+
+def get_deltafront_contour_depth(bottom_depth, slope, model_boundary):
+    """
+    Test different contour depths to find the depth contour that has the highest slope
+    on average. This is the contour that best follows the steepest part of the foreset
+    and is used to bound the delta and for classification of architectural elements.
+
+    Parameters
+    ----------
+    bottom_depth : _type_
+        _description_
+    slope : _type_
+        _description_
+    """
+    contour_depths = [2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8]
+    foreset_contours = []
+    timesteps = bottom_depth.shape[0]
+    model_inner_boundary = buffer(model_boundary, -16)
+    model_inner_grid = rasterize(
+        [(model_inner_boundary, 1)],
+        out_shape=(slope[0, :, :].shape[1], slope[0, :, :].shape[0]),
+    ).transpose()
+    for i in np.arange(20, timesteps, 5):
+        slope_mean = []
+        bottom_depth_i = np.copy(bottom_depth[i, :, :])
+        bottom_depth_i[model_inner_grid == 0] = np.nan
+        slope_i = slope[i, :, :]
+        slope_i[model_inner_grid == 0] = np.nan
+        for contour_depth in contour_depths:
+            contours = measure.find_contours(bottom_depth[i, :, :], contour_depth)
+            selected_contour = contours[np.argmax([len(c) for c in contours])]
+            selected_contour = np.round(selected_contour).astype(np.int64)
+            sampled_slopes = slope_i[selected_contour[:, 0], selected_contour[:, 1]]
+            slope_mean.append(np.nanmean(sampled_slopes))
+        foreset_contours.append(contour_depths[np.nanargmax(slope_mean)])
+
+    foreset_fit = np.polyfit(np.arange(20, timesteps, 5), foreset_contours, 2)
+    t = np.arange(0, timesteps, 1)
+    interpolated_foreset_depth = (
+        foreset_fit[0] * t**2 + foreset_fit[1] * t + foreset_fit[2]
+    )
+    return interpolated_foreset_depth
+
+
+def numpy_mode(array):
+    vals, counts = np.unique(array, return_counts=True)
+    index = np.argmax(counts)
+    return vals[index]
 
 
 def join_linestrings_to_polygon(linestring_a, linestring_b, reverse=False):
@@ -52,23 +106,127 @@ def join_linestrings_to_polygon(linestring_a, linestring_b, reverse=False):
     return polygon
 
 
-def extend_linestring(linestring, length_fraction=0.05):
-    coor_start_x = linestring.xy[0][0] + (
-        (linestring.xy[0][0] - linestring.xy[0][1]) * length_fraction
-    )
-    coor_start_y = linestring.xy[1][0] + (
-        (linestring.xy[1][0] - linestring.xy[1][1]) * length_fraction
-    )
+def snap_linestring_to_polygon(
+    linestring,
+    model_boundary,
+    mouth_position,
+    river_width,
+    snap_distance=5,
+    overshoot=True,
+):
+    """
+    Snap a linestring on both sides of the delta to the model boundary if it comes
+    within snap_distance cells. Cut off the rest of the linestring (after the first
+    time the line came within snap_distance of the coast).
 
-    coor_end_x = linestring.xy[0][-1] + (
-        (linestring.xy[0][-1] - linestring.xy[0][-2]) * length_fraction
+    Parameters
+    ----------
+    linestring : _type_
+        Line of e.g. delta lower or upper edge
+    snap_distance : int, optional
+        Snapping sensitivity in number of cells, by default 12
+    """
+    coordinates = []
+    split_point = np.argmin(np.abs(np.array(linestring.xy[1]) - mouth_position[0]))
+    mouth_left = mouth_position[0] - river_width / 2
+    mouth_right = mouth_position[0] + river_width / 2
+
+    for x, y in zip(
+        linestring.xy[0][:split_point][::-1], linestring.xy[1][:split_point][::-1]
+    ):
+        point = Point(x, y)
+        if point.distance(model_boundary.exterior) > snap_distance:
+            coordinates.append(point.coords[0])
+        elif y > mouth_left and y < mouth_right:
+            coordinates.append(point.coords[0])
+        else:
+            break
+
+    coordinates = coordinates[::-1]
+
+    for x, y in zip(linestring.xy[0][split_point:], linestring.xy[1][split_point:]):
+        point = Point(x, y)
+        if point.distance(model_boundary.exterior) > snap_distance:
+            coordinates.append(point.coords[0])
+        elif y > mouth_left and y < mouth_right:
+            coordinates.append(point.coords[0])
+        else:
+            break
+
+    coordinates.insert(
+        0, nearest_points(Point(coordinates[0]), model_boundary.exterior)[1]
     )
-    coor_end_y = linestring.xy[1][-1] + (
-        (linestring.xy[1][-1] - linestring.xy[1][-2]) * length_fraction
+    coordinates.append(
+        nearest_points(Point(coordinates[-1]), model_boundary.exterior)[1]
     )
+    ls = LineString(coordinates)
+    if overshoot:
+        ls = extend_linestring(ls)
+    return ls
+
+
+def extend_linestring(linestring, length=2):
+    dx_start = linestring.xy[0][0] - linestring.xy[0][1]
+    dx_end = linestring.xy[0][-1] - linestring.xy[0][-2]
+    dy_start = linestring.xy[1][0] - linestring.xy[1][1]
+    dy_end = linestring.xy[1][-1] - linestring.xy[1][-2]
+
+    start_length_factor = length / np.sqrt(dx_start**2 + dy_start**2)
+    end_length_factor = length / np.sqrt(dx_end**2 + dy_end**2)
+
+    dx_start *= start_length_factor
+    dy_start *= start_length_factor
+    dx_end *= end_length_factor
+    dy_end *= end_length_factor
+
+    coor_start_x = linestring.xy[0][0] + dx_start
+    coor_start_y = linestring.xy[1][0] + dy_start
+    coor_end_x = linestring.xy[0][-1] + dx_end
+    coor_end_y = linestring.xy[1][-1] + dy_end
 
     coors = [(x, y) for x, y in zip(linestring.xy[0], linestring.xy[1])]
     coors.insert(0, tuple([coor_start_x, coor_start_y]))
     coors.append(tuple([coor_end_x, coor_end_y]))
     ls = LineString(coors)
     return ls
+
+
+def skeleton_endpoints(skeleton):
+    # Find row and column locations that are non-zero
+    (rows, cols) = np.nonzero(skeleton)
+
+    # Initialize empty list of co-ordinates
+    skel_coords = []
+
+    # For each non-zero pixel...
+    for r, c in zip(rows, cols):
+        # Extract an 8-connected neighbourhood
+        (col_neigh, row_neigh) = np.meshgrid(
+            np.array([c - 1, c, c + 1]), np.array([r - 1, r, r + 1])
+        )
+
+        # Cast to int to index into image
+        col_neigh = col_neigh.astype("int")
+        row_neigh = row_neigh.astype("int")
+
+        # Convert into a single 1D array and check for non-zero locations
+        pix_neighbourhood = skeleton[row_neigh, col_neigh].ravel() != 0
+
+        # If the number of non-zero locations equals 2, add this to
+        # our list of co-ordinates
+        if np.sum(pix_neighbourhood) == 2:
+            skel_coords.append((r, c))
+    return skel_coords
+
+
+def create_circular_mask(h, w, center=None, radius=None):
+    if center is None:  # use the middle of the image
+        center = (int(w / 2), int(h / 2))
+    if radius is None:  # use the smallest distance between the center and image walls
+        radius = min(center[0], center[1], w - center[0], h - center[1])
+
+    Y, X = np.ogrid[:h, :w]
+    dist_from_center = np.sqrt((X - center[0]) ** 2 + (Y - center[1]) ** 2)
+
+    mask = dist_from_center <= radius
+    return mask

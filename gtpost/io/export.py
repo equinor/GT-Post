@@ -1,6 +1,21 @@
 import xarray as xr
 
-# from gtpost.model import ModelResult
+# Compression parameters
+ENCODINGS = {
+    "d50_per_sedclass": {"zlib": True, "complevel": 9},
+    "xcor": {"zlib": True, "complevel": 9},
+    "ycor": {"zlib": True, "complevel": 9},
+    "zcor": {"zlib": True, "complevel": 9},
+    "diameter": {"zlib": True, "complevel": 9},
+    "fraction": {"zlib": True, "complevel": 9},
+    "sorting": {"zlib": True, "complevel": 9},
+    "porosity": {"zlib": True, "complevel": 9},
+    "permeability": {"zlib": True, "complevel": 9},
+    "vfractions": {"zlib": True, "complevel": 9},
+    "mfractions": {"zlib": True, "complevel": 9},
+    "archel": {"zlib": True, "complevel": 9},
+    "subenv": {"zlib": True, "complevel": 9},
+}
 
 
 def create_sed_and_obj_dataset(p):

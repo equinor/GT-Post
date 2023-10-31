@@ -34,10 +34,10 @@ class PlotBase:
         self.yticks_map = np.arange(0, len(self.model.dataset.M), 50)
 
         self.data = {
-            # "d50": self.model.d50,
+            "d50": self.model.d50,
             "architectural_elements": self.model.architectural_elements,
             "bed_level_change": self.model.bed_level_change,
-            # "porosity": self.model.porosity,
+            "porosity": self.model.porosity,
             "bottom_depth": self.model.bottom_depth,
         }
 

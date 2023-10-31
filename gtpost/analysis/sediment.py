@@ -37,18 +37,26 @@ def get_d50input(sedfile, sedtype, rho_p, sedfile_line):
 
 
 def calculate_stratigraphy(dmsedcum, bed_level):
-    msedcum = np.cumsum(np.squeeze(np.asarray(dmsedcum)), axis=0)
-    bl = np.squeeze(np.asarray(-bed_level))
+    msedcum = np.cumsum(dmsedcum, axis=0)
+    dmsedcum_final = np.zeros_like(dmsedcum)
+    bl = -bed_level
     for it in range(np.shape(bl)[0] - 2, -1, -1):
-        bl_now = np.squeeze(bl[it, :, :])
-        bl_nextt = np.squeeze(bl[it + 1, :, :])
+        bl_now = bl[it, :, :]
+        bl_nextt = bl[it + 1, :, :]
         bl_now[bl_now > bl_nextt] = bl_nextt[bl_now > bl_nextt]
         bl[it, :, :] = bl_now
         for i_f in range(np.shape(msedcum)[1]):
-            msed_now = np.squeeze(np.squeeze(msedcum[it, i_f, :, :]))
-            msed_nextt = np.squeeze(np.squeeze(msedcum[it + 1, i_f, :, :]))
+            msed_now = msedcum[it, i_f, :, :]
+            msed_nextt = msedcum[it + 1, i_f, :, :]
             msed_now[msed_now > msed_nextt] = msed_nextt[msed_now > msed_nextt]
             msedcum[it, i_f, :, :] = msed_now
+
+    # for i in range(bl.shape[0]-1):
+    #     bl_diff = bl[i+1, :, :] - bl[i, :, :]
+    #     # if no sedimentation or erosion, take absolute values of fluxes
+    #     dmsedcum_final[i, :, ]
+    #     # If sedimentation, use only positive fluxes to cell to determine deposited
+    #     # sediment mass per fraction
 
     dmsedcum_final = np.diff(msedcum, axis=0, prepend=0)
     zcor = bl
@@ -82,7 +90,7 @@ def calculate_sand_fraction(sedtype, vfraction):
             vfrac[:, stype, :, :] = 0
         else:
             pass
-    return np.sum(vfrac, axis=1)
+    return np.sum(vfrac, axis=1).astype(np.float32)
 
 
 def calculate_sorting(diameters, percentage2cal):
@@ -102,7 +110,8 @@ def calculate_sorting(diameters, percentage2cal):
 
 @numba.njit
 def calculate_distribution(fraction_data, d50input):
-    # fraction_data = np.array([0.1,0.1,0.15,0.35,0.2,0.1], dtype=np.float32)
+    # fraction_data = np.array([0.1, 0.1, 0.15, 0.35, 0.2, 0.1], dtype=np.float32)
+    # fraction_data = np.array([0, 0, 0, 0, 0, 0], dtype=np.float32)
     # Select only relevant xdata
     xdata = d50input[fraction_data > 0]
     xphi = -np.log2(1000 * xdata)
@@ -199,7 +208,7 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
         it += 1
         for ix in range(nx):
             for iy in range(ny):
-                fraction_data = vfraction[it, :, ix, iy]
+                fraction_data = vfraction[it - 1, :, ix, iy]
                 # return the phi value needs to be changed back to meters
                 (
                     cdf,
@@ -228,7 +237,7 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
                     if diameters[it, ix, iy, ipercen] == 2:
                         if it > 0:
                             diameters[it, ix, iy, ipercen] = diameters[
-                                it, ix, iy, ipercen
+                                it - 1, ix, iy, ipercen
                             ]
                         else:
                             diameters[it, ix, iy, ipercen] = 0

@@ -34,18 +34,19 @@ def continuous_cmap(colorlist, name, vmin, vmax):
 
 
 class ArchelColormap(NamedTuple):
-    alphas = [1, 1, 1, 1, 1, 1, 1]
+    alphas = [1, 1, 1, 1, 1, 1, 1, 1]
     colors = [
         "snow",
         "yellowgreen",
+        "mediumseagreen",
         "peru",
         "deepskyblue",
         "yellow",
         "turquoise",
         "mediumblue",
     ]
-    labels = ["N/A", "DT", "CF", "AC", "MB", "DF", "PD"]
-    ticks = np.arange(0, 7)
+    labels = ["N/A", "DT-subar", "DT-subaq", "CF", "AC", "MB", "DF", "PD"]
+    ticks = np.arange(0, 8)
     name = "Architectural elements"
     type = "categorical"
     cmap, mappable, bounds, values, norm = categorical_cmap(alphas, colors, name)
@@ -63,6 +64,23 @@ class GrainsizeColormap(NamedTuple):
     type = "mappable"
     vmin = 0
     vmax = 1.6
+    cmap, mappable, norm = continuous_cmap(
+        [c0, c1, c2, c3, c4, c5, c6], name, vmin, vmax
+    )
+
+
+class SandfractionColormap(NamedTuple):
+    c0 = (0.0, "#006400")  # dark green
+    c1 = (0.044, "#6B8E23")  # olivedrab
+    c2 = (0.088, "#FFFF00")  # yellow
+    c3 = (0.177, "#FFD700")  # gold
+    c4 = (0.354, "#FF8C00")  # dark orange
+    c5 = (0.707, "#8B0000")  # dark red
+    c6 = (1.0, "#BA55D3")  # mediumorchid
+    name = "Sand fraction"
+    type = "mappable"
+    vmin = 0
+    vmax = 1
     cmap, mappable, norm = continuous_cmap(
         [c0, c1, c2, c3, c4, c5, c6], name, vmin, vmax
     )
