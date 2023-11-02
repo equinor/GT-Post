@@ -51,7 +51,7 @@ def create_sed_and_obj_dataset(p):
             ("dimen_t", "dimen_x", "dimen_y"),
             p.zcor,
             dict(
-                long_name="x coordinates of cells",
+                long_name="z coordinates of cells",
                 variable_type="D3D output",
                 units="meter",
             ),
@@ -125,7 +125,7 @@ def create_sed_and_obj_dataset(p):
             dict(
                 long_name="architectural element",
                 variable_type="calculated",
-                units="nr 0 to 6",
+                units="nr 0 to 7",
             ),
         ),
         subenv=(

@@ -12,7 +12,7 @@ from skimage import measure, morphology
 from skimage.morphology import skeletonize
 
 import gtpost.utils as utils
-from gtpost.analysis import window_ops
+from gtpost.postprocess import window_ops
 
 
 def slope(array: np.ndarray):

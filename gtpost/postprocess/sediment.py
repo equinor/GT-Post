@@ -36,33 +36,6 @@ def get_d50input(sedfile, sedtype, rho_p, sedfile_line):
     return d50input
 
 
-def calculate_stratigraphy(dmsedcum, bed_level):
-    msedcum = np.cumsum(dmsedcum, axis=0)
-    dmsedcum_final = np.zeros_like(dmsedcum)
-    bl = -bed_level
-    for it in range(np.shape(bl)[0] - 2, -1, -1):
-        bl_now = bl[it, :, :]
-        bl_nextt = bl[it + 1, :, :]
-        bl_now[bl_now > bl_nextt] = bl_nextt[bl_now > bl_nextt]
-        bl[it, :, :] = bl_now
-        for i_f in range(np.shape(msedcum)[1]):
-            msed_now = msedcum[it, i_f, :, :]
-            msed_nextt = msedcum[it + 1, i_f, :, :]
-            msed_now[msed_now > msed_nextt] = msed_nextt[msed_now > msed_nextt]
-            msedcum[it, i_f, :, :] = msed_now
-
-    # for i in range(bl.shape[0]-1):
-    #     bl_diff = bl[i+1, :, :] - bl[i, :, :]
-    #     # if no sedimentation or erosion, take absolute values of fluxes
-    #     dmsedcum_final[i, :, ]
-    #     # If sedimentation, use only positive fluxes to cell to determine deposited
-    #     # sediment mass per fraction
-
-    dmsedcum_final = np.diff(msedcum, axis=0, prepend=0)
-    zcor = bl
-    return dmsedcum_final, zcor
-
-
 def calculate_fraction(rho_db, dmsedcum_final):
     vfraction = np.zeros_like(dmsedcum_final)
     old_err_state = np.seterr(divide="ignore", invalid="ignore")
@@ -194,9 +167,6 @@ def calculate_distribution(fraction_data, d50input):
 def calculate_diameter(d50input, percentage2cal, vfraction):
     if len(vfraction.shape) == 4:
         nt, nlyr, nx, ny = vfraction.shape
-    # elif len(vfraction.shape)==3:
-    #     nlyr, nx, ny = vfraction.shape
-    #     nt = 1
 
     diameters = np.zeros((nt, nx, ny, len(percentage2cal)))
     porosity = np.zeros((nt, nx, ny))
@@ -204,11 +174,10 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
     diameters[0] = np.nan
     porosity[0] = np.nan
     permeability[0] = np.nan
-    for it in range(nt - 1):
-        it += 1
+    for it in range(nt):
         for ix in range(nx):
             for iy in range(ny):
-                fraction_data = vfraction[it - 1, :, ix, iy]
+                fraction_data = vfraction[it, :, ix, iy]
                 # return the phi value needs to be changed back to meters
                 (
                     cdf,

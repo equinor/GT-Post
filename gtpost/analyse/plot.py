@@ -10,7 +10,7 @@ from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy import spatial
 
-from gtpost.visualise import colormaps
+from gtpost.analyse import colormaps
 
 
 # from gtpost.model import ModelResult

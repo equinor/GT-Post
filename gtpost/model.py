@@ -2,15 +2,13 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import List, Union
 
-import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-from matplotlib.colors import ListedColormap
 
 import gtpost.utils as utils
-from gtpost.analysis import sediment, surface
-from gtpost.io import export, read_d3d_input, ENCODINGS
-from gtpost.visualise import plot
+from gtpost.analyse import plot
+from gtpost.io import ENCODINGS, export, read_d3d_input
+from gtpost.postprocess import sediment, surface
 
 default_settings_file = (
     Path(__file__).parents[1].joinpath(r"config\default_settings.ini")
@@ -170,7 +168,7 @@ class ModelResult:
         """
         # Initial detection of Delta top, Delta front and Prodelta
         dep_env = surface.detect_depositional_environments(
-            self.bottom_depth,  # + self.dataset["STD_SSUV"].values,
+            self.bottom_depth,
             self.mouth_position,
             self.mouth_river_width,
             self.model_boundary,
@@ -213,9 +211,7 @@ class ModelResult:
         """
         self.architectural_elements = surface.detect_elements(
             self.dep_env,
-            self.channels,
             self.channel_skeleton,
-            self.channel_width,
             self.bottom_depth,
             self.bed_level_change,
             self.sandfraction,
@@ -240,9 +236,11 @@ class ModelResult:
         None (but the above attributes are added to the instance)
         """
         percentage2cal = [5, 10, 16, 50, 84, 90]
-        self.dmsedcum_final, self.zcor = sediment.calculate_stratigraphy(
-            self.dataset["DMSEDCUM"].values, self.dataset["DPS"].values
-        )
+        self.dmsedcum_final = self.dataset["DMSEDCUM"].values
+        # Only the incoming sediment flux determines the composition of potential
+        # deposits, so remove fluxes of sediment classes that are negative.
+        self.dmsedcum_final[self.dmsedcum_final < 0] = 0
+        self.zcor = -self.dataset["DPS"].values
         self.vfraction = sediment.calculate_fraction(self.rho_db, self.dmsedcum_final)
         self.sandfraction = sediment.calculate_sand_fraction(
             self.sed_type, self.vfraction
@@ -267,9 +265,6 @@ class ModelResult:
         self.detect_depositional_environments()
         self.detect_architectural_elements()
 
-    def export_sediment_data(self):
-        pass
-
     def export_sediment_and_object_data(self, out_file):
         ds = export.create_sed_and_obj_dataset(self)
         ds.to_netcdf(out_file, engine="h5netcdf", encoding=ENCODINGS)
@@ -279,27 +274,30 @@ if __name__ == "__main__":
     d3d_folders = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling").glob("*")
 
     for d3d_folder in d3d_folders:
-        d3d_folder = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_054")
+        d3d_folder = Path(
+            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_039"
+        )
         folder_name = d3d_folder.stem
+        config_file = r"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\config\settings_sobrarbe.ini"
         output_folder = Path(
             f"n:\\Projects\\11209000\\11209074\\B. Measurements and calculations\\test_results\\{folder_name}"
         )
 
-        test = ModelResult.from_folder(d3d_folder)
-        test.postprocess()
-        # test.export_sediment_and_object_data(
-        #     output_folder.joinpath(f"Sed_and_Obj_data.nc")
-        # )
-
         if not output_folder.is_dir():
             Path.mkdir(output_folder)
+
+        test = ModelResult.from_folder(d3d_folder, settings_file=config_file)
+        test.postprocess()
+        # test.export_sediment_and_object_data(
+        #     output_folder.joinpath("Sed_and_Obj_data.nc")
+        # )
 
         mapplotter = plot.MapPlot(test)
         mapplotter.twopanel_map("bottom_depth", "architectural_elements")
         mapplotter.save_figures(output_folder, "maps_wd_ae")
 
         xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (110, 155))
-        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
+        # xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
         xsectplotter_xshore.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",
@@ -310,7 +308,7 @@ if __name__ == "__main__":
         xsectplotter_xshore.save_figures(output_folder, "d50_xshore")
 
         xsectplotter_lshore = plot.CrossSectionPlot(test, (10, 60), (70, 240))
-        xsectplotter_lshore = plot.CrossSectionPlot(test, (115, 80), (115, 220))
+        # xsectplotter_lshore = plot.CrossSectionPlot(test, (115, 80), (115, 220))
         xsectplotter_lshore.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",
