@@ -223,10 +223,10 @@ class ModelResult:
         """
         Compute sediment parameters. Add the following attributes ModelResult:
 
-        dmsedcum_final      :       Cumulative sed ... #TODO
+        dmsedcum_final      :       Mass flux per sediment class (time, f, x, y)
         zcor                :       z coordinate for each time, x, y for stratigraphy
-        vfraction           :       sediment type fractions ... #TODO
-        sandfraction        :       Fraction of sand sediment types
+        vfraction           :       Volume fraction per sediment class (time, f, x, y)
+        sandfraction        :       Fraction of sand sediment types (time, x, y)
         diameters           :       np.ndarray: D50 array (time, x, y)
         porosity            :       np.ndarray: Porosity array (time, x, y)
         permeability        :       np.ndarray: Permeability array (time, x, y)
@@ -265,7 +265,7 @@ class ModelResult:
         self.detect_depositional_environments()
         self.detect_architectural_elements()
 
-    def export_sediment_and_object_data(self, out_file):
+    def export_sediment_and_object_data(self, out_file: Union[str, Path]):
         ds = export.create_sed_and_obj_dataset(self)
         ds.to_netcdf(out_file, engine="h5netcdf", encoding=ENCODINGS)
 
@@ -278,7 +278,9 @@ if __name__ == "__main__":
             r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_039"
         )
         folder_name = d3d_folder.stem
-        config_file = r"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\config\settings_sobrarbe.ini"
+        config_file = (
+            Path(__file__).parents[1].joinpath(r"config\settings_sobrarbe.ini")
+        )
         output_folder = Path(
             f"n:\\Projects\\11209000\\11209074\\B. Measurements and calculations\\test_results\\{folder_name}"
         )
@@ -288,9 +290,9 @@ if __name__ == "__main__":
 
         test = ModelResult.from_folder(d3d_folder, settings_file=config_file)
         test.postprocess()
-        # test.export_sediment_and_object_data(
-        #     output_folder.joinpath("Sed_and_Obj_data.nc")
-        # )
+        test.export_sediment_and_object_data(
+            output_folder.joinpath("Sed_and_Obj_data.nc")
+        )
 
         mapplotter = plot.MapPlot(test)
         mapplotter.twopanel_map("bottom_depth", "architectural_elements")
@@ -317,3 +319,4 @@ if __name__ == "__main__":
 
         xsectplotter_lshore.twopanel_xsection("d50", "d50")
         xsectplotter_lshore.save_figures(output_folder, "d50_lshore")
+        print("stop")
