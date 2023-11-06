@@ -53,6 +53,7 @@ def detect_depositional_environments(
         Environments delta top, delta front and prodelta.
     """
     environments = np.zeros_like(bottom_depth, dtype=np.int32)
+    foreset_contours = []
     for t in range(bottom_depth.shape[0] - 1):
         t += 1
         bottom_depth_now = window_ops.numba_window_average(bottom_depth[t, :, :], 7)
@@ -76,7 +77,9 @@ def detect_depositional_environments(
         )
         environments[t, :, :] = environments_t
 
-    return environments
+        foreset_contours.append(foreset_contour)
+
+    return environments, foreset_contours
 
 
 def delta_areas_from_boundaries(

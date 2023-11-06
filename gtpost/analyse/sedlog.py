@@ -113,9 +113,13 @@ class SedimentaryLog:
 
 if __name__ == "__main__":
     log = SedimentaryLog(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_039\Sed_and_Obj_data.nc"
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045\Sed_and_Obj_data.nc"
     )
+    # log.plot_log_summary_four_locations(
+    #     "diameter", [158, 158, 158, 158], [10, 30, 50, 70], [0, 1.4]
+    # )
     log.plot_log_summary_four_locations(
-        "diameter", [158, 158, 158, 158], [10, 30, 50, 70], [0, 1.4]
+        "diameter", [120, 120, 120, 120], [10, 30, 50, 70], [0, 1.2]
     )
+    plt.show()
     # log.plot_single_log("diameter", 188, 36)

@@ -32,6 +32,7 @@ class ModelResult:
         "slope",
         "foreset_depth",
         "toeset_depth",
+        "delta_fringe",
         "df_average_width",
         "bed_level_change",
         "dep_env",
@@ -147,7 +148,9 @@ class ModelResult:
         self.foreset_depth = utils.get_deltafront_contour_depth(
             self.bottom_depth, self.slope, self.model_boundary
         )
-        self.df_average_width = 10
+        self.df_average_width = int(
+            self.config["classification"]["deltafront_expected_width"]
+        )
 
     def detect_depositional_environments(self):
         """
@@ -167,7 +170,7 @@ class ModelResult:
         None (attribute dep_env is created)
         """
         # Initial detection of Delta top, Delta front and Prodelta
-        dep_env = surface.detect_depositional_environments(
+        dep_env, self.delta_fringe = surface.detect_depositional_environments(
             self.bottom_depth,
             self.mouth_position,
             self.mouth_river_width,
@@ -275,7 +278,7 @@ if __name__ == "__main__":
 
     for d3d_folder in d3d_folders:
         d3d_folder = Path(
-            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_039"
+            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_045"
         )
         folder_name = d3d_folder.stem
         config_file = (
