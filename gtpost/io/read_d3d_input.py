@@ -1,4 +1,4 @@
-from gtpost.postprocess.sediment import get_d50input
+from gtpost.analyze.sediment import get_d50input
 
 
 def read_sedfile(sedfile):

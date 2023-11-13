@@ -10,7 +10,7 @@ from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy import spatial
 
-from gtpost.analyse import colormaps
+from gtpost.visualize import colormaps
 
 
 # from gtpost.model import ModelResult
@@ -142,11 +142,17 @@ class PlotBase:
         caxis = self.cax[axis_idx]
 
         for i, x in enumerate(self.anchor_x):
-            bed_chg = self.dh[timestep, i]
+            subsidence = self.dsub[i]
+            # absolute bed change is depth change between timesteps plus subsidence
+            absolute_bed_chg = self.dh[timestep, i] + subsidence
             current_surface = self.anchor_y[timestep, i]
-            self.patches_per_position[i]
-            if bed_chg != 0:
-                if bed_chg < 0.0:
+
+            # First update existing patches with the subsidence that took place since
+            # the last timestep
+            [p.set_y(p.get_y() + subsidence) for p in self.patches_per_position[i]]
+
+            if absolute_bed_chg != 0:
+                if absolute_bed_chg < 0.0:
                     if colormap.type == "mappable":
                         color = colormap.mappable.to_rgba(data[timestep, i])
                     elif colormap.type == "categorical":
@@ -156,7 +162,7 @@ class PlotBase:
                         patches.Rectangle(
                             xy=(x, current_surface),
                             width=self.width,
-                            height=bed_chg,
+                            height=absolute_bed_chg,
                             color=color,
                             linewidth=0,
                         )
@@ -302,6 +308,7 @@ class CrossSectionPlot(PlotBase):
             -self.model.dataset["DPS"][:, self.xc, self.yc].values, axis1=1, axis2=2
         )
         self.dh = self.model.bed_level_change[:, self.xc, self.yc]
+        self.dsub = self.model.subsidence_per_t[self.xc, self.yc]
         self.width = 1
         self.xlim = [self.anchor_x[0], self.anchor_x[-1]]
         self.ylim = [
@@ -311,8 +318,8 @@ class CrossSectionPlot(PlotBase):
         ]
 
     def twopanel_xsection(self, variable_basemap, variable_xsect):
-        data_xsect = self.data[variable_xsect][:, self.xc, self.yc]
-        data_base = self.data[variable_basemap]
+        data_xsect = self.model.__dict__[variable_xsect][:, self.xc, self.yc]
+        data_base = self.model.__dict__[variable_basemap]
         colormap_xsect = self.colormaps[variable_xsect]
         colormap_base = self.colormaps[variable_basemap]
 
@@ -336,9 +343,9 @@ class CrossSectionPlot(PlotBase):
             plt.close()
 
     def threepanel_xsection(self, variable_basemap, variable_xsect1, variable_xsect2):
-        data_xsect1 = self.data[variable_xsect1][:, self.xc, self.yc]
-        data_xsect2 = self.data[variable_xsect2][:, self.xc, self.yc]
-        data_base = self.data[variable_basemap]
+        data_xsect1 = self.model.__dict__[variable_xsect1][:, self.xc, self.yc]
+        data_xsect2 = self.model.__dict__[variable_xsect2][:, self.xc, self.yc]
+        data_base = self.model.__dict__[variable_basemap]
         colormap_xsect1 = self.colormaps[variable_xsect1]
         colormap_xsect2 = self.colormaps[variable_xsect2]
         colormap_base = self.colormaps[variable_basemap]
@@ -385,8 +392,8 @@ class MapPlot(PlotBase):
         super().__init__(modelresult)
 
     def twopanel_map(self, variable_1, variable_2):
-        data_1 = self.data[variable_1]
-        data_2 = self.data[variable_2]
+        data_1 = self.model.__dict__[variable_1]
+        data_2 = self.model.__dict__[variable_2]
         colormap_1 = self.colormaps[variable_1]
         colormap_2 = self.colormaps[variable_2]
 

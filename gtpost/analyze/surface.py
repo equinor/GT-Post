@@ -12,7 +12,7 @@ from skimage import measure, morphology
 from skimage.morphology import skeletonize
 
 import gtpost.utils as utils
-from gtpost.postprocess import window_ops
+from gtpost.analyze import window_ops
 
 
 def slope(array: np.ndarray):
@@ -132,7 +132,7 @@ def delta_areas_from_boundaries(
     return environments_new
 
 
-def detect_channel_network(dataset, dep_env, bed_level_change, resolution, config):
+def detect_channel_network(dataset, dep_env, d50, resolution, config):
     # Unpack config settings
     channel_detection_range = int(
         config["classification"]["channel_detection_windowsize"]
@@ -151,7 +151,10 @@ def detect_channel_network(dataset, dep_env, bed_level_change, resolution, confi
         dep_env_now = dep_env[t, :, :]
         min_depth_now = dataset.MEAN_H1[t, :, :].values
         max_flow_now = dataset.MAX_UV[t, :, :].values
+        d50_now = d50[t, :, :].astype(np.float32)
 
+        # Get local (channel detection range window) differences for flow, D50 and
+        # water depth.
         min_depth_now[dep_env_now != 1] = np.nan
         min_depth_now[min_depth_now > 500] = np.nan
         local_depth = window_ops.numba_window_difference_between_minimum(
@@ -162,6 +165,11 @@ def detect_channel_network(dataset, dep_env, bed_level_change, resolution, confi
         local_flow = window_ops.numba_window_difference_between_minimum(
             max_flow_now, channel_detection_range
         )
+        d50_now[dep_env_now != 1] = np.nan
+        d50_now[d50_now < -500] = np.nan
+        local_d50 = window_ops.numba_window_difference_between_minimum(
+            d50_now, channel_detection_range
+        )
 
         # Detect active channels and parameters (skeleton, width, depth)
         channels_now = np.full_like(dep_env_now, False).astype(bool)
@@ -171,7 +179,7 @@ def detect_channel_network(dataset, dep_env, bed_level_change, resolution, confi
             & (local_flow < channel_detection_sensitivity)
         ] = True
         channels_now[dep_env_now != 1] = False
-        channels_now = morphology.remove_small_objects(channels_now, min_size=150)
+        channels_now = morphology.remove_small_objects(channels_now, min_size=100)
         channels_now = morphology.binary_closing(channels_now, morphology.disk(2))
         channels[t, :, :] = channels_now
         channel_skel[t, :, :] = skeletonize(channels_now)
@@ -188,8 +196,12 @@ def detect_channel_network(dataset, dep_env, bed_level_change, resolution, confi
                 channels_now
             )
             underfilled = local_depth < channel_detection_sensitivity
+            locally_fine_material = d50_now < 0.3
             abandoned_channels_now = (
-                was_channel_recently * underfilled * (dep_env_now == 1)
+                was_channel_recently
+                * underfilled
+                * locally_fine_material
+                * (dep_env_now == 1)
             )
             abandoned_channels_now = morphology.remove_small_objects(
                 abandoned_channels_now, min_size=50
@@ -264,9 +276,7 @@ def detect_elements(
         ch_skel_now = channel_skeleton[t, :, :]
 
         # Prodelta = depositional environment prodelta
-        archels[t, :, :][
-            (dep_now == 5)  # & (bottom_depth[t, :, :] > foreset_depth[t])
-        ] = 7
+        archels[t, :, :][(dep_now == 5)] = 7
 
         # Delta front = depositional environment delta edge
         archels[t, :, :][dep_now == 4] = 6

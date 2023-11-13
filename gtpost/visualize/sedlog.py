@@ -7,7 +7,7 @@ import xarray as xr
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from gtpost.analyse import colormaps
+from gtpost.visualize import colormaps
 
 
 class SedimentaryLog:
@@ -113,13 +113,13 @@ class SedimentaryLog:
 
 if __name__ == "__main__":
     log = SedimentaryLog(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045\Sed_and_Obj_data.nc"
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054\Sed_and_Obj_data_Roda54.nc"
     )
     # log.plot_log_summary_four_locations(
     #     "diameter", [158, 158, 158, 158], [10, 30, 50, 70], [0, 1.4]
     # )
     log.plot_log_summary_four_locations(
-        "diameter", [120, 120, 120, 120], [10, 30, 50, 70], [0, 1.2]
+        "diameter", [130, 130, 130, 130], [110, 140, 160, 180], [0, 1.4]
     )
     plt.show()
     # log.plot_single_log("diameter", 188, 36)

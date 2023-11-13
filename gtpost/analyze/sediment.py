@@ -83,8 +83,6 @@ def calculate_sorting(diameters, percentage2cal):
 
 @numba.njit
 def calculate_distribution(fraction_data, d50input):
-    # fraction_data = np.array([0.1, 0.1, 0.15, 0.35, 0.2, 0.1], dtype=np.float32)
-    # fraction_data = np.array([0, 0, 0, 0, 0, 0], dtype=np.float32)
     # Select only relevant xdata
     xdata = d50input[fraction_data > 0]
     xphi = -np.log2(1000 * xdata)
@@ -212,6 +210,4 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
                             diameters[it, ix, iy, ipercen] = 0
                     else:
                         pass
-    # print('stop')
-    # porosity[:,140,180]
     return (diameters, porosity, permeability)
