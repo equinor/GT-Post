@@ -56,6 +56,24 @@ def create_sed_and_obj_dataset(p):
                 units="meter",
             ),
         ),
+        subsidence=(
+            ("dimen_x", "dimen_y"),
+            p.subsidence_per_t,
+            dict(
+                long_name="Subsidence in meter per timestep",
+                variable_type="D3D output",
+                units="meter",
+            ),
+        ),
+        preserved_thickness=(
+            ("dimen_t", "dimen_x", "dimen_y"),
+            p.preserved_thickness,
+            dict(
+                long_name="Final preserved thickness of deposits",
+                variable_type="calculated",
+                units="meter",
+            ),
+        ),
         diameter=(
             ("dimen_t", "dimen_x", "dimen_y"),
             p.d50,

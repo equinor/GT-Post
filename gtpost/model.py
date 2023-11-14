@@ -282,6 +282,9 @@ class ModelResult:
         # deposits, so remove fluxes of sediment classes that are negative.
         self.dmsedcum_final[self.dmsedcum_final < 0] = 0
         self.zcor = -self.dataset["DPS"].values
+        self.preserved_thickness = sediment.preservation(
+            self.zcor, self.dataset["SDU"].values
+        )
         self.vfraction = sediment.calculate_fraction(self.rho_db, self.dmsedcum_final)
         self.sandfraction = sediment.calculate_sand_fraction(
             self.sed_type, self.vfraction
@@ -293,6 +296,9 @@ class ModelResult:
         )
         self.sorting = sediment.calculate_sorting(self.diameters, percentage2cal)
         self.d50 = self.diameters[:, :, :, 3]
+
+    def statistics_summary(self):
+        pass
 
     def process(self):
         """
@@ -313,6 +319,7 @@ class ModelResult:
         self.compute_sediment_parameters()
         self.detect_depositional_environments()
         self.detect_architectural_elements()
+        self.statistics_summary()
 
     def export_sediment_and_object_data(self, out_file: Union[str, Path]):
         ds = export.create_sed_and_obj_dataset(self)
@@ -339,16 +346,16 @@ if __name__ == "__main__":
 
         test = ModelResult.from_folder(d3d_folder, settings_file=config_file)
         test.postprocess()
-        # test.export_sediment_and_object_data(
-        #     output_folder.joinpath("Sed_and_Obj_data.nc")
-        # )
+        test.export_sediment_and_object_data(
+            output_folder.joinpath("Sed_and_Obj_data.nc")
+        )
 
         # mapplotter = plot.MapPlot(test)
         # mapplotter.twopanel_map("bottom_depth", "architectural_elements")
         # mapplotter.save_figures(output_folder, "maps_wd_ae")
 
-        xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
-        # xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
+        # xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
+        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
         xsectplotter_xshore.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",
