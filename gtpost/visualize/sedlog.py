@@ -133,7 +133,7 @@ class SedimentaryLog:
             idxs = (self.data["preserved_thickness"].values[:, y1:y2, :] > 0) & (
                 self.data["archel"].values[:, y1:y2, :] == i
             )
-            preserved_thickness = log.data["preserved_thickness"].values[:, y1:y2, :][
+            preserved_thickness = self.data["preserved_thickness"].values[:, y1:y2, :][
                 idxs
             ]
             volumes[i - 1] = np.sum(preserved_thickness)
@@ -143,20 +143,19 @@ class SedimentaryLog:
 
 
 if __name__ == "__main__":
-    # log = SedimentaryLog(
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference\Sed_and_Obj_data.nc"
-    # )
     log = SedimentaryLog(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054_Reference\Sed_and_Obj_data.nc"
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference\Sed_and_Obj_data.nc"
+    )
+    # log = SedimentaryLog(
+    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054_Reference\Sed_and_Obj_data.nc"
+    # )
+    log.plot_log_summary_four_locations(
+        "diameter", [115, 115, 115, 115], [10, 30, 50, 70], [0, 1.4]
     )
     # log.plot_log_summary_four_locations(
-    #     "diameter", [115, 115, 115, 115], [10, 30, 50, 70], [0, 1.4]
+    #     "diameter", [140, 140, 140, 140], [110, 140, 160, 180], [0, 1.4]
     # )
-    # log.plot_log_summary_four_locations(
-    #     "diameter", [130, 130, 130, 130], [110, 140, 160, 180], [0, 1.4]
-    # )
-    # plt.show()
-    # log.plot_single_log("diameter", 188, 36)
+    plt.show()
 
-    # log.plot_volume_piechart(20, 100)
-    log.plot_volume_piechart(100, 220)
+    log.plot_volume_piechart(20, 100)
+    # log.plot_volume_piechart(100, 220)

@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 
 import gtpost.utils as utils
-from gtpost.analyze import sediment, surface
+from gtpost.analyze import sediment, statistics, surface
 from gtpost.io import ENCODINGS, export, read_d3d_input
 from gtpost.visualize import plot
 
@@ -298,7 +298,51 @@ class ModelResult:
         self.d50 = self.diameters[:, :, :, 3]
 
     def statistics_summary(self):
-        pass
+        (
+            delta_volume,
+            archel_volumes,
+            archel_d50s,
+            archel_fractions,
+            archel_sorting,
+        ) = statistics.get_stats_per_archel(
+            self.architectural_elements,
+            self.preserved_thickness,
+            self.d50,
+            self.sandfraction,
+            self.sorting,
+            self.mouth_position[1],
+        )
+        self.delta_stats = {
+            "delta_volume": delta_volume,
+            "delta_top_aerial_volume": archel_volumes[0],
+            "delta_top_aerial_d50": archel_d50s[0],
+            "delta_top_aerial_sandfraction": archel_fractions[0],
+            "delta_top_aerial_sorting": archel_sorting[0],
+            "delta_top_sub_volume": archel_volumes[1],
+            "delta_top_sub_d50": archel_d50s[1],
+            "delta_top_sub_sandfraction": archel_fractions[1],
+            "delta_top_sub_sorting": archel_sorting[1],
+            "abandoned_channel_volume": archel_volumes[2],
+            "abandoned_channel_d50": archel_d50s[2],
+            "abandoned_channel_sandfraction": archel_fractions[2],
+            "abandoned_channel_sorting": archel_sorting[2],
+            "active_channel_volume": archel_volumes[3],
+            "active_channel_d50": archel_d50s[3],
+            "active_channel_sandfraction": archel_fractions[3],
+            "active_channel_sorting": archel_sorting[3],
+            "mouthbar_volume": archel_volumes[4],
+            "mouthbar_d50": archel_d50s[4],
+            "mouthbar_sandfraction": archel_fractions[4],
+            "mouthbar_sorting": archel_sorting[4],
+            "delta_front_volume": archel_volumes[5],
+            "delta_front_d50": archel_d50s[5],
+            "delta_front_sandfraction": archel_fractions[5],
+            "delta_front_sorting": archel_sorting[5],
+            "prodelta_volume": archel_volumes[6],
+            "prodelta_d50": archel_d50s[6],
+            "prodelta_sandfraction": archel_fractions[6],
+            "prodelta_sorting": archel_sorting[6],
+        }
 
     def process(self):
         """
