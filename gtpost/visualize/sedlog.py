@@ -36,7 +36,7 @@ class SedimentaryLog:
             logdepth, logdata = self._get_log_data(data_var, x, y)
             logdepth_ae, logdata_ae = self._get_log_data("archel", x, y)
 
-            ax.plot(logdata, logdepth, color="darkred")
+            ax.plot(logdata, logdepth, color="black", linewidth=0.5)
             ax.set_xlabel(data_var)
             ax.xaxis.set_tick_params(labeltop=True, top=True)
 
@@ -44,8 +44,9 @@ class SedimentaryLog:
             for j in np.arange(0, len(logdepth), 2):
                 y1 = [logdepth_ae[j], logdepth_ae[j]]
                 y2 = [logdepth_ae[j + 1], logdepth_ae[j + 1]]
+                xbnd = [bnd[0], logdata[j]]
                 ax.fill_between(
-                    bnd,
+                    xbnd,
                     y1,
                     y2,
                     color=colormaps.ArchelColormap.colors[int(logdata_ae[j])],
@@ -114,6 +115,13 @@ class SedimentaryLog:
         fig.set_size_inches(1600.0 / float(dpi), 1000.0 / float(dpi))
         return fig, ax1, ax2, ax3, ax4, ax5, ax6, cax
 
+    @staticmethod
+    def eight_plot_figure_base():
+        fig, axs = plt.subplots(nrows=4, ncols=2, dpi=72)
+        dpi = fig.get_dpi()
+        fig.set_size_inches(500.0 / float(dpi), 800.0 / float(dpi))
+        return fig, axs
+
     def plot_volume_piechart(self, y1, y2):
         _, total_volume, volume_percentage = self._get_volume_stats(y1, y2)
         fig, ax = plt.subplots()
@@ -126,6 +134,28 @@ class SedimentaryLog:
         ax.set_title(
             f"Preserved architectural element distribution\nTotal delta volume = {np.round(total_volume*50*50, 0)} $m^3$"
         )
+
+    def plot_d50_histograms(self, y1, y2):
+        d50_distributions, d50_distribution_weights = self._get_diameter_distributions(
+            y1, y2
+        )
+        fig, axs = self.eight_plot_figure_base()
+        # axes = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
+        bins = [0, 0.063, 0.125, 0.25, 0.5, 1, 1.4]
+        binlabels = ["s/c", "vf", "f", "m", "c", "vc"]
+        for i, ax in enumerate(axs.flat):
+            counts, bins = np.histogram(
+                d50_distributions[i - 1],
+                bins=bins,
+                weights=d50_distribution_weights[i - 1],
+            )
+            if i != 0:
+                ax.bar(binlabels, counts, color=colormaps.ArchelColormap.colors[i])
+            else:
+                ax.bar(binlabels, counts)
+
+            ax.set_yticks([])
+        fig
 
     def _get_volume_stats(self, y1, y2):
         volumes = np.zeros(7)
@@ -141,6 +171,30 @@ class SedimentaryLog:
         volume_percentage = (volumes / total_deposited_volume) * 100
         return volumes, total_deposited_volume, volume_percentage
 
+    def _get_diameter_distributions(self, y1, y2):
+        d50_distributions = []
+        d50_distribution_weights = []
+        for i in range(1, 8):
+            idxs = (self.data["preserved_thickness"].values[:, y1:y2, :] > 0) & (
+                self.data["archel"].values[:, y1:y2, :] == i
+            )
+            d50_distr = self.data["diameter"].values[:, y1:y2, :][idxs]
+            d50_distr_weights = self.data["preserved_thickness"].values[:, y1:y2, :][
+                idxs
+            ]
+            d50_distributions.append(d50_distr)
+            d50_distribution_weights.append(d50_distr_weights)
+
+        idxs_total = self.data["preserved_thickness"].values[:, y1:y2, :] > 0
+        d50_total = self.data["diameter"].values[:, y1:y2, :][idxs_total]
+        d50_total_weights = self.data["preserved_thickness"].values[:, y1:y2, :][
+            idxs_total
+        ]
+        d50_distributions.insert(0, d50_total)
+        d50_distribution_weights.insert(0, d50_total_weights)
+
+        return d50_distributions, d50_distribution_weights
+
 
 if __name__ == "__main__":
     log = SedimentaryLog(
@@ -149,6 +203,7 @@ if __name__ == "__main__":
     # log = SedimentaryLog(
     #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054_Reference\Sed_and_Obj_data.nc"
     # )
+    log.plot_d50_histograms(20, 100)
     log.plot_log_summary_four_locations(
         "diameter", [115, 115, 115, 115], [10, 30, 50, 70], [0, 1.4]
     )

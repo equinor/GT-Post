@@ -71,13 +71,11 @@ def calculate_sorting(diameters, percentage2cal):
     index16 = percentage2cal.index(16)
     index84 = percentage2cal.index(84)
     index90 = percentage2cal.index(90)
-    # using Folks 1968 for calculate sorting parameter. the indices are diameter value for percentage2cal
-
-    # TODO: Diamters in m moeten omgezet worden naar phi-schaal met  -np.log2()
-
-    sorting = (diameters[:, :, :, index84] - diameters[:, :, :, index16]) / 4 + (
-        diameters[:, :, :, index90] - diameters[:, :, :, index10]
-    ) / 6.6
+    # using Folks 1968 for calculate sorting parameter.
+    diameters_phi = -np.log2(diameters)
+    sorting = (
+        diameters_phi[:, :, :, index84] - diameters_phi[:, :, :, index16]
+    ) / 4 + (diameters_phi[:, :, :, index90] - diameters_phi[:, :, :, index10]) / 6.6
     return sorting
 
 

@@ -25,9 +25,7 @@ def get_stats_per_archel(
         archel_fractions[i - 1] = np.average(
             fractions[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
         )
-        archel_sorting[i - 1] = np.average(
-            sorting[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
-        )
+        archel_sorting[i - 1] = np.nanmean(sorting[:, coastline_y:, :][idxs])
     delta_volume, archel_volumes = volume_stats(volumes)
     return delta_volume, archel_volumes, archel_d50s, archel_fractions, archel_sorting
 
