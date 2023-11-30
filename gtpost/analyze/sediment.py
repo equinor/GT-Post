@@ -22,14 +22,14 @@ def get_d50input(sedfile, sedtype, rho_p, sedfile_line):
     for stype in range(len(sedtype)):
         if sedtype[stype] == "mud":
             linetoread = sedfile_line[stype] + 3
-            with open(sedfile) as fobj:
+            with open(sedfile, encoding="cp1252") as fobj:
                 line = fobj.readlines()
                 svelocity = float(line[linetoread].split()[2])
                 d50c = np.sqrt(18 * mu * svelocity / g / (rho_p[stype] - rhof))
                 d50input.append(d50c)
         if sedtype[stype] == "sand":
             linetoread = sedfile_line[stype] + 2
-            with open(sedfile) as fobj:
+            with open(sedfile, encoding="cp1252") as fobj:
                 line = fobj.readlines()
                 d50c = float(line[linetoread].split()[2])
                 d50input.append(d50c)

@@ -119,7 +119,7 @@ class SedimentaryLog:
     def eight_plot_figure_base():
         fig, axs = plt.subplots(nrows=4, ncols=2, dpi=72)
         dpi = fig.get_dpi()
-        fig.set_size_inches(500.0 / float(dpi), 800.0 / float(dpi))
+        fig.set_size_inches(650.0 / float(dpi), 1000.0 / float(dpi))
         return fig, axs
 
     def plot_volume_piechart(self, y1, y2):
@@ -145,17 +145,23 @@ class SedimentaryLog:
         binlabels = ["s/c", "vf", "f", "m", "c", "vc"]
         for i, ax in enumerate(axs.flat):
             counts, bins = np.histogram(
-                d50_distributions[i - 1],
+                d50_distributions[i],
                 bins=bins,
-                weights=d50_distribution_weights[i - 1],
+                weights=d50_distribution_weights[i],
             )
             if i != 0:
                 ax.bar(binlabels, counts, color=colormaps.ArchelColormap.colors[i])
+                ax.set_title(
+                    colormaps.ArchelColormap.labels[i], y=1, pad=-14, loc="right"
+                )
             else:
                 ax.bar(binlabels, counts)
+                ax.set_title("All AEs", y=1, pad=-14, loc="right")
 
             ax.set_yticks([])
-        fig
+            fig.suptitle(
+                "D50 distribution per preserved architectural element", fontsize=16
+            )
 
     def _get_volume_stats(self, y1, y2):
         volumes = np.zeros(7)
@@ -197,13 +203,13 @@ class SedimentaryLog:
 
 
 if __name__ == "__main__":
-    log = SedimentaryLog(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference\Sed_and_Obj_data.nc"
-    )
     # log = SedimentaryLog(
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054_Reference\Sed_and_Obj_data.nc"
+    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference\Sed_and_Obj_data.nc"
     # )
-    log.plot_d50_histograms(20, 100)
+    log = SedimentaryLog(
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_049\Sed_and_Obj_data.nc"
+    )
+    log.plot_d50_histograms(100, 220)
     log.plot_log_summary_four_locations(
         "diameter", [115, 115, 115, 115], [10, 30, 50, 70], [0, 1.4]
     )
@@ -214,3 +220,10 @@ if __name__ == "__main__":
 
     log.plot_volume_piechart(20, 100)
     # log.plot_volume_piechart(100, 220)
+
+    ds = xr.open_dataset(
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sed_And_Obj_Data.nc"
+    )
+
+    for data_var in ds.data_vars.variables:
+        print(type(ds[data_var].attrs["long_name"]))
