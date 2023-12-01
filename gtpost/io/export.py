@@ -6,6 +6,8 @@ ENCODINGS = {
     "xcor": {"zlib": True, "complevel": 9},
     "ycor": {"zlib": True, "complevel": 9},
     "zcor": {"zlib": True, "complevel": 9},
+    "subsidence": {"zlib": True, "complevel": 9},
+    "preserved_thickness": {"zlib": True, "complevel": 9},
     "diameter": {"zlib": True, "complevel": 9},
     "fraction": {"zlib": True, "complevel": 9},
     "sorting": {"zlib": True, "complevel": 9},

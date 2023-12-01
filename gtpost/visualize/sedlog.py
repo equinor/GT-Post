@@ -132,7 +132,7 @@ class SedimentaryLog:
             autopct="%1.1f%%",
         )
         ax.set_title(
-            f"Preserved architectural element distribution\nTotal delta volume = {np.round(total_volume*50*50, 0)} $m^3$"
+            f"SB41 Preserved architectural element distribution\nTotal delta volume = {np.round(total_volume*50*50, 0)} $m^3$"
         )
 
     def plot_d50_histograms(self, y1, y2):
@@ -160,7 +160,7 @@ class SedimentaryLog:
 
             ax.set_yticks([])
             fig.suptitle(
-                "D50 distribution per preserved architectural element", fontsize=16
+                "SB41 D50 distribution per preserved architectural element", fontsize=16
             )
 
     def _get_volume_stats(self, y1, y2):
@@ -203,18 +203,18 @@ class SedimentaryLog:
 
 
 if __name__ == "__main__":
-    # log = SedimentaryLog(
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference\Sed_and_Obj_data.nc"
-    # )
     log = SedimentaryLog(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_049\Sed_and_Obj_data.nc"
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference\Sed_and_Obj_data.nc"
     )
-    log.plot_d50_histograms(100, 220)
+    # log = SedimentaryLog(
+    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_049\Sed_and_Obj_data.nc"
+    # )
+    log.plot_d50_histograms(20, 100)
     log.plot_log_summary_four_locations(
-        "diameter", [115, 115, 115, 115], [10, 30, 50, 70], [0, 1.4]
+        "diameter", [120, 120, 120, 120], [10, 30, 50, 70], [0, 1.4]
     )
     # log.plot_log_summary_four_locations(
-    #     "diameter", [140, 140, 140, 140], [110, 140, 160, 180], [0, 1.4]
+    #     "diameter", [120, 155, 120, 155], [160, 160, 150, 170], [0, 1.4]
     # )
     plt.show()
 
