@@ -285,26 +285,22 @@ class ModelResult:
             "delta_top_sub_d50": archel_d50s[1],
             "delta_top_sub_sandfraction": archel_fractions[1],
             "delta_top_sub_sorting": archel_sorting[1],
-            "abandoned_channel_volume": archel_volumes[2],
-            "abandoned_channel_d50": archel_d50s[2],
-            "abandoned_channel_sandfraction": archel_fractions[2],
-            "abandoned_channel_sorting": archel_sorting[2],
-            "active_channel_volume": archel_volumes[3],
-            "active_channel_d50": archel_d50s[3],
-            "active_channel_sandfraction": archel_fractions[3],
-            "active_channel_sorting": archel_sorting[3],
-            "mouthbar_volume": archel_volumes[4],
-            "mouthbar_d50": archel_d50s[4],
-            "mouthbar_sandfraction": archel_fractions[4],
-            "mouthbar_sorting": archel_sorting[4],
-            "delta_front_volume": archel_volumes[5],
-            "delta_front_d50": archel_d50s[5],
-            "delta_front_sandfraction": archel_fractions[5],
-            "delta_front_sorting": archel_sorting[5],
-            "prodelta_volume": archel_volumes[6],
-            "prodelta_d50": archel_d50s[6],
-            "prodelta_sandfraction": archel_fractions[6],
-            "prodelta_sorting": archel_sorting[6],
+            "active_channel_volume": archel_volumes[2],
+            "active_channel_d50": archel_d50s[2],
+            "active_channel_sandfraction": archel_fractions[2],
+            "active_channel_sorting": archel_sorting[2],
+            "mouthbar_volume": archel_volumes[3],
+            "mouthbar_d50": archel_d50s[3],
+            "mouthbar_sandfraction": archel_fractions[3],
+            "mouthbar_sorting": archel_sorting[3],
+            "delta_front_volume": archel_volumes[4],
+            "delta_front_d50": archel_d50s[4],
+            "delta_front_sandfraction": archel_fractions[4],
+            "delta_front_sorting": archel_sorting[4],
+            "prodelta_volume": archel_volumes[5],
+            "prodelta_d50": archel_d50s[5],
+            "prodelta_sandfraction": archel_fractions[5],
+            "prodelta_sorting": archel_sorting[5],
         }
 
     def process(self):
@@ -339,7 +335,7 @@ if __name__ == "__main__":
 
     for d3d_folder in d3d_folders:
         d3d_folder = Path(
-            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_045_Reference"
+            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_054_Reference"
         )
         folder_name = d3d_folder.stem
         config_file = Path(__file__).parents[1].joinpath(r"config\settings_Roda.ini")
@@ -361,7 +357,7 @@ if __name__ == "__main__":
         # mapplotter.save_figures(output_folder, "maps_wd_ae")
 
         # xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
-        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
+        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (220, 140))
         xsectplotter_xshore.twopanel_xsection(
             "deposition_age",
             "deposition_age",

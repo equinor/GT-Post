@@ -298,7 +298,7 @@ def detect_elements(
             )
             if p > mouthbar_search_radius * 4
         ]
-        mb_mask = np.zeros_like(subenvironment, dtype=bool)
+        mb_mask = np.zeros_like(subenvironment_now, dtype=bool)
         for channel_endpoint in channel_endpoints:
             channel_end_mask = utils.create_circular_mask(
                 subenvironment_now.shape[0],

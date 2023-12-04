@@ -34,7 +34,7 @@ def continuous_cmap(colorlist, name, vmin, vmax):
 
 
 class ArchelColormap(NamedTuple):
-    alphas = [1, 1, 1, 1, 1, 1, 1, 1]
+    alphas = [1, 1, 1, 1, 1, 1, 1]
     colors = [
         "snow",
         "yellowgreen",

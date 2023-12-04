@@ -9,11 +9,11 @@ def get_stats_per_archel(
     sorting: np.array,
     coastline_y: int,
 ):
-    volumes = np.zeros(7)
-    archel_d50s = np.zeros(7)
-    archel_fractions = np.zeros(7)
-    archel_sorting = np.zeros(7)
-    for i in range(1, 8):
+    volumes = np.zeros(6)
+    archel_d50s = np.zeros(6)
+    archel_fractions = np.zeros(6)
+    archel_sorting = np.zeros(6)
+    for i in range(1, 7):
         idxs = (preserved_thickness[:, coastline_y:, :] > 0) & (
             archels[:, coastline_y:, :] == i
         )
