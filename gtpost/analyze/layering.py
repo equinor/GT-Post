@@ -41,41 +41,6 @@ def preservation(
             deposition_age[t, :, :] = np.full_like(z_preserved, t)
         else:
             deposition_age[t, :, :] = deposition_age[t - 1, :, :]
-            deposition_age[t, :, :][dmsedcum_final[t, :, :] > 0] = t
+            deposition_age[t, :, :][np.sum(dmsedcum_final[t, :, :, :], axis=0) > 0] = t
 
     return preserved_thickness, deposition_age
-
-
-def reconstruct_preserved_layering(
-    preserved_thickness: np.ndarray, subsidence: np.ndarray
-):
-    """This function takes the preserved_thickness and produces for each preserved layer
-    the top and bottom elevation of said layer at the final timestep. If a layer is not
-    preserved, the top and bottom become NaN.
-
-    Parameters
-    ----------
-    timestep : int
-        _description_
-    preserved_thickness : np.ndarray
-        _description_
-
-    Returns
-    -------
-    _type_
-        _description_
-    """
-
-    preserved_layer_top = 0
-    preserved_layer_bottom = 0
-
-    return preserved_layer_top, preserved_layer_bottom
-
-
-if __name__ == "__main__":
-    ds = xr.open_dataset(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054_Reference\Sed_and_Obj_data.nc"
-    )
-    test = reconstruct_preserved_layering(
-        ds.preserved_thickness.values, ds.subsidence.values
-    )

@@ -39,14 +39,13 @@ class ArchelColormap(NamedTuple):
         "snow",
         "yellowgreen",
         "mediumseagreen",
-        "peru",
         "deepskyblue",
         "yellow",
         "turquoise",
         "mediumblue",
     ]
-    labels = ["N/A", "DT-subar", "DT-subaq", "CF", "AC", "MB", "DF", "PD"]
-    ticks = np.arange(0, 8)
+    labels = ["N/A", "DT-subar", "DT-subaq", "AC", "MB", "DF", "PD"]
+    ticks = np.arange(0, 7)
     name = "Architectural elements"
     type = "categorical"
     cmap, mappable, bounds, values, norm = categorical_cmap(alphas, colors, name)

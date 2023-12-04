@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 
 import gtpost.utils as utils
-from gtpost.analyze import sediment, statistics, surface, layering
+from gtpost.analyze import layering, sediment, statistics, surface
 from gtpost.io import ENCODINGS, export, read_d3d_input
 from gtpost.visualize import plot
 
@@ -207,7 +207,10 @@ class ModelResult:
         None (attribute dep_env is created)
         """
         # Initial detection of Delta top, Delta front and Prodelta
-        dep_env, self.delta_fringe = surface.detect_depositional_environments(
+        (
+            self.subenvironment,
+            self.delta_fringe,
+        ) = surface.detect_depositional_environments(
             self.bottom_depth,
             self.mouth_position,
             self.mouth_river_width,
@@ -217,15 +220,13 @@ class ModelResult:
         )
         # Detection of channel network
         (
-            self.dep_env,
             self.channels,
             self.channel_skeleton,
             self.channel_width,
             self.channel_depth,
         ) = surface.detect_channel_network(
             self.dataset,
-            dep_env,
-            self.d50,
+            self.subenvironment,
             self.dx,
             self.config,
         )
@@ -240,18 +241,18 @@ class ModelResult:
 
         1 - Delta top subaerial (overbank deposits/background sedimentation)
         2 - Delta top subaqeous (submerged overbank deposits/background sedimentation)
-        3 - Abandoned channel (channel fill deposits)
-        4 - Active channel (bed deposits)
-        5 - Mouthbars (mouthbar deposits in vicinity of channels and delta front)
-        6 - Delta front (background sedimentation around delta edge)
-        7 - Prodelta (marine background sedimentation)
+        3 - Active channel (bed deposits)
+        4 - Mouthbars (mouthbar deposits in vicinity of channels and delta front)
+        5 - Delta front (background sedimentation around delta edge)
+        6 - Prodelta (marine background sedimentation)
 
         Returns
         -------
         None (attribute architectural_elements is created)
         """
         self.architectural_elements = surface.detect_elements(
-            self.dep_env,
+            self.subenvironment,
+            self.channels,
             self.channel_skeleton,
             self.bottom_depth,
             self.bed_level_change,

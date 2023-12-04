@@ -13,6 +13,7 @@ from skimage.morphology import skeletonize
 
 import gtpost.utils as utils
 from gtpost.analyze import window_ops
+from gtpost.analyze.classifications import ArchEl, SubEnv
 
 
 def slope(array: np.ndarray):
@@ -45,7 +46,7 @@ def detect_depositional_environments(
     foreset_depth : np.ndarray
         Array with expected depth of the (steepest part of) the foreset
     df_average_width : float
-        Average width of the deltafront.
+        Average (expected) width of the deltafront.
 
     Returns
     -------
@@ -118,13 +119,12 @@ def delta_areas_from_boundaries(
         foreset_contour, topset_contour, reverse=True
     )
 
-    # Rasterize areas: 1 = Delta top; 2 = Abandoned channels (added later); 3 = Active
-    # channels (added later); 4 = Delta front; and 5 = Prodelta.
+    # Rasterize areas to subenvironments
     environments_new = rasterize(
         [
-            (model_boundary, 1),
-            (delta_edge_polygon, 4),
-            (deep_marine_polygon, 5),
+            (model_boundary, SubEnv.deltatop.value),
+            (delta_edge_polygon, SubEnv.deltafront.value),
+            (deep_marine_polygon, SubEnv.prodelta.value),
         ],
         out_shape=(environments.shape[1], environments.shape[0]),
         dtype=np.int32,
@@ -132,7 +132,7 @@ def delta_areas_from_boundaries(
     return environments_new
 
 
-def detect_channel_network(dataset, dep_env, d50, resolution, config):
+def detect_channel_network(dataset, subenvironment, resolution, config):
     # Unpack config settings
     channel_detection_range = int(
         config["classification"]["channel_detection_windowsize"]
@@ -141,44 +141,37 @@ def detect_channel_network(dataset, dep_env, d50, resolution, config):
         config["classification"]["channel_detection_sensitivity"]
     )
 
-    channels = np.full_like(dep_env, False).astype(bool)
-    channel_skel = np.full_like(dep_env, False).astype(bool)
+    channels = np.full_like(subenvironment, False).astype(bool)
+    channel_skel = np.full_like(subenvironment, False).astype(bool)
     channel_width = np.zeros_like(channels).astype(np.float32)
     channel_depth = np.zeros_like(channels).astype(np.float32)
 
-    for t in range(dep_env.shape[0] - 1):
+    for t in range(subenvironment.shape[0] - 1):
         t += 1
-        dep_env_now = dep_env[t, :, :]
+        subenvironment_now = subenvironment[t, :, :]
         min_depth_now = dataset.MEAN_H1[t, :, :].values
         max_flow_now = dataset.MAX_UV[t, :, :].values
-        d50_now = d50[t, :, :].astype(np.float32)
 
-        # Get local (channel detection range window) differences for flow, D50 and
+        # Get local (within channel detection range window) differences for flow and
         # water depth.
-        min_depth_now[dep_env_now != 1] = np.nan
+        min_depth_now[subenvironment_now != 1] = np.nan
         min_depth_now[min_depth_now > 500] = np.nan
         local_depth = window_ops.numba_window_difference_between_minimum(
             min_depth_now, channel_detection_range
         )
-        max_flow_now[dep_env_now != 1] = np.nan
+        max_flow_now[subenvironment_now != 1] = np.nan
         max_flow_now[max_flow_now < -500] = np.nan
         local_flow = window_ops.numba_window_difference_between_minimum(
             max_flow_now, channel_detection_range
         )
-        d50_now[dep_env_now != 1] = np.nan
-        d50_now[d50_now < -500] = np.nan
-        local_d50 = window_ops.numba_window_difference_between_minimum(
-            d50_now, channel_detection_range
-        )
 
         # Detect active channels and parameters (skeleton, width, depth)
-        channels_now = np.full_like(dep_env_now, False).astype(bool)
-        abandoned_channels_now = np.full_like(dep_env_now, False).astype(bool)
+        channels_now = np.full_like(subenvironment_now, False).astype(bool)
         channels_now[
             (local_depth < channel_detection_sensitivity)
             & (local_flow < channel_detection_sensitivity)
         ] = True
-        channels_now[dep_env_now != 1] = False
+        channels_now[subenvironment_now != SubEnv.deltatop.value] = False
         channels_now = morphology.remove_small_objects(channels_now, min_size=100)
         channels_now = morphology.binary_closing(channels_now, morphology.disk(2))
         channels[t, :, :] = channels_now
@@ -189,62 +182,45 @@ def detect_channel_network(dataset, dep_env, d50, resolution, config):
         channel_depth[t, :, :] = channels_now.astype(int) * (
             dataset["DPS"].values[t, :, :] + dataset["S1"].values[t, :, :]
         )
-        # Detect abandoned channels if it was a channel recently and is still a local
-        # depression (i.e. underfilled)
-        if t > 10:
-            was_channel_recently = channels[t - 10 : t, :, :].max(axis=0) * np.invert(
-                channels_now
-            )
-            underfilled = local_depth < channel_detection_sensitivity
-            locally_fine_material = d50_now < 0.3
-            abandoned_channels_now = (
-                was_channel_recently
-                * underfilled
-                * locally_fine_material
-                * (dep_env_now == 1)
-            )
-            abandoned_channels_now = morphology.remove_small_objects(
-                abandoned_channels_now, min_size=50
-            )
-            abandoned_channels_now = morphology.binary_closing(
-                abandoned_channels_now, morphology.disk(2)
-            )
 
-        # Finally assign channel environments
-        dep_env[t, :, :][abandoned_channels_now] = 2
-        dep_env[t, :, :][channels_now] = 3
-
-    return (dep_env, channels, channel_skel, channel_width, channel_depth)
+    return (channels, channel_skel, channel_width, channel_depth)
 
 
 def detect_elements(
-    dep_env,
-    channel_skeleton,
-    bottom_depth,
-    bed_level_change,
-    sand_fraction,
-    foreset_depth,
-    config,
-):
-    """
-    Detect architectural elements
-
-    Prodelta = 7
-    Delta front = 6
-    Mouthbars = 5
-    Abandoned channels = 3
-    Active channels = 4
-    Delta top (subaqeous) = 2
-    Delta top (subaerial) = 1
+    subenvironment: np.ndarray,
+    channels: np.ndarray,
+    channel_skeleton: np.ndarray,
+    bottom_depth: np.ndarray,
+    bed_level_change: np.ndarray,
+    sand_fraction: np.ndarray,
+    foreset_depth: np.ndarray,
+    config: dict,
+) -> np.ndarray:
+    """Detect Architectural Elements
 
     Parameters
     ----------
-    dataset : _type_
-        _description_
-    dep_env : _type_
-        _description_
-    slope : _type_
-        _description_
+    subenvironment : np.ndarray
+        Previously determined subenvironments
+    channels : np.ndarray
+        Previously determined channels
+    channel_skeleton : np.ndarray
+        Channel skeleton
+    bottom_depth : np.ndarray
+        Bottom depth array (t, x, y)
+    bed_level_change : np.ndarray
+        Bed level change array (t, x, y)
+    sand_fraction : np.ndarray
+        Sand fraction array (t, x, y)
+    foreset_depth : np.ndarray
+        Average foreset depth (t)
+    config : ConfigParser object (dict-like behaviour)
+        ConfigParser object with classification settings
+
+    Returns
+    -------
+    np.ndarray
+        Array with architectural elements (t, x, y)
     """
     # Unpack config settings
     delta_top_subaqeous_depth = float(
@@ -266,45 +242,52 @@ def detect_elements(
         config["classification"]["mouthbar_detection_critical_bl_change_ch"]
     )
 
-    archels = np.zeros_like(dep_env)
-    mask = np.zeros_like(dep_env[0, :, :], dtype=bool)
+    archels = np.zeros_like(subenvironment)
+    mask = np.zeros_like(subenvironment[0, :, :], dtype=bool)
     mb_kernel = np.ones((mouthbar_search_radius, mouthbar_search_radius))
-    for t in range(dep_env.shape[0] - 1):
+    for t in range(subenvironment.shape[0] - 1):
         t += 1
-        dep_now = dep_env[t, :, :]
+        subenvironment_now = subenvironment[t, :, :]
         bed_chg_now = bed_level_change[t, :, :]
         ch_skel_now = channel_skeleton[t, :, :]
 
         # Prodelta = depositional environment prodelta
-        archels[t, :, :][(dep_now == 5)] = 7
+        archels[t, :, :][
+            (subenvironment_now == SubEnv.prodelta)
+        ] = ArchEl.prodelta.value
 
         # Delta front = depositional environment delta edge
-        archels[t, :, :][dep_now == 4] = 6
         archels[t, :, :][
-            (dep_now == 5) & (sand_fraction[t, :, :] > delta_front_min_sandfrac)
-        ] = 6
+            subenvironment_now == SubEnv.deltafront
+        ] = ArchEl.deltafront.value
+        archels[t, :, :][
+            (subenvironment_now == SubEnv.prodelta.value)
+            & (sand_fraction[t, :, :] > delta_front_min_sandfrac)
+        ] = ArchEl.deltafront.value
 
         # Delta top = depositional environment delta top
-        archels[t, :, :][dep_now == 1] = 2
         archels[t, :, :][
-            (dep_now == 1) & (bottom_depth[t, :, :] < delta_top_subaqeous_depth)
-        ] = 1
+            subenvironment_now == SubEnv.deltatop.value
+        ] = ArchEl.dtaqua.value
+        archels[t, :, :][
+            (subenvironment_now == SubEnv.deltatop.value)
+            & (bottom_depth[t, :, :] < delta_top_subaqeous_depth)
+        ] = ArchEl.dtair.value
 
         # Channels / Abandoned channels = depositional environment channels
-        archels[t, :, :][dep_now == 3] = 4
-        archels[t, :, :][dep_now == 2] = 3
+        archels[t, :, :][channels] = ArchEl.channel.value
 
         # Mouth bars
         # First find end points of channels. Mouthbars may only be classified around
         # these points within the (user-set) mouthbar search radius.
         channel_endpoints = utils.skeleton_endpoints(ch_skel_now)
         channel_endpoints = [ch for ch in channel_endpoints if ch[0] > 10]
-        delta_top = np.ma.masked_where(archels[t, :, :] == 2, mask).mask.astype(
-            np.int32
-        )
-        delta_front = np.ma.masked_where(archels[t, :, :] == 6, mask).mask.astype(
-            np.int32
-        )
+        delta_top = np.ma.masked_where(
+            archels[t, :, :] == ArchEl.dtaqua.value, mask
+        ).mask.astype(np.int32)
+        delta_front = np.ma.masked_where(
+            archels[t, :, :] == ArchEl.deltafront.value, mask
+        ).mask.astype(np.int32)
         ch_endpoint_allowed_area = convolve2d(
             delta_top + delta_front, mb_kernel, mode="same", boundary="wrap"
         )
@@ -316,17 +299,17 @@ def detect_elements(
             )
             if p > mouthbar_search_radius * 4
         ]
-        mb_mask = np.zeros_like(dep_now, dtype=bool)
+        mb_mask = np.zeros_like(subenvironment, dtype=bool)
         for channel_endpoint in channel_endpoints:
             channel_end_mask = utils.create_circular_mask(
-                dep_now.shape[0],
-                dep_now.shape[1],
+                subenvironment_now.shape[0],
+                subenvironment_now.shape[1],
                 channel_endpoint[::-1],
                 mouthbar_search_radius / 2,
             )
             channel_end_mask = np.ma.masked_where(
-                (archels[t, :, :] != 1)
-                & (archels[t, :, :] != 7)
+                (archels[t, :, :] != ArchEl.dtair.value)
+                & (archels[t, :, :] != ArchEl.prodelta.value)
                 & channel_end_mask
                 & (bottom_depth[t, :, :] < foreset_depth[t] / 1.5),
                 mask,
@@ -337,22 +320,17 @@ def detect_elements(
         mouthbars = np.ma.masked_where(
             (
                 mb_mask
-                & (archels[t, :, :] == 6)
+                & (archels[t, :, :] == ArchEl.deltafront.value)
                 & (bed_chg_now < mouthbar_critical_bl_change_df)
             )
             | (
                 mb_mask
-                & (archels[t, :, :] == 2)
+                & (archels[t, :, :] == ArchEl.dtaqua.value)
                 & (bed_chg_now < mouthbar_critical_bl_change_dt)
             )
             | (
                 mb_mask
-                & (archels[t, :, :] == 4)
-                & (bed_chg_now < mouthbar_critical_bl_change_ch)
-            )
-            | (
-                mb_mask
-                & (archels[t, :, :] == 3)
+                & (archels[t, :, :] == ArchEl.channel.value)
                 & (bed_chg_now < mouthbar_critical_bl_change_ch)
             ),
             mask,
@@ -366,6 +344,6 @@ def detect_elements(
             mouthbars = mouthbars.data
 
         # Assign MB element
-        archels[t, :, :][mouthbars] = 5
+        archels[t, :, :][mouthbars] = ArchEl.mouthbar.value
 
     return archels
