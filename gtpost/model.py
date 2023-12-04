@@ -283,7 +283,7 @@ class ModelResult:
         self.dmsedcum_final[self.dmsedcum_final < 0] = 0
         self.zcor = -self.dataset["DPS"].values
         self.preserved_thickness, self.deposition_age = layering.preservation(
-            self.zcor, self.dataset["SDU"].values
+            self.zcor, self.dataset["SDU"].values, self.dmsedcum_final
         )
         self.vfraction = sediment.calculate_fraction(self.rho_db, self.dmsedcum_final)
         self.sandfraction = sediment.calculate_sand_fraction(

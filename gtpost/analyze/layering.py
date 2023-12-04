@@ -2,7 +2,9 @@ import numpy as np
 import xarray as xr
 
 
-def preservation(zcor: np.ndarray, subsidence: np.ndarray) -> np.ndarray:
+def preservation(
+    zcor: np.ndarray, subsidence: np.ndarray, dmsedcum_final: np.ndarray
+) -> np.ndarray:
     """
     Get preservation potential of each deposit in the final model. i.e. when a deposit
     is (partially) preserved it returns the thickness of the final preserved sediment
@@ -39,7 +41,7 @@ def preservation(zcor: np.ndarray, subsidence: np.ndarray) -> np.ndarray:
             deposition_age[t, :, :] = np.full_like(z_preserved, t)
         else:
             deposition_age[t, :, :] = deposition_age[t - 1, :, :]
-            deposition_age[t, :, :][z_preserved > 0] = t
+            deposition_age[t, :, :][dmsedcum_final[t, :, :] > 0] = t
 
     return preserved_thickness, deposition_age
 
