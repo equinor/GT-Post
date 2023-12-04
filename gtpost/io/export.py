@@ -76,6 +76,15 @@ def create_sed_and_obj_dataset(p):
                 units="meter",
             ),
         ),
+        deposition_age=(
+            ("dimen_t", "dimen_x", "dimen_y"),
+            p.deposition_age,
+            dict(
+                long_name="Final preserved thickness of deposits",
+                variable_type="calculated",
+                units="meter",
+            ),
+        ),
         diameter=(
             ("dimen_t", "dimen_x", "dimen_y"),
             p.d50,

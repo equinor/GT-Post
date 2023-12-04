@@ -21,6 +21,7 @@ class PlotBase:
         "bed_level_change": colormaps.BedlevelchangeColormap(),
         "porosity": colormaps.PorosityColormap(),
         "bottom_depth": colormaps.BottomDepthColormap(),
+        "deposition_age": colormaps.DepositionageColormap(),
     }
     axlabelsize = 10
     axtitlesize = 12

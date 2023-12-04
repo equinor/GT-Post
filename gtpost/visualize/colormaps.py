@@ -118,3 +118,14 @@ class PorosityColormap(NamedTuple):
     vmin = 0.25
     vmax = 0.35
     cmap, mappable, norm = continuous_cmap([c0, c1, c2], name, vmin, vmax)
+
+
+class DepositionageColormap(NamedTuple):
+    c0 = (0.0, "lightgray")  # dark green
+    c1 = (0.5, "tan")  # olivedrab
+    c2 = (1, "goldenrod")  # yellow
+    name = "Age (timestep) of deposition"
+    type = "mappable"
+    vmin = 0
+    vmax = 320
+    cmap, mappable, norm = continuous_cmap([c0, c1, c2], name, vmin, vmax)

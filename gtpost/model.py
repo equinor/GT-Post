@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 
 import gtpost.utils as utils
-from gtpost.analyze import sediment, statistics, surface
+from gtpost.analyze import sediment, statistics, surface, layering
 from gtpost.io import ENCODINGS, export, read_d3d_input
 from gtpost.visualize import plot
 
@@ -282,7 +282,7 @@ class ModelResult:
         # deposits, so remove fluxes of sediment classes that are negative.
         self.dmsedcum_final[self.dmsedcum_final < 0] = 0
         self.zcor = -self.dataset["DPS"].values
-        self.preserved_thickness = sediment.preservation(
+        self.preserved_thickness, self.deposition_age = layering.preservation(
             self.zcor, self.dataset["SDU"].values
         )
         self.vfraction = sediment.calculate_fraction(self.rho_db, self.dmsedcum_final)
@@ -398,8 +398,12 @@ if __name__ == "__main__":
         # mapplotter.twopanel_map("bottom_depth", "architectural_elements")
         # mapplotter.save_figures(output_folder, "maps_wd_ae")
 
-        # xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
-        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
+        xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
+        # xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))'
+        xsectplotter_xshore.twopanel_xsection(
+            "deposition_age",
+            "deposition_age",
+        )
         xsectplotter_xshore.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",

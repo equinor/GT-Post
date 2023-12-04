@@ -25,6 +25,7 @@ def preservation(zcor: np.ndarray, subsidence: np.ndarray) -> np.ndarray:
     """
     zcor_corrected = zcor - subsidence
     preserved_thickness = np.zeros_like(zcor)
+    deposition_age = np.zeros_like(zcor)
     for t in range(zcor.shape[0]):
         if t != zcor.shape[0] - 1:
             z_preserved = (
@@ -34,8 +35,9 @@ def preservation(zcor: np.ndarray, subsidence: np.ndarray) -> np.ndarray:
             z_preserved = zcor_corrected[t, :, :] - zcor_corrected[t - 1, :, :]
         z_preserved[z_preserved < 0] = 0
         preserved_thickness[t, :, :] = z_preserved
+        deposition_age[t, :, :] = np.full_like(z_preserved, t)
 
-    return preserved_thickness
+    return preserved_thickness, deposition_age
 
 
 def reconstruct_preserved_layering(
