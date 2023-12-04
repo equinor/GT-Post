@@ -16,42 +16,6 @@ default_settings_file = (
 
 
 class ModelResult:
-    # __slots__ = [
-    #     "config",
-    #     "dataset",
-    #     "sed_type",
-    #     "rho_p",
-    #     "rho_db",
-    #     "d50_input",
-    #     "dx",
-    #     "dy",
-    #     "mouth_position",
-    #     "mouth_river_width",
-    #     "model_boundary",
-    #     "bottom_depth",
-    #     "slope",
-    #     "foreset_depth",
-    #     "toeset_depth",
-    #     "delta_fringe",
-    #     "df_average_width",
-    #     "bed_level_change",
-    #     "dep_env",
-    #     "channels",
-    #     "channel_skeleton",
-    #     "channel_depth",
-    #     "channel_width",
-    #     "dmsedcum_final",
-    #     "zcor",
-    #     "vfraction",
-    #     "sandfraction",
-    #     "diameters",
-    #     "porosity",
-    #     "permeability",
-    #     "sorting",
-    #     "d50",
-    #     "architectural_elements",
-    # ]
-
     def __init__(
         self,
         dataset: xr.Dataset,
@@ -80,12 +44,6 @@ class ModelResult:
         self.config = ConfigParser()
         self.config.read(settings_file)
         self.dataset = dataset
-        # self.dataset = dataset.isel(
-        #     time=slice(
-        #         int(0),
-        #         int(50),
-        #     )
-        # )
         if post:
             self.complete_init_for_postprocess()
             self.processing_state = "postprocessing"
@@ -189,24 +147,21 @@ class ModelResult:
             self.config["classification"]["deltafront_expected_width"]
         )
 
-    def detect_depositional_environments(self):
+    def detect_subenvironments(self):
         """
         Detect depositional environments and channel parameters.
 
-        Adds the attribute "dep_env" which is an np.ndarray with time, x and y
+        Adds the attribute subenvironment which is an np.ndarray with time, x and y
         dimensions. It detects the following environments:
 
         1 - Delta top
-        2 - Abandoned channel
-        3 - Active channel
-        4 - Delta edge area
-        5 - Deep marine area
+        2 - Delta edge area (Delta front)
+        3 - Deep marine area (Prodelta)
 
         Returns
         -------
-        None (attribute dep_env is created)
+        None (attribute subenvironment is created)
         """
-        # Initial detection of Delta top, Delta front and Prodelta
         (
             self.subenvironment,
             self.delta_fringe,
@@ -218,7 +173,16 @@ class ModelResult:
             self.foreset_depth,
             self.df_average_width,
         )
-        # Detection of channel network
+
+    def detect_channel_network(self):
+        """
+        Detect channels and derived parameters.
+
+        Returns
+        -------
+        None (attributes channels, channel_skeleton, channel_width and channel_depth
+        are created)
+        """
         (
             self.channels,
             self.channel_skeleton,
@@ -230,8 +194,6 @@ class ModelResult:
             self.dx,
             self.config,
         )
-        # Update of Delta front area to include the mouth of channels that connect to
-        # the delta front (mouthbars are expected to form here)
 
     def detect_architectural_elements(self):
         """
@@ -358,11 +320,12 @@ class ModelResult:
         Run all postprocess methods in order:
 
         - Compute sediment parameters
-        - Detect depositional environments
+        - Detect subenvironments
         - Detect architectural elements
         """
         self.compute_sediment_parameters()
-        self.detect_depositional_environments()
+        self.detect_subenvironments()
+        self.detect_channel_network()
         self.detect_architectural_elements()
         self.statistics_summary()
 
@@ -376,12 +339,10 @@ if __name__ == "__main__":
 
     for d3d_folder in d3d_folders:
         d3d_folder = Path(
-            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_045_Reference"
+            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_045_Reference"
         )
         folder_name = d3d_folder.stem
-        config_file = (
-            Path(__file__).parents[1].joinpath(r"config\settings_sobrarbe.ini")
-        )
+        config_file = Path(__file__).parents[1].joinpath(r"config\settings_Roda.ini")
         output_folder = Path(
             f"n:\\Projects\\11209000\\11209074\\B. Measurements and calculations\\test_results\\{folder_name}"
         )
@@ -391,20 +352,21 @@ if __name__ == "__main__":
 
         test = ModelResult.from_folder(d3d_folder, settings_file=config_file)
         test.postprocess()
-        test.export_sediment_and_object_data(
-            output_folder.joinpath("Sed_and_Obj_data.nc")
-        )
+        # test.export_sediment_and_object_data(
+        #     output_folder.joinpath("Sed_and_Obj_data.nc")
+        # )
 
         # mapplotter = plot.MapPlot(test)
         # mapplotter.twopanel_map("bottom_depth", "architectural_elements")
         # mapplotter.save_figures(output_folder, "maps_wd_ae")
 
-        xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
-        # xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))'
+        # xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
+        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (200, 140))
         xsectplotter_xshore.twopanel_xsection(
             "deposition_age",
             "deposition_age",
         )
+        xsectplotter_xshore.save_figures(output_folder, "depage_xshore")
         xsectplotter_xshore.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",

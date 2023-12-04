@@ -16,6 +16,3 @@ class ArchEl(Enum):
     mouthbar = 4
     deltafront = 5
     prodelta = 6
-
-
-print("")
