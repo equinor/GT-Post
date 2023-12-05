@@ -39,27 +39,56 @@ class TestSediment:
 
     @pytest.fixture
     def d50input(self):
-        return [0.00141, 0.000707, 0.000354, 0.000111, 0.0001, 0.000043988]
+        return [0.00141, 0.000707, 0.000354, 0.0002, 0.0001, 0.000043988]
 
     @pytest.fixture
     def vfraction(self):
+        # Some interesting distributions to test. From heavily skewed to nicely
+        # distributed to weird two-topped distributions.
         return np.array(
             [
                 [
-                    [[0.19781426, 0.3307917], [0.05305415, 0.2640609]],
-                    [[0.12051993, 0.14733111], [0.30461417, 0.11390245]],
-                    [[0.21241281, 0.00959145], [0.27731068, 0.14979465]],
-                    [[0.12743822, 0.27439835], [0.11158288, 0.12623321]],
-                    [[0.05180586, 0.14029618], [0.07487635, 0.07301612]],
-                    [[0.29000891, 0.0975912], [0.17856177, 0.27299268]],
+                    [[0.30, 0.02], [0.05, 0.05]],
+                    [[0.35, 0.08], [0.15, 0.15]],
+                    [[0.15, 0.10], [0.30, 0.30]],
+                    [[0.10, 0.15], [0.30, 0.30]],
+                    [[0.08, 0.35], [0.15, 0.15]],
+                    [[0.02, 0.30], [0.05, 0.05]],
                 ],
                 [
-                    [[0.29439073, 0.16615557], [0.16738296, 0.11607106]],
-                    [[0.04918017, 0.22235202], [0.15960236, 0.04857014]],
-                    [[0.19086802, 0.1780519], [0.18958096, 0.38452546]],
-                    [[0.01212051, 0.12117725], [0.14205688, 0.02613655]],
-                    [[0.19632886, 0.19546311], [0.18337638, 0.10903122]],
-                    [[0.25711172, 0.11680016], [0.15800046, 0.31566556]],
+                    [[1.00, 0.00], [0.50, 0.00]],
+                    [[0.00, 0.00], [0.00, 0.00]],
+                    [[0.00, 0.00], [0.00, 0.00]],
+                    [[0.00, 0.00], [0.00, 0.30]],
+                    [[0.00, 0.00], [0.00, 0.70]],
+                    [[0.00, 1.00], [0.50, 0.00]],
+                ],
+            ]
+        )
+
+    @pytest.fixture
+    def diameters_target(self):
+        return np.array(
+            [
+                [
+                    [
+                        [0.14358729, 0.2030631, 0.65975396, 1.41421356, 1.62450479],
+                        [0.04123462, 0.04736614, 0.10153155, 0.35355339, 0.5],
+                    ],
+                    [
+                        [0.08246924, 0.11662912, 0.26794337, 0.61557221, 0.8122524],
+                        [0.08246924, 0.11662912, 0.26794337, 0.61557221, 0.8122524],
+                    ],
+                ],
+                [
+                    [
+                        [1.07177346, 1.14869835, 1.41421356, 1.74110113, 1.86606598],
+                        [0.03349292, 0.03589682, 0.04419417, 0.05440941, 0.05831456],
+                    ],
+                    [
+                        [0.04736614, 0.0625, 0.25, 1.0, 1.31950791],
+                        [0.07694653, 0.08246924, 0.11662912, 0.18946457, 0.21763764],
+                    ],
                 ],
             ]
         )
@@ -94,19 +123,57 @@ class TestSediment:
         )
 
     @pytest.mark.unittest
-    def test_calculate_sorting(self):
-        pass
+    def test_calculate_sorting(self, diameters_target):
+        sorting = sediment.calculate_sorting(diameters_target, [10, 16, 50, 84, 90])
+        assert_allclose(
+            sorting,
+            np.array(
+                [
+                    [[1.23030303, 1.27045458], [1.10000003, 1.10000003]],
+                    [[0.27121212, 0.27121215], [1.72727274, 0.52727273]],
+                ]
+            ),
+        )
 
     @pytest.mark.unittest
-    def test_calculate_distribution(self):
-        pass
-
-    @pytest.mark.unittest
-    def test_calculate_diameter(self, d50input, vfraction):
+    def test_calculate_diameter_porosity_permeability(
+        self, d50input, vfraction, diameters_target
+    ):
         diameters, porosity, permeability = sediment.calculate_diameter(
             np.asarray(d50input, dtype=np.float32),
-            np.array([5, 10, 16, 50, 84, 90], dtype=np.float32),
+            np.array([10, 16, 50, 84, 90], dtype=np.float32),
             vfraction,
         )
 
+        # Lower D-values must always be a smaller grain size.
+        assert (diameters[:, :, :, 0] < diameters[:, :, :, 1]).all()
+        assert (diameters[:, :, :, 1] < diameters[:, :, :, 2]).all()
+        assert (diameters[:, :, :, 2] < diameters[:, :, :, 3]).all()
+        assert (diameters[:, :, :, 3] < diameters[:, :, :, 4]).all()
+
+        assert_allclose(diameters, diameters_target, atol=1e-7)
+        assert_allclose(
+            porosity,
+            np.array(
+                [
+                    [[0.28738403, 0.28597625], [0.29219721, 0.29219721]],
+                    [[0.34669999, 0.34424062], [0.27189716, 0.32539888]],
+                ]
+            ),
+        )
+        assert_allclose(
+            permeability,
+            np.array(
+                [
+                    [
+                        [1.01514711e-09, 6.19265668e-11],
+                        [2.44974538e-10, 2.44974538e-10],
+                    ],
+                    [
+                        [5.68450212e-09, 1.73186250e-12],
+                        [2.29137137e-10, 1.69956940e-11],
+                    ],
+                ]
+            ),
+        )
         pass

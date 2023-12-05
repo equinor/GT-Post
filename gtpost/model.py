@@ -335,10 +335,12 @@ if __name__ == "__main__":
 
     for d3d_folder in d3d_folders:
         d3d_folder = Path(
-            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_054_Reference"
+            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_045_Reference"
         )
         folder_name = d3d_folder.stem
-        config_file = Path(__file__).parents[1].joinpath(r"config\settings_Roda.ini")
+        config_file = (
+            Path(__file__).parents[1].joinpath(r"config\settings_sobrarbe.ini")
+        )
         output_folder = Path(
             f"n:\\Projects\\11209000\\11209074\\B. Measurements and calculations\\test_results\\{folder_name}"
         )
@@ -356,8 +358,8 @@ if __name__ == "__main__":
         # mapplotter.twopanel_map("bottom_depth", "architectural_elements")
         # mapplotter.save_figures(output_folder, "maps_wd_ae")
 
-        # xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
-        xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (220, 140))
+        xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
+        # xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (220, 140))
         xsectplotter_xshore.twopanel_xsection(
             "deposition_age",
             "deposition_age",
@@ -372,8 +374,8 @@ if __name__ == "__main__":
         xsectplotter_xshore.twopanel_xsection("d50", "d50")
         xsectplotter_xshore.save_figures(output_folder, "d50_xshore")
 
-        xsectplotter_lshore = plot.CrossSectionPlot(test, (10, 60), (70, 240))
-        # xsectplotter_lshore = plot.CrossSectionPlot(test, (115, 80), (115, 220))
+        # xsectplotter_lshore = plot.CrossSectionPlot(test, (10, 60), (70, 240))
+        xsectplotter_lshore = plot.CrossSectionPlot(test, (115, 80), (115, 220))
         xsectplotter_lshore.twopanel_xsection(
             "architectural_elements",
             "architectural_elements",
@@ -382,4 +384,9 @@ if __name__ == "__main__":
 
         xsectplotter_lshore.twopanel_xsection("d50", "d50")
         xsectplotter_lshore.save_figures(output_folder, "d50_lshore")
+        xsectplotter_lshore.twopanel_xsection(
+            "deposition_age",
+            "deposition_age",
+        )
+        xsectplotter_lshore.save_figures(output_folder, "depage_lshore")
         print("stop")

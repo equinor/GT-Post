@@ -215,7 +215,9 @@ class PlotBase:
 
         axis.set_xlabel("Distance along profile line (km)", fontsize=self.axlabelsize)
         axis.set_ylabel("Vertical position (m)", fontsize=self.axlabelsize)
-        axis.set_title(colormap.name, fontsize=self.titlesize, loc="left")
+        axis.set_title(
+            colormap.name + f" (t = {timestep})", fontsize=self.titlesize, loc="left"
+        )
 
         colorbar = self.fig.colorbar(
             colormap.mappable, cax=caxis, orientation="horizontal"
@@ -254,7 +256,9 @@ class PlotBase:
 
         axis.set_xlabel("Alongshore direction (km)", fontsize=self.axlabelsize)
         axis.set_ylabel("Cross-shore direction (km)", fontsize=self.axlabelsize)
-        axis.set_title(colormap.name, fontsize=self.titlesize, loc="left")
+        axis.set_title(
+            colormap.name + f" (t = {timestep})", fontsize=self.titlesize, loc="left"
+        )
 
         colorbar = self.fig.colorbar(
             colormap.mappable, cax=caxis, orientation="horizontal"

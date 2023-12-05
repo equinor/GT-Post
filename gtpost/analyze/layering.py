@@ -41,6 +41,6 @@ def preservation(
             deposition_age[t, :, :] = np.full_like(z_preserved, t)
         else:
             deposition_age[t, :, :] = deposition_age[t - 1, :, :]
-            deposition_age[t, :, :][np.sum(dmsedcum_final[t, :, :, :], axis=0) > 0] = t
+            deposition_age[t, :, :][np.sum(dmsedcum_final[t, :, :, :], axis=0) > 1] = t
 
     return preserved_thickness, deposition_age

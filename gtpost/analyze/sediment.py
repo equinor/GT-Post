@@ -66,7 +66,7 @@ def calculate_sand_fraction(sedtype, vfraction):
     return np.sum(vfrac, axis=1).astype(np.float32)
 
 
-def calculate_sorting(diameters, percentage2cal):
+def calculate_sorting(diameters: np.array, percentage2cal: list):
     index10 = percentage2cal.index(10)
     index16 = percentage2cal.index(16)
     index84 = percentage2cal.index(84)
@@ -76,7 +76,7 @@ def calculate_sorting(diameters, percentage2cal):
     sorting = (
         diameters_phi[:, :, :, index84] - diameters_phi[:, :, :, index16]
     ) / 4 + (diameters_phi[:, :, :, index90] - diameters_phi[:, :, :, index10]) / 6.6
-    return sorting
+    return -sorting
 
 
 @numba.njit
@@ -193,7 +193,11 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
                         ]
                 for ipercen in range(len(percentage2cal)):
                     diameters[it, ix, iy, ipercen] = 2 ** (
-                        -xvalue[np.argmin(np.abs(cdf - 0.01 * percentage2cal[ipercen]))]
+                        -xvalue[
+                            np.argmin(
+                                np.abs(cdf - (1 - (0.01 * percentage2cal[ipercen])))
+                            )
+                        ]
                     )
                     # set diameter to zero if there is no deposition
                     # because in the models, we don't have 2000mm,

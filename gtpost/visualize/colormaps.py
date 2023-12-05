@@ -121,10 +121,10 @@ class PorosityColormap(NamedTuple):
 
 class DepositionageColormap(NamedTuple):
     c0 = (0.0, "lightgray")
-    c1 = (0.25, "tan")
-    c2 = (0.5, "goldenrod")
-    c3 = (0.75, "darkorange")
-    c4 = (1, "firebrick")
+    c1 = (0.25, "gold")
+    c2 = (0.5, "darkorange")
+    c3 = (0.75, "crimson")
+    c4 = (1, "magenta")
     name = "Age (timestep) of deposition"
     type = "mappable"
     vmin = 0
