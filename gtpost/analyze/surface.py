@@ -190,7 +190,7 @@ def detect_elements(
     channels: np.ndarray,
     channel_skeleton: np.ndarray,
     bottom_depth: np.ndarray,
-    bed_level_change: np.ndarray,
+    deposit_height: np.ndarray,
     sand_fraction: np.ndarray,
     foreset_depth: np.ndarray,
     config: dict,
@@ -207,8 +207,8 @@ def detect_elements(
         Channel skeleton
     bottom_depth : np.ndarray
         Bottom depth array (t, x, y)
-    bed_level_change : np.ndarray
-        Bed level change array (t, x, y)
+    deposit_height : np.ndarray
+        Deposit height array (t, x, y)
     sand_fraction : np.ndarray
         Sand fraction array (t, x, y)
     foreset_depth : np.ndarray
@@ -231,13 +231,13 @@ def detect_elements(
     mouthbar_search_radius = int(
         config["classification"]["mouthbar_detection_search_radius"]
     )
-    mouthbar_critical_bl_change_df = -float(
+    mouthbar_critical_bl_change_df = float(
         config["classification"]["mouthbar_detection_critical_bl_change_df"]
     )
-    mouthbar_critical_bl_change_ch = -float(
+    mouthbar_critical_bl_change_ch = float(
         config["classification"]["mouthbar_detection_critical_bl_change_ch"]
     )
-    mouthbar_critical_bl_change_dt = -float(
+    mouthbar_critical_bl_change_dt = float(
         config["classification"]["mouthbar_detection_critical_bl_change_ch"]
     )
 
@@ -247,7 +247,7 @@ def detect_elements(
     for t in range(subenvironment.shape[0] - 1):
         t += 1
         subenvironment_now = subenvironment[t, :, :]
-        bed_chg_now = bed_level_change[t, :, :]
+        bed_chg_now = deposit_height[t, :, :]
         ch_skel_now = channel_skeleton[t, :, :]
 
         # Prodelta = depositional environment prodelta
@@ -320,17 +320,17 @@ def detect_elements(
             (
                 mb_mask
                 & (archels[t, :, :] == ArchEl.deltafront.value)
-                & (bed_chg_now < mouthbar_critical_bl_change_df)
+                & (bed_chg_now > mouthbar_critical_bl_change_df)
             )
             | (
                 mb_mask
                 & (archels[t, :, :] == ArchEl.dtaqua.value)
-                & (bed_chg_now < mouthbar_critical_bl_change_dt)
+                & (bed_chg_now > mouthbar_critical_bl_change_dt)
             )
             | (
                 mb_mask
                 & (archels[t, :, :] == ArchEl.channel.value)
-                & (bed_chg_now < mouthbar_critical_bl_change_ch)
+                & (bed_chg_now > mouthbar_critical_bl_change_ch)
             ),
             mask,
         )

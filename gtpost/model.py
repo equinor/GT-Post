@@ -121,7 +121,7 @@ class ModelResult:
         mouth_position      :       tuple(int, int): x, y position of the delta apex
         mouth_river_width   :       int: width of the river at the delta apex
         model_boundary      :       shapely.Polygon: polygon of model boundary
-        bed_level_change    :       np.ndarray: array (time, x, y) with bed level change
+        deposit_height      :       np.ndarray: array (time, x, y) height of deposit
         slope               :       np.ndarray: array (time, x, y) with surface slope
         foreset_depth       :       np.ndarray: array (time) with time-dependent depth
                                     of the foreset.
@@ -132,11 +132,16 @@ class ModelResult:
             self.dataset, self.mouth_position
         )
         self.model_boundary = utils.get_model_bound(self.dataset)
-        self.bed_level_change = np.zeros_like(self.dataset["MEAN_H1"])
-        self.bed_level_change[1:, :, :] = (
-            self.dataset["DPS"].values[1:, :, :] - self.dataset["DPS"].values[:-1, :, :]
-        )
         self.subsidence_per_t = np.diff(self.dataset["SDU"].values, axis=0)[0, :, :]
+        self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
+        self.deposit_height[1:, :, :] = -(
+            (
+                self.dataset["DPS"].values[1:, :, :]
+                - self.dataset["DPS"].values[:-1, :, :]
+            )
+            + self.subsidence_per_t
+        )
+        self.deposit_height[np.abs(self.deposit_height) < 1e-6] = 0
         self.dataset["MEAN_H1"] = self.dataset.MEAN_H1.where(self.dataset.MEAN_H1 > -50)
         self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
         self.slope = surface.slope(self.dataset["MEAN_H1"].values)
@@ -217,7 +222,7 @@ class ModelResult:
             self.channels,
             self.channel_skeleton,
             self.bottom_depth,
-            self.bed_level_change,
+            self.deposit_height,
             self.sandfraction,
             self.foreset_depth,
             self.config,
@@ -246,7 +251,7 @@ class ModelResult:
         self.dmsedcum_final[self.dmsedcum_final < 0] = 0
         self.zcor = -self.dataset["DPS"].values
         self.preserved_thickness, self.deposition_age = layering.preservation(
-            self.zcor, self.dataset["SDU"].values, self.dmsedcum_final
+            self.zcor, self.dataset["SDU"].values, self.deposit_height
         )
         self.vfraction = sediment.calculate_fraction(self.rho_db, self.dmsedcum_final)
         self.sandfraction = sediment.calculate_sand_fraction(

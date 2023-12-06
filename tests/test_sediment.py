@@ -3,12 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-from numpy.testing import (
-    assert_allclose,
-    assert_almost_equal,
-    assert_array_equal,
-    assert_equal,
-)
+from numpy.testing import assert_allclose
 
 from gtpost.analyze import sediment
 

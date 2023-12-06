@@ -3,7 +3,7 @@ import xarray as xr
 
 
 def preservation(
-    zcor: np.ndarray, subsidence: np.ndarray, dmsedcum_final: np.ndarray
+    zcor: np.ndarray, subsidence: np.ndarray, deposit_height: np.ndarray
 ) -> np.ndarray:
     """
     Get preservation potential of each deposit in the final model. i.e. when a deposit
@@ -41,6 +41,6 @@ def preservation(
             deposition_age[t, :, :] = np.full_like(z_preserved, t)
         else:
             deposition_age[t, :, :] = deposition_age[t - 1, :, :]
-            deposition_age[t, :, :][np.sum(dmsedcum_final[t, :, :, :], axis=0) > 1] = t
+            deposition_age[t, :, :][deposit_height > 1e-5] = t
 
     return preserved_thickness, deposition_age
