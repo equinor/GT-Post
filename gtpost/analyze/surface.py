@@ -252,12 +252,12 @@ def detect_elements(
 
         # Prodelta = depositional environment prodelta
         archels[t, :, :][
-            (subenvironment_now == SubEnv.prodelta)
+            (subenvironment_now == SubEnv.prodelta.value)
         ] = ArchEl.prodelta.value
 
         # Delta front = depositional environment delta edge
         archels[t, :, :][
-            subenvironment_now == SubEnv.deltafront
+            subenvironment_now == SubEnv.deltafront.value
         ] = ArchEl.deltafront.value
         archels[t, :, :][
             (subenvironment_now == SubEnv.prodelta.value)
@@ -274,7 +274,7 @@ def detect_elements(
         ] = ArchEl.dtair.value
 
         # Channels / Abandoned channels = depositional environment channels
-        archels[t, :, :][channels] = ArchEl.channel.value
+        archels[t, :, :][channels[t, :, :]] = ArchEl.channel.value
 
         # Mouth bars
         # First find end points of channels. Mouthbars may only be classified around
