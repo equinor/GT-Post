@@ -132,7 +132,7 @@ class SedimentaryLog:
             autopct="%1.1f%%",
         )
         ax.set_title(
-            f"SB41 Preserved architectural element distribution\nTotal delta volume = {np.round(total_volume*50*50, 0)} $m^3$"
+            f"Preserved architectural element distribution\nTotal delta volume = {np.round(total_volume*50*50, 0)} $m^3$"
         )
 
     def plot_d50_histograms(self, y1, y2):
@@ -160,7 +160,7 @@ class SedimentaryLog:
 
             ax.set_yticks([])
             fig.suptitle(
-                "SB41 D50 distribution per preserved architectural element", fontsize=16
+                "D50 distribution per preserved architectural element", fontsize=16
             )
 
     def _get_volume_stats(self, y1, y2):
@@ -180,7 +180,7 @@ class SedimentaryLog:
     def _get_diameter_distributions(self, y1, y2):
         d50_distributions = []
         d50_distribution_weights = []
-        for i in range(1, 8):
+        for i in range(1, 7):
             idxs = (self.data["preserved_thickness"].values[:, y1:y2, :] > 0) & (
                 self.data["archel"].values[:, y1:y2, :] == i
             )

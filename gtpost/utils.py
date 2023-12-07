@@ -6,20 +6,39 @@ from shapely.ops import nearest_points
 from skimage import measure
 
 
-def get_dx_dy(dataset):
+def get_dx_dy(xvalues: np.ndarray) -> (int, int):
     """
-    Get horizontal and vertical grid spacing
+    Get grid spacing. Assumes spacing is the same along x and y dimensions.
+
+    Parameters
+    ----------
+    xvalues : np.ndarray
+        (y) array with x-coordinates
+
+    Returns
+    -------
+    int, int
+        Grid resolution along x and y axis
     """
-    xvals = dataset.XZ[:, 0].values
-    diff = np.diff(xvals[xvals > 0])[0]
+    diff = np.diff(xvalues[xvalues > 0])[0]
     return diff, diff
 
 
-def get_model_bound(dataset):
+def get_model_bound(mean_depth: np.ndarray) -> Polygon:
     """
-    Get position of initial coastline
+    Get position of initial coastline.
+
+    Parameters
+    ----------
+    mean_depth : np.ndarray
+        (x, y) Array of mean depth at first D3D model timestep
+
+    Returns
+    -------
+    Polygon
+        shapely.geometry.Polygon object around the margins of the model.
     """
-    contours = measure.find_contours(dataset.MEAN_H1[1, :, :].values, -999)
+    contours = measure.find_contours(mean_depth, -999)
     boundary = Polygon(contours[0]).buffer(-1)
     return boundary
 
@@ -225,8 +244,8 @@ def create_circular_mask(h, w, center=None, radius=None):
     if radius is None:  # use the smallest distance between the center and image walls
         radius = min(center[0], center[1], w - center[0], h - center[1])
 
-    Y, X = np.ogrid[:h, :w]
-    dist_from_center = np.sqrt((X - center[0]) ** 2 + (Y - center[1]) ** 2)
+    y, x = np.ogrid[:h, :w]
+    dist_from_center = np.sqrt((y - center[0]) ** 2 + (x - center[1]) ** 2)
 
     mask = dist_from_center <= radius
     return mask

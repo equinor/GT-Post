@@ -162,7 +162,7 @@ class PlotBase:
                         patches.Rectangle(
                             xy=(x, current_surface),
                             width=self.width,
-                            height=absolute_bed_chg,
+                            height=-absolute_bed_chg,
                             color=color,
                             linewidth=0,
                         )

@@ -126,12 +126,14 @@ class ModelResult:
         foreset_depth       :       np.ndarray: array (time) with time-dependent depth
                                     of the foreset.
         """
-        self.dx, self.dy = utils.get_dx_dy(self.dataset)
+        self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
         self.mouth_position = utils.get_mouth_midpoint(self.dataset)
         self.mouth_river_width = utils.get_river_width_at_mouth(
             self.dataset, self.mouth_position
         )
-        self.model_boundary = utils.get_model_bound(self.dataset)
+        self.model_boundary = utils.get_model_bound(
+            self.dataset.MEAN_H1[1, :, :].values
+        )
         self.subsidence_per_t = np.diff(self.dataset["SDU"].values, axis=0)[0, :, :]
         self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
         self.deposit_height[1:, :, :] = -(
@@ -141,7 +143,7 @@ class ModelResult:
             )
             + self.subsidence_per_t
         )
-        self.deposit_height[np.abs(self.deposit_height) < 1e-6] = 0
+        self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
         self.dataset["MEAN_H1"] = self.dataset.MEAN_H1.where(self.dataset.MEAN_H1 > -50)
         self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
         self.slope = surface.slope(self.dataset["MEAN_H1"].values)
