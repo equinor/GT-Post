@@ -127,12 +127,16 @@ class ModelResult:
                                     of the foreset.
         """
         self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
-        self.mouth_position = utils.get_mouth_midpoint(self.dataset)
+        self.mouth_position = utils.get_mouth_midpoint(
+            self.dataset["MEAN_H1"][1, :, :].values,
+            self.dataset.N.values,
+            self.dataset.M.values,
+        )
         self.mouth_river_width = utils.get_river_width_at_mouth(
-            self.dataset, self.mouth_position
+            self.dataset["MEAN_H1"][1, :, :].values, self.mouth_position
         )
         self.model_boundary = utils.get_model_bound(
-            self.dataset.MEAN_H1[1, :, :].values
+            self.dataset["MEAN_H1"][1, :, :].values
         )
         self.subsidence_per_t = np.diff(self.dataset["SDU"].values, axis=0)[0, :, :]
         self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])

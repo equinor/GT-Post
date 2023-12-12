@@ -43,24 +43,55 @@ def get_model_bound(mean_depth: np.ndarray) -> Polygon:
     return boundary
 
 
-def get_mouth_midpoint(dataset):
+def get_mouth_midpoint(
+    mean_water_depth: np.array, dimension_n: np.array, dimension_m: np.array
+) -> list:
     """
     Get x and y position of the river mouth.
+
+    Parameters
+    ----------
+    mean_water_depth : np.array
+        Array of mean water depth at the first timestep (MEAN_H1 data var in trim file).
+    dimension_n : np.array
+        Array of n-dimension cells (N data var in trim file).
+    dimension_m : np.array
+        Array of m-dimension cells (M data var in trim file).
+
+    Returns
+    -------
+    list
+        list with mouth midpoint x-position and mouth y-position.
     """
-    x_mouth = int(len(dataset.N) / 2 - 1)
+    x_mouth = int(np.ceil(np.mean(np.where(mean_water_depth[1, :] == -999.0))))
     y_values = np.array(
         [
-            np.count_nonzero(dataset.MEAN_H1[1, i, :] == -999.0)
-            for i in range(len(dataset.M))
+            np.count_nonzero(mean_water_depth[i, :] == -999.0)
+            for i in range(len(dimension_m))
         ]
     )
-    y_values[y_values == len(dataset.N)] = 0
-    y_mouth = len(dataset.M) - np.argmax(y_values[::-1])
+    y_values[y_values == len(dimension_n)] = 0
+    y_mouth = len(dimension_m) - np.argmax(y_values[::-1]) - 1
     return [x_mouth, y_mouth]
 
 
-def get_river_width_at_mouth(dataset, mouth_midpoint):
-    line = dataset.MEAN_H1[1, mouth_midpoint[1] - 1, :].values
+def get_river_width_at_mouth(mean_water_depth: np.array, mouth_midpoint: list) -> int:
+    """
+    Get the total width of the fluvial part of the model domain
+
+    Parameters
+    ----------
+    mean_water_depth : np.array
+        Array of mean water depth at the first timestep (MEAN_H1 data var in trim file).
+    mouth_midpoint : list
+        Delta mouth midpoint: result of utils.get_mouth_midpoint.
+
+    Returns
+    -------
+    int
+        River width in number of grid cells.
+    """
+    line = mean_water_depth[mouth_midpoint[1] - 1, :]
     left_side = np.argmax(line > 0)
     right_side = len(line) - np.argmax(line[::-1] > 0)
     width = right_side - left_side
