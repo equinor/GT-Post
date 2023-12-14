@@ -1,20 +1,82 @@
+import json
 from pathlib import Path
-from typing import Union
 
 from gtpost.model import ModelResult
+from gtpost.visualize import plot
+
+default_settings_file = (
+    Path(__file__).parents[2].joinpath(r"config\default_settings.ini")
+)
 
 
 def main(
-    input_folder: Union[str, Path],
-    output_folder: Union[str, Path],
-    config_file: Union[str, Path],
-):
-    input_folder = Path(input_folder)
-    output_folder = Path(output_folder)
-    config_file = Path(config_file)
+    fpath_input: str | Path = "/data/input",
+    fpath_output: str | Path = "/data/output",
+    fpath_settings: str | Path = default_settings_file,
+) -> None:
+    """
+    main function that interfaces with the Delft3D Geotool backend for postprocessing
+    model results.
 
-    modelresult = ModelResult.from_folder(input_folder)
+    Parameters
+    ----------
+    fpath_input : str | Path, optional
+        Path with input, including at least the .sed file, config ini file, and most
+        importantly the trim.nc file with model results up to the last exported timstep.
+        by default the relative path is "/data/input" within the container folder
+        structure.
+    fpath_output : str | Path, optional
+        Relative path within the container folder structure to write results to,
+        by default "/data/output"
+
+
+    Output for D3D-GT and to be displayed in the postprocessing GUI elements:
+
+    - NetCDF file containing all the postprocessing output.
+    - JSON file containing statistics per architectural element (to be displayed in GUI)
+    - Figures showing bathymetry and architectural elements (top down).
+    - Figures showing median sediment diameter D50 (along a cross-shore profile).
+    - Figures showing architectural elements (along a cross-shore profile).
+    - Figures showing age of deposition (along a cross-shore profile).
+    - TODO: some of the workshop figures like sedtype volume per ae histogram...
+    """
+    fpath_input = Path(fpath_input)
+    fpath_output = Path(fpath_output)
+
+    modelresult = ModelResult.from_folder(
+        fpath_input, post=True, settings_file=fpath_settings
+    )
     modelresult.postprocess()
     modelresult.export_sediment_and_object_data(
-        output_folder.joinpath("Sed_and_Obj_data.nc")
+        fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
     )
+    json.dump(
+        modelresult.delta_stats,
+        fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"),
+    )
+
+    # Map plots
+    map_plotter = plot.MapPlot(modelresult)
+    map_plotter.twopanel_map("bottom_depth", "architectural_elements")
+    map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
+
+    # Cross-section plots
+    xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
+    xsect_end = (modelresult.mouth_position[1] + 100, modelresult.mouth_position[0])
+    xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
+
+    xsect_plotter.twopanel_xsection("bottom_depth", "d50")
+    xsect_plotter.save_figures(fpath_output, "xsect_diameter")
+
+    xsect_plotter.twopanel_xsection("bottom_depth", "architectural_elements")
+    xsect_plotter.save_figures(fpath_output, "xsect_archels")
+
+    xsect_plotter.twopanel_xsection("bottom_depth", "deposition_age")
+    xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
+
+    # Summary plots
+    # TODO
+
+
+if __name__ == "__main__":
+    main()

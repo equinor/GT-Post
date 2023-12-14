@@ -1,0 +1,64 @@
+from pathlib import Path
+
+from gtpost.model import ModelResult
+from gtpost.visualize import plot
+
+default_settings_file = (
+    Path(__file__).parents[2].joinpath(r"config\default_settings.ini")
+)
+
+
+def main(
+    fpath_input: str | Path = "/data/input",
+    fpath_output: str | Path = "/data/output",
+    fpath_settings: str | Path = default_settings_file,
+) -> None:
+    """
+    main function that interfaces with the Delft3D Geotool backend for processing during
+    a model run.
+
+    Parameters
+    ----------
+    fpath_input : str | Path, optional
+        Path with input, including at least the .sed file, config ini file, and most
+        importantly the trim.nc file with model results up to the last exported timstep.
+        by default the relative path is "/data/input" within the container folder
+        structure.
+    fpath_output : str | Path, optional
+        Relative path within the container folder structure to write results to,
+        by default "/data/output"
+
+
+    Output for D3D-GT and to be displayed in the processing GUI elements:
+
+    - Figures showing bathymetry and sedimentation/erosion rate (top down)
+    - Figures showing median sediment diameter D50 (along a cross-shore profile)
+    """
+    fpath_input = Path(fpath_input)
+    fpath_output = Path(fpath_output)
+
+    modelresult = ModelResult.from_folder(
+        fpath_input, post=False, settings_file=fpath_settings
+    )
+    modelresult.process()
+
+    # Map plots
+    map_plotter = plot.MapPlot(modelresult)
+    map_plotter.twopanel_map("bottom_depth", "deposit_height")
+    map_plotter.save_figures(fpath_output, "map_bottomdepth_deposition")
+
+    # Cross-section plots
+    xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
+    xsect_end = (modelresult.mouth_position[1] + 100, modelresult.mouth_position[0])
+    xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
+
+    xsect_plotter.twopanel_xsection("bottom_depth", "d50")
+    xsect_plotter.save_figures(fpath_output, "xsect_diameter")
+
+
+if __name__ == "__main__":
+    main(
+        fpath_input=r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_049",
+        fpath_output=r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_049",
+    )
+    # main()

@@ -18,7 +18,7 @@ class PlotBase:
     colormaps = {
         "d50": colormaps.GrainsizeColormap(),
         "architectural_elements": colormaps.ArchelColormap(),
-        "bed_level_change": colormaps.BedlevelchangeColormap(),
+        "deposit_height": colormaps.BedlevelchangeColormap(),
         "porosity": colormaps.PorosityColormap(),
         "bottom_depth": colormaps.BottomDepthColormap(),
         "deposition_age": colormaps.DepositionageColormap(),
@@ -33,14 +33,6 @@ class PlotBase:
         self.tickfactor = self.model.dx / 1000
         self.xticks_map = np.arange(0, len(self.model.dataset.N), 50)
         self.yticks_map = np.arange(0, len(self.model.dataset.M), 50)
-
-        self.data = {
-            "d50": self.model.d50,
-            "architectural_elements": self.model.architectural_elements,
-            "bed_level_change": self.model.bed_level_change,
-            "porosity": self.model.porosity,
-            "bottom_depth": self.model.bottom_depth,
-        }
 
     def __new__(cls, *args, **kwargs):
         if cls is PlotBase:

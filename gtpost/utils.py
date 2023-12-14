@@ -45,7 +45,7 @@ def get_model_bound(mean_depth: np.ndarray) -> Polygon:
 
 def get_mouth_midpoint(
     mean_water_depth: np.array, dimension_n: np.array, dimension_m: np.array
-) -> list:
+) -> list[int, int]:
     """
     Get x and y position of the river mouth.
 

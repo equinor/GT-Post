@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 import numpy as np
 import xarray as xr
@@ -19,9 +19,9 @@ class ModelResult:
     def __init__(
         self,
         dataset: xr.Dataset,
-        sedfile: Union[str, Path],
+        sedfile: str | Path,
         modelname: str = "Unnamed Delft3D Geotool modelresult",
-        settings_file: Union[str, Path] = default_settings_file,
+        settings_file: str | Path = default_settings_file,
         post: bool = True,
     ):
         """
@@ -67,15 +67,16 @@ class ModelResult:
     @classmethod
     def from_folder(
         cls,
-        delft3d_folder: Union[str, Path],
-        settings_file: Union[str, Path] = default_settings_file,
+        delft3d_folder: str | Path,
+        settings_file: str | Path = default_settings_file,
+        post: bool = True,
     ):
         """
         Constructor for ModelResult class from Delft3D i/o folder
 
         Parameters
         ----------
-        delft3d_folder : Union[str, Path]
+        delft3d_folder : str | Path
             Location of the D3D i/o folder
 
         Returns
@@ -99,7 +100,11 @@ class ModelResult:
         dataset = xr.open_dataset(trimfile)
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
-                dataset, sedfile, modelname=modelname, settings_file=settings_file
+                dataset,
+                sedfile,
+                modelname=modelname,
+                post=post,
+                settings_file=settings_file,
             )
         else:
             raise TypeError("File is not recognized as a Delft3D trim file")
@@ -109,8 +114,23 @@ class ModelResult:
         Derive additional attributes from the trimfile (self.dataset) for postprocessing
         the final model results. These are:
         """
+        self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
+        self.mouth_position = utils.get_mouth_midpoint(
+            self.dataset["MEAN_H1"][1, :, :].values,
+            self.dataset.N.values,
+            self.dataset.M.values,
+        )
         self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
         self.subsidence_per_t = np.diff(self.dataset["SDU"].values, axis=0)[0, :, :]
+        self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
+        self.deposit_height[1:, :, :] = -(
+            (
+                self.dataset["DPS"].values[1:, :, :]
+                - self.dataset["DPS"].values[:-1, :, :]
+            )
+            + self.subsidence_per_t
+        )
+        self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
 
     def complete_init_for_postprocess(self):
         """
@@ -336,12 +356,14 @@ class ModelResult:
         self.detect_architectural_elements()
         self.statistics_summary()
 
-    def export_sediment_and_object_data(self, out_file: Union[str, Path]):
+    def export_sediment_and_object_data(self, out_file: str | Path):
         ds = export.create_sed_and_obj_dataset(self)
         ds.to_netcdf(out_file, engine="h5netcdf", encoding=ENCODINGS)
 
 
 if __name__ == "__main__":
+    # Below code is all for testing/debugging purposes.
+
     d3d_folders = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling").glob("*")
 
     for d3d_folder in d3d_folders:
