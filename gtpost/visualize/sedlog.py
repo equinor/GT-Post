@@ -140,10 +140,9 @@ class SedimentaryLog:
             y1, y2
         )
         fig, axs = self.eight_plot_figure_base()
-        # axes = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
         bins = [0, 0.063, 0.125, 0.25, 0.5, 1, 1.4]
         binlabels = ["s/c", "vf", "f", "m", "c", "vc"]
-        for i, ax in enumerate(axs.flat):
+        for i, ax in enumerate(axs.flat[1:]):
             counts, bins = np.histogram(
                 d50_distributions[i],
                 bins=bins,

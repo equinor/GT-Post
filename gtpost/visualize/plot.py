@@ -130,6 +130,11 @@ class PlotBase:
             dpi = self.fig.get_dpi()
             self.fig.set_size_inches(2000.0 / float(dpi), 1000.0 / float(dpi))
 
+        if self.figtype == "gistograms":
+            self.fig, self.axs = plt.subplots(nrows=4, ncols=2, dpi=72)
+            dpi = self.fig.get_dpi()
+            self.fig.set_size_inches(650.0 / float(dpi), 1000.0 / float(dpi))
+
     def draw_xsection(self, axis_idx, timestep, data, colormap):
         axis = self.ax[axis_idx]
         caxis = self.cax[axis_idx]
@@ -401,6 +406,35 @@ class MapPlot(PlotBase):
             self.draw_map(1, t, data_2, colormap_2)
             self.figures.append(self.fig)
             plt.close()
+
+
+class StatPlot(PlotBase):
+    def __init__(self, modelresult):
+        super().__init__(modelresult)
+
+    def plot_histograms(self):
+        fig, axs = self.create_figure()
+        bins = [0, 0.063, 0.125, 0.25, 0.5, 1, 1.4]
+        binlabels = ["s/c", "vf", "f", "m", "c", "vc"]
+        for i, ax in enumerate(axs.flat[1:]):
+            counts, bins = np.histogram(
+                self.model.d50_distributions[i],
+                bins=bins,
+                weights=self.model.d50_distribution_weights[i],
+            )
+            if i != 0:
+                ax.bar(binlabels, counts, color=colormaps.ArchelColormap.colors[i])
+                ax.set_title(
+                    colormaps.ArchelColormap.labels[i], y=1, pad=-14, loc="right"
+                )
+            else:
+                ax.bar(binlabels, counts)
+                ax.set_title("All AEs", y=1, pad=-14, loc="right")
+
+            ax.set_yticks([])
+            fig.suptitle(
+                "D50 distribution per preserved architectural element", fontsize=16
+            )
 
 
 # if __name__ == "__main__":

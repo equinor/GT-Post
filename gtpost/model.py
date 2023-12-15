@@ -292,6 +292,19 @@ class ModelResult:
         self.d50 = self.diameters[:, :, :, 3]
 
     def statistics_summary(self):
+        """
+        Get statistics from calculated model results
+        """
+        (
+            self.d50_distributions,
+            self.d50_distribution_weights,
+        ) = statistics.get_diameter_distributions(
+            self.architectural_elements.values,
+            self.preserved_thickness.values,
+            self.d50.values,
+            self.mouth_position[1],
+        )
+
         (
             delta_volume,
             archel_volumes,
