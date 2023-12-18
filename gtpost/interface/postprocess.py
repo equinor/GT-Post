@@ -50,10 +50,14 @@ def main(
     modelresult.export_sediment_and_object_data(
         fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
     )
-    json.dump(
-        modelresult.delta_stats,
-        fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"),
-    )
+
+    with open(
+        fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"
+    ) as f:
+        json.dump(
+            modelresult.delta_stats,
+            f,
+        )
 
     # Map plots
     map_plotter = plot.MapPlot(modelresult)
