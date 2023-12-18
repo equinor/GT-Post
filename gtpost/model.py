@@ -300,9 +300,9 @@ class ModelResult:
             self.d50_distributions,
             self.d50_distribution_weights,
         ) = statistics.get_diameter_distributions(
-            self.architectural_elements.values,
-            self.preserved_thickness.values,
-            self.d50.values,
+            self.architectural_elements,
+            self.preserved_thickness,
+            self.d50,
             self.mouth_position[1],
         )
 
