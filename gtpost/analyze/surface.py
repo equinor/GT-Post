@@ -303,7 +303,7 @@ def detect_elements(
             channel_end_mask = utils.create_circular_mask(
                 subenvironment_now.shape[0],
                 subenvironment_now.shape[1],
-                channel_endpoint[::-1],
+                channel_endpoint,
                 mouthbar_search_radius / 2,
             )
             channel_end_mask = np.ma.masked_where(

@@ -36,7 +36,7 @@ def get_stats_per_archel(
         Weighted average sand fraction per AE (np.array)
         Weighted average sorting per AE (np.array)
     """
-    array_length = len(classifications.ArchEl)
+    array_length = len(classifications.ArchEl) - 1
     volumes = np.zeros(array_length)
     archel_d50s = np.zeros(array_length)
     archel_fractions = np.zeros(array_length)

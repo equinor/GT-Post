@@ -216,10 +216,26 @@ def snap_linestring_to_polygon(
 
 
 def extend_linestring(linestring, length=2):
-    dx_start = linestring.xy[0][0] - linestring.xy[0][1]
-    dx_end = linestring.xy[0][-1] - linestring.xy[0][-2]
-    dy_start = linestring.xy[1][0] - linestring.xy[1][1]
-    dy_end = linestring.xy[1][-1] - linestring.xy[1][-2]
+    dx_start = (
+        (linestring.xy[0][0] - linestring.xy[0][1])
+        if (linestring.xy[0][0] != linestring.xy[0][1])
+        else linestring.xy[0][0] - linestring.xy[0][2]
+    )
+    dx_end = (
+        (linestring.xy[0][-1] - linestring.xy[0][-2])
+        if (linestring.xy[0][-1] != linestring.xy[0][-2])
+        else linestring.xy[0][-1] - linestring.xy[0][-3]
+    )
+    dy_start = (
+        (linestring.xy[1][0] - linestring.xy[1][1])
+        if (linestring.xy[1][0] != linestring.xy[1][1])
+        else linestring.xy[1][0] - linestring.xy[1][2]
+    )
+    dy_end = (
+        (linestring.xy[1][-1] - linestring.xy[1][-2])
+        if (linestring.xy[1][-1] != linestring.xy[1][-2])
+        else linestring.xy[1][-1] - linestring.xy[1][-3]
+    )
 
     start_length_factor = length / np.sqrt(dx_start**2 + dy_start**2)
     end_length_factor = length / np.sqrt(dx_end**2 + dy_end**2)
