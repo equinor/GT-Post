@@ -20,9 +20,47 @@ class ArchEl(Enum):
     prodelta = 6
 
 
-class Fractions:
-    bounds = np.array([0, 0.063, 0.125, 0.25, 0.5, 1, 2])
-    labels = np.array(["s/c", "vf", "f", "m", "c", "vc", "g"])
+class Classifier:
+    def __init__(self, bounds: list, labels: list):
+        self.bounds = np.array(bounds)
+        self.labels = np.array(labels)
+
+    @property
+    def max_value(self):
+        return self.bounds[-1]
+
+    @property
+    def min_value(self):
+        return self.bounds[0]
 
     def classify(self, value):
-        return self.labels[np.digitize(value, self.bounds) - 1]
+        value = np.array([value])
+        if all(value < self.max_value) and all(value > self.min_value):
+            return self.labels[np.digitize(value, self.bounds) - 1]
+        else:
+            raise ValueError(
+                "One or more values are outside of the range of the classifier"
+            )
+
+
+def fraction_classifier(values: list) -> np.array:
+    fraction_classes = Classifier(
+        [0, 0.063, 0.125, 0.25, 0.5, 1, 2], ["s/c", "vf", "f", "m", "c", "vc"]
+    )
+    return fraction_classes.classify(values)
+
+
+def sorting_classifier(values: list) -> np.array:
+    sorting_classes = Classifier(
+        [0, 0.35, 0.5, 0.71, 1, 2, 4, 999],
+        [
+            "Very well",
+            "Well",
+            "Moderately well",
+            "Moderate",
+            "Poor",
+            "Very poor",
+            "Extremely poor",
+        ],
+    )
+    return sorting_classes.classify(values)

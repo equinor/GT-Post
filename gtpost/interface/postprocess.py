@@ -8,6 +8,8 @@ default_settings_file = (
     Path(__file__).parents[2].joinpath(r"config\default_settings.ini")
 )
 
+# TODO: input.ini uitlezen voor template naam.
+
 
 def main(
     fpath_input: str | Path = "/data/input",

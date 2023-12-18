@@ -7,6 +7,7 @@ import xarray as xr
 
 import gtpost.utils as utils
 from gtpost.analyze import layering, sediment, statistics, surface
+from gtpost.analyze.classifications import sorting_classifier
 from gtpost.io import ENCODINGS, export, read_d3d_input
 from gtpost.visualize import plot
 
@@ -324,27 +325,27 @@ class ModelResult:
             "delta_top_aerial_volume": archel_volumes[0],
             "delta_top_aerial_d50": archel_d50s[0],
             "delta_top_aerial_sandfraction": archel_fractions[0],
-            "delta_top_aerial_sorting": archel_sorting[0],
+            "delta_top_aerial_sorting": sorting_classifier(archel_sorting[0])[0],
             "delta_top_sub_volume": archel_volumes[1],
             "delta_top_sub_d50": archel_d50s[1],
             "delta_top_sub_sandfraction": archel_fractions[1],
-            "delta_top_sub_sorting": archel_sorting[1],
+            "delta_top_sub_sorting": sorting_classifier(archel_sorting[1])[0],
             "active_channel_volume": archel_volumes[2],
             "active_channel_d50": archel_d50s[2],
             "active_channel_sandfraction": archel_fractions[2],
-            "active_channel_sorting": archel_sorting[2],
+            "active_channel_sorting": sorting_classifier(archel_sorting[2])[0],
             "mouthbar_volume": archel_volumes[3],
             "mouthbar_d50": archel_d50s[3],
             "mouthbar_sandfraction": archel_fractions[3],
-            "mouthbar_sorting": archel_sorting[3],
+            "mouthbar_sorting": sorting_classifier(archel_sorting[3])[0],
             "delta_front_volume": archel_volumes[4],
             "delta_front_d50": archel_d50s[4],
             "delta_front_sandfraction": archel_fractions[4],
-            "delta_front_sorting": archel_sorting[4],
+            "delta_front_sorting": sorting_classifier(archel_sorting[4])[0],
             "prodelta_volume": archel_volumes[5],
             "prodelta_d50": archel_d50s[5],
             "prodelta_sandfraction": archel_fractions[5],
-            "prodelta_sorting": archel_sorting[5],
+            "prodelta_sorting": sorting_classifier(archel_sorting[5])[0],
         }
 
     def process(self):
