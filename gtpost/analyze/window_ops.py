@@ -365,13 +365,3 @@ def numba_window_difference_between_maximum(array, window_size=3):
             diff_max = window.window_max() - window.array[row, col]
             output[row, col] = diff_max
     return output
-
-
-if __name__ == "__main__":
-    window_size = 5
-    edge_size = int((window_size - 1) / 2)
-
-    random = np.random.RandomState(12)
-    raster = random.randint(1, 10, size=(5, 5)).astype("float32")
-    print(raster)
-    print(numba_window_average(raster, window_size))

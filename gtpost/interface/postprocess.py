@@ -61,6 +61,11 @@ def main(
             f,
         )
 
+    # Summary plot
+    stat_plotter = plot.StatPlot(modelresult)
+    stat_plotter.plot_histograms()
+    stat_plotter.save_figures(fpath_output, "archel_summary")
+
     # Map plots
     map_plotter = plot.MapPlot(modelresult)
     map_plotter.twopanel_map("bottom_depth", "architectural_elements")
@@ -79,9 +84,6 @@ def main(
 
     xsect_plotter.twopanel_xsection("bottom_depth", "deposition_age")
     xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
-
-    # Summary plots
-    # TODO
 
 
 if __name__ == "__main__":

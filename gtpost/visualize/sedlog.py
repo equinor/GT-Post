@@ -134,12 +134,29 @@ class SedimentaryLog:
         ax.set_title(
             f"Preserved architectural element distribution\nTotal delta volume = {np.round(total_volume*50*50, 0)} $m^3$"
         )
+        _, total_volume, volume_percentage = self._get_volume_stats(y1, y2)
 
     def plot_d50_histograms(self, y1, y2):
         d50_distributions, d50_distribution_weights = self._get_diameter_distributions(
             y1, y2
         )
+        _, _, volume_percentage = self._get_volume_stats(y1, y2)
         fig, axs = self.eight_plot_figure_base()
+
+        # Volume distribution in first plot
+        aelabels = ["DT-r", "DT-q", "AC", "MB", "DF", "PD"]
+        y_pos = np.arange(len(aelabels))
+        axs[0, 0].barh(
+            y_pos,
+            volume_percentage,
+            align="center",
+            color=colormaps.ArchelColormap.colors[1:],
+        )
+        axs[0, 0].set_yticks(y_pos, labels=aelabels)
+        axs[0, 0].invert_yaxis()
+        axs[0, 0].set_title("Volume distribution between AEs (%)", loc="left")
+
+        # D50
         bins = [0, 0.063, 0.125, 0.25, 0.5, 1, 1.4]
         binlabels = ["s/c", "vf", "f", "m", "c", "vc"]
         for i, ax in enumerate(axs.flat[1:]):
@@ -203,7 +220,7 @@ class SedimentaryLog:
 
 if __name__ == "__main__":
     log = SedimentaryLog(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference\Sed_and_Obj_data.nc"
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_048\Sobrabre_048 - coarse-sand_sed_and_obj_data.nc"
     )
     # log = SedimentaryLog(
     #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_049\Sed_and_Obj_data.nc"

@@ -130,7 +130,7 @@ class PlotBase:
             dpi = self.fig.get_dpi()
             self.fig.set_size_inches(2000.0 / float(dpi), 1000.0 / float(dpi))
 
-        if self.figtype == "gistograms":
+        if self.figtype == "histograms":
             self.fig, self.axs = plt.subplots(nrows=4, ncols=2, dpi=72)
             dpi = self.fig.get_dpi()
             self.fig.set_size_inches(650.0 / float(dpi), 1000.0 / float(dpi))
@@ -293,8 +293,11 @@ class PlotBase:
         pass
 
     def save_figures(self, path, name):
-        for i, f in enumerate(self.figures):
-            f.savefig(Path(path) / f"{i:04}_{name}.png")
+        if len(self.figures) > 1:
+            for i, f in enumerate(self.figures):
+                f.savefig(Path(path) / f"{i:04}_{name}.png")
+        else:
+            f.savefig(Path(path) / f"{name}.png")
 
 
 class CrossSectionPlot(PlotBase):
@@ -413,10 +416,26 @@ class StatPlot(PlotBase):
         super().__init__(modelresult)
 
     def plot_histograms(self):
-        fig, axs = self.create_figure()
+        self.figures = []
+        self.create_figure("histograms")
+
+        # Volume distribution in first plot
+        aelabels = ["DT-r", "DT-q", "AC", "MB", "DF", "PD"]
+        y_pos = np.arange(len(aelabels))
+        self.axs[0, 0].barh(
+            y_pos,
+            self.model.archel_volumes,
+            align="center",
+            color=colormaps.ArchelColormap.colors[1:],
+        )
+        self.axs[0, 0].set_yticks(y_pos, labels=aelabels)
+        self.axs[0, 0].invert_yaxis()
+        self.axs[0, 0].set_title("Volume distribution between AEs (%)", loc="left")
+
+        # D50
         bins = [0, 0.063, 0.125, 0.25, 0.5, 1, 1.4]
         binlabels = ["s/c", "vf", "f", "m", "c", "vc"]
-        for i, ax in enumerate(axs.flat[1:]):
+        for i, ax in enumerate(self.axs.flat[1:]):
             counts, bins = np.histogram(
                 self.model.d50_distributions[i],
                 bins=bins,
@@ -432,13 +451,9 @@ class StatPlot(PlotBase):
                 ax.set_title("All AEs", y=1, pad=-14, loc="right")
 
             ax.set_yticks([])
-            fig.suptitle(
+            self.fig.suptitle(
                 "D50 distribution per preserved architectural element", fontsize=16
             )
 
-
-# if __name__ == "__main__":
-#     for i in range(120):
-#         plt.plot(self.anchor_y[0, :])
-#         plt.plot(self.anchor_y[1, :])
-#         plt.plot(self.dh[1, :])
+        self.figures.append(self.fig)
+        plt.close()
