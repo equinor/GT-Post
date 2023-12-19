@@ -297,7 +297,7 @@ class PlotBase:
             for i, f in enumerate(self.figures):
                 f.savefig(Path(path) / f"{i:04}_{name}.png")
         else:
-            f.savefig(Path(path) / f"{name}.png")
+            self.figures[0].savefig(Path(path) / f"{name}.png")
 
 
 class CrossSectionPlot(PlotBase):

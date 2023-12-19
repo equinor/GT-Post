@@ -70,7 +70,8 @@ def get_mouth_midpoint(
             for i in range(len(dimension_m))
         ]
     )
-    y_values[y_values == len(dimension_n)] = 0
+    y_values[:2] = 0
+    y_values[-2:] = 0
     y_mouth = len(dimension_m) - np.argmax(y_values[::-1]) - 1
     return [x_mouth, y_mouth]
 
