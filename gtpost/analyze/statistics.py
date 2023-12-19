@@ -4,37 +4,37 @@ from gtpost.analyze import classifications
 
 
 def get_stats_per_archel(
-    archels: np.array,
-    preserved_thickness: np.array,
-    d50: np.array,
-    fractions: np.array,
-    sorting: np.array,
+    archels: np.ndarray,
+    preserved_thickness: np.ndarray,
+    d50: np.ndarray,
+    fractions: np.ndarray,
+    sorting: np.ndarray,
     coastline_y: int,
-) -> (float, np.array, np.array, np.array, np.array):
+) -> (float, np.ndarray, np.ndarray, np.ndarray, np.ndarray):
     """
     Derive statistics per architectural element
 
     Parameters
     ----------
-    archels : np.array
+    archels : np.ndarray
         Architectural elements
-    preserved_thickness : np.array
+    preserved_thickness : np.ndarray
         Calculated preserved thickness
-    d50 : np.array
+    d50 : np.ndarray
         Sediment d50
-    fractions : np.array
+    fractions : np.ndarray
         Sand fraction array
-    sorting : np.array
+    sorting : np.ndarray
         Sorting array
 
     Returns
     -------
-    float, np.array, np.array, np.array, np.array
+    float, np.ndarray, np.ndarray, np.ndarray, np.ndarray
         Total delta volume (float)
-        Volume per AE (np.array)
-        Weighted average d50 per AE (np.array)
-        Weighted average sand fraction per AE (np.array)
-        Weighted average sorting per AE (np.array)
+        Volume per AE (np.ndarray)
+        Weighted average d50 per AE (np.ndarray)
+        Weighted average sand fraction per AE (np.ndarray)
+        Weighted average sorting per AE (np.ndarray)
     """
     array_length = len(classifications.ArchEl) - 1
     volumes = np.zeros(array_length)
@@ -59,14 +59,17 @@ def get_stats_per_archel(
 
 
 def get_diameter_distributions(
-    archels: np.array, preserved_thickness: np.array, d50: np.array, coastline_y: int
+    archels: np.array,
+    preserved_thickness: np.ndarray,
+    d50: np.ndarray,
+    coastline_y: int,
 ) -> (list, list):
     """
     Get distribution of grain size classes per architectural element
 
     Parameters
     ----------
-    archels : np.array
+    archels : np.ndarray
         Architectural elements
     list : _type_
         _description_

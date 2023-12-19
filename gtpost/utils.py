@@ -67,18 +67,18 @@ def get_model_bound(mean_depth: np.ndarray) -> Polygon:
 
 
 def get_mouth_midpoint(
-    mean_water_depth: np.array, dimension_n: np.array, dimension_m: np.array
+    mean_water_depth: np.ndarray, dimension_n: np.ndarray, dimension_m: np.ndarray
 ) -> list[int, int]:
     """
     Get x and y position of the river mouth.
 
     Parameters
     ----------
-    mean_water_depth : np.array
+    mean_water_depth : np.ndarray
         Array of mean water depth at the first timestep (MEAN_H1 data var in trim file).
-    dimension_n : np.array
+    dimension_n : np.ndarray
         Array of n-dimension cells (N data var in trim file).
-    dimension_m : np.array
+    dimension_m : np.ndarray
         Array of m-dimension cells (M data var in trim file).
 
     Returns
@@ -99,13 +99,13 @@ def get_mouth_midpoint(
     return [x_mouth, y_mouth]
 
 
-def get_river_width_at_mouth(mean_water_depth: np.array, mouth_midpoint: list) -> int:
+def get_river_width_at_mouth(mean_water_depth: np.ndarray, mouth_midpoint: list) -> int:
     """
     Get the total width of the fluvial part of the model domain
 
     Parameters
     ----------
-    mean_water_depth : np.array
+    mean_water_depth : np.ndarray
         Array of mean water depth at the first timestep (MEAN_H1 data var in trim file).
     mouth_midpoint : list
         Delta mouth midpoint: result of utils.get_mouth_midpoint.

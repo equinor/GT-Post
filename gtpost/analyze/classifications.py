@@ -21,15 +21,15 @@ class ArchEl(Enum):
 
 
 class Classifier:
-    def __init__(self, bounds: list | np.array, labels: list | np.array):
+    def __init__(self, bounds: list | np.ndarray, labels: list | np.ndarray):
         """
         Class to create custom classifiers used for labelling values.
 
         Parameters
         ----------
-        bounds : list | np.array
+        bounds : list | np.ndarray
             Array of bounding values for classes. e.g. [0, 1, 2, 3].
-        labels : list | np.array
+        labels : list | np.ndarray
             Associated labels. e.g. [label1, label2, label3].
         """
         self.bounds = np.array(bounds)
@@ -49,18 +49,18 @@ class Classifier:
     def min_value(self):
         return self.bounds[0]
 
-    def classify(self, value: np.array) -> np.array:
+    def classify(self, value: np.ndarray) -> np.ndarray:
         """
         Classify values to labels.
 
         Parameters
         ----------
-        value : np.array
+        value : np.ndarray
             Array of values to be labelled.
 
         Returns
         -------
-        np.array
+        np.ndarray
             Array of labelled data.
 
         Raises
@@ -77,7 +77,7 @@ class Classifier:
             )
 
 
-def fraction_classifier(values: list | np.array) -> np.array:
+def fraction_classifier(values: list | np.ndarray) -> np.ndarray:
     """
     Classifier for sediment fractions. Labels and bounds are:
 
@@ -90,12 +90,12 @@ def fraction_classifier(values: list | np.array) -> np.array:
 
     Parameters
     ----------
-    values : list | np.array
+    values : list | np.ndarray
         Grain size values to classify into sediment classes.
 
     Returns
     -------
-    np.array
+    np.ndarray
         Classified result.
     """
     fraction_classes = Classifier(
@@ -104,7 +104,7 @@ def fraction_classifier(values: list | np.array) -> np.array:
     return fraction_classes.classify(values)
 
 
-def sorting_classifier(values: list | np.array) -> np.array:
+def sorting_classifier(values: list | np.ndarray) -> np.ndarray:
     """
     Classifier for the Folks (1968) sorting parameter. Labels and bounds are:
 
@@ -118,12 +118,12 @@ def sorting_classifier(values: list | np.array) -> np.array:
 
     Parameters
     ----------
-    values : list | np.array
+    values : list | np.ndarray
         Folks sorting values to classify into sorting classes.
 
     Returns
     -------
-    np.array
+    np.ndarray
         Classified result.
     """
     sorting_classes = Classifier(

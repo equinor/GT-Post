@@ -66,7 +66,7 @@ def calculate_sand_fraction(sedtype, vfraction):
     return np.sum(vfrac, axis=1).astype(np.float32)
 
 
-def calculate_sorting(diameters: np.array, percentage2cal: list):
+def calculate_sorting(diameters: np.ndarray, percentage2cal: list):
     index10 = percentage2cal.index(10)
     index16 = percentage2cal.index(16)
     index84 = percentage2cal.index(84)
