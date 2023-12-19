@@ -28,9 +28,9 @@ class Classifier:
         Parameters
         ----------
         bounds : list | np.array
-            Array of bounding values for classes. e.g. [0, 1, 2, 3]
+            Array of bounding values for classes. e.g. [0, 1, 2, 3].
         labels : list | np.array
-            Associated labels. e.g. [label1, label2, label3]
+            Associated labels. e.g. [label1, label2, label3].
         """
         self.bounds = np.array(bounds)
         self.labels = np.array(labels)
@@ -38,7 +38,7 @@ class Classifier:
         if not len(self.bounds) - len(self.labels) == 1:
             raise ValueError(
                 "Lenght of bounds array must be one position longer than labels array"
-                + "e.g. bounds = [0, 1, 2, 3] and labels = [label1, label2, label3]"
+                + "e.g. bounds = [0, 1, 2, 3] and labels = [label1, label2, label3]."
             )
 
     @property
@@ -51,29 +51,29 @@ class Classifier:
 
     def classify(self, value: np.array) -> np.array:
         """
-        Classify values to labels
+        Classify values to labels.
 
         Parameters
         ----------
         value : np.array
-            Array of values to be labelled
+            Array of values to be labelled.
 
         Returns
         -------
         np.array
-            Array of labelled data
+            Array of labelled data.
 
         Raises
         ------
         ValueError
-            If a value was outside of the bounds range was queried
+            If a value was outside of the bounds range was queried.
         """
         value = np.array([value])
         if all(value < self.max_value) and all(value > self.min_value):
             return self.labels[np.digitize(value, self.bounds) - 1]
         else:
             raise ValueError(
-                "One or more values are outside of the range of the classifier"
+                "One or more values are outside of the range of the classifier."
             )
 
 
@@ -91,12 +91,12 @@ def fraction_classifier(values: list | np.array) -> np.array:
     Parameters
     ----------
     values : list | np.array
-        Grain size values to classify into sediment classes
+        Grain size values to classify into sediment classes.
 
     Returns
     -------
     np.array
-        Classified result
+        Classified result.
     """
     fraction_classes = Classifier(
         [0, 0.063, 0.125, 0.25, 0.5, 1, 2], ["s/c", "vf", "f", "m", "c", "vc"]
@@ -119,12 +119,12 @@ def sorting_classifier(values: list | np.array) -> np.array:
     Parameters
     ----------
     values : list | np.array
-        Folks sorting values to classify into sorting classes
+        Folks sorting values to classify into sorting classes.
 
     Returns
     -------
     np.array
-        Classified result
+        Classified result.
     """
     sorting_classes = Classifier(
         [0, 0.35, 0.5, 0.71, 1, 2, 4, 999],

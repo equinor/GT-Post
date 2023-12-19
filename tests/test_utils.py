@@ -23,6 +23,11 @@ class TestUtils:
         )
 
     @pytest.mark.unittest
+    def test_get_template_name(self):
+        template_name = utils.get_template_name(Path(__file__).parents[0] / "data")
+        assert template_name == "river_dominated_delta"
+
+    @pytest.mark.unittest
     def test_get_dx_dy(self):
         xvalues = np.array([0, 0, 0, 50, 100, 150, 200])
         xres, yres = utils.get_dx_dy(xvalues)

@@ -1,9 +1,32 @@
+from configparser import ConfigParser
+from pathlib import Path
+
 import numpy as np
 from rasterio.features import rasterize
 from shapely import buffer
 from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import nearest_points
 from skimage import measure
+
+
+def get_template_name(input_path: str | Path) -> str:
+    """
+    Get the name of a D3D-GT template from the input.ini file.
+
+    Parameters
+    ----------
+    input_path : str | Path
+        Input D3D-GT folder, where input.ini is located.
+
+    Returns
+    -------
+    str
+        Name of the D3D-GT template.
+    """
+    input_ini = ConfigParser()
+    input_ini.read(Path(input_path).joinpath("input.ini"))
+    template_name = input_ini["template"]["value"].lower().replace(" ", "_")
+    return template_name
 
 
 def get_dx_dy(xvalues: np.ndarray) -> (int, int):

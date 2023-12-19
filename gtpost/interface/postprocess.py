@@ -40,7 +40,7 @@ def main(
     - Figures showing median sediment diameter D50 (along a cross-shore profile).
     - Figures showing architectural elements (along a cross-shore profile).
     - Figures showing age of deposition (along a cross-shore profile).
-    - TODO: some of the workshop figures like sedtype volume per ae histogram...
+    - Summary figure with histograms (AE distribution and fractions per AE)
     """
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
@@ -87,4 +87,45 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    # main(
+    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_045_Reference",
+    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference_new",
+    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
+    # )
+    # main(
+    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_048",
+    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_048",
+    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
+    # )
+    # main(
+    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_049",
+    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_049",
+    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
+    # )
+    # main(
+    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_050",
+    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_050",
+    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
+    # )
+    main(
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_054_Reference",
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054_Reference_new",
+        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
+    )
+    main(
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058",
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_058",
+        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
+    )
+    main(
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_059",
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_059",
+        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
+    )
+    main(
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_060",
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_060",
+        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
+    )
+
+    # main()
