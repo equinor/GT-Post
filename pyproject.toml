@@ -1,21 +1,81 @@
 [build-system]
-requires = [
-    "setuptools>=64",
-    "wheel"
-]
+requires = ["setuptools>66", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.pytest.ini_options]
-testpaths = [
-    "tests",
+
+[project]
+name = "gtpost"
+version = "0.1.0"
+authors = [
+    {name = "Erik van Onselen", email = "erik.vanonselen@deltares.nl"}
 ]
+description = "Delft3D Geotool post-processing"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "delft3d",
+    "geotool",
+    "morphological model",
+    "delta",
+    "geology",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research/Consultans",
+    "Topic :: Scientific/Engineering :: Geology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering",
+]
+requires-python = ">=3.10, <3.12"
+dependencies = [
+    "numpy",
+    "numba",
+    "pandas>=2.0.1",
+    "rasterio",
+    "xarray",
+    "scipy",
+    "matplotlib",
+    "scikit-image",
+    "shapely",
+    "h5netcdf",
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "pyvista",
+    "black",
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "sphinx",
+    "sphinx-rtd-theme",
+]
+
+
+[project.urls]
+Homepage = "https://github.com/Deltares-research/GT-Post"
+Repository = "https://github.com/Deltares-research/GT-Post"
+
+
+[tool.setuptools.packages.find]
+include = ["gtpost", "gtpost.*"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 markers = [
 	"unittest: test of single component",
 	"integrationtest: test of multiple components",
 ]
 
+
 [tool.black]
 line-length = 88
+
 
 [tool.ruff]
 line-length = 88
@@ -23,6 +83,7 @@ target-version = "py310"
 select = ["F", "E", "W", "N", "I001"]
 ignore = ["F401"]
 unfixable = ["F401"]
+
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
