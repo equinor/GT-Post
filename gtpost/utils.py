@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from pathlib import Path
+from typing import List
 
 import numpy as np
 from rasterio.features import rasterize
@@ -122,7 +123,15 @@ def get_river_width_at_mouth(mean_water_depth: np.ndarray, mouth_midpoint: list)
     return width
 
 
-def get_deltafront_contour_depth(bottom_depth, slope, model_boundary):
+def get_deltafront_contour_depth(
+    bottom_depth: np.ndarray,
+    slope: np.ndarray,
+    model_boundary: Polygon,
+    contour_depths: List[float] = [2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8],
+    first_timestep: int = 20,
+    timestep_resolution: int = 5,
+    buffersize: int = 16,
+):
     """
     Test different contour depths to find the depth contour that has the highest slope
     on average. This is the contour that best follows the steepest part of the foreset
@@ -130,20 +139,38 @@ def get_deltafront_contour_depth(bottom_depth, slope, model_boundary):
 
     Parameters
     ----------
-    bottom_depth : _type_
-        _description_
-    slope : _type_
-        _description_
+    bottom_depth : np.ndarray
+        3D bottom depth array representing (t, x, y) dimensions
+    slope : np.ndarray
+        3D slope array representing (t, x, y) dimensions
+    model_boundary : Polygon
+        Bounding polygon of the model domain
+    contour_depths : List[float]
+        Contour depths to test
+    first_timestep : int
+        First timestep to consider for reconstructing deltafront depth over time
+    timestep_resolution : int
+        'Distance' to sample timesteps for use in the analysis. Larger distance meanse
+        faster computation time but less accuracy.
+    buffersize: int
+        Distance away from the model edge to consider (to prevent taking into acoount
+        unwanted values like the NaN value of -999 used in D3D output).
+
+    Returns
+    -------
+    np.ndarray
+        Array with interpolated contour (delta front) depths. Lenght is the amount of
+        modelled timesteps.
+
     """
-    contour_depths = [2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8]
     foreset_contours = []
     timesteps = bottom_depth.shape[0]
-    model_inner_boundary = buffer(model_boundary, -16)
+    model_inner_boundary = buffer(model_boundary, -buffersize)
     model_inner_grid = rasterize(
         [(model_inner_boundary, 1)],
         out_shape=(slope[0, :, :].shape[1], slope[0, :, :].shape[0]),
     ).transpose()
-    for i in np.arange(20, timesteps, 5):
+    for i in np.arange(first_timestep, timesteps, timestep_resolution):
         slope_mean = []
         bottom_depth_i = np.copy(bottom_depth[i, :, :])
         bottom_depth_i[model_inner_grid == 0] = np.nan
@@ -157,7 +184,9 @@ def get_deltafront_contour_depth(bottom_depth, slope, model_boundary):
             slope_mean.append(np.nanmean(sampled_slopes))
         foreset_contours.append(contour_depths[np.nanargmax(slope_mean)])
 
-    foreset_fit = np.polyfit(np.arange(20, timesteps, 5), foreset_contours, 2)
+    foreset_fit = np.polyfit(
+        np.arange(first_timestep, timesteps, timestep_resolution), foreset_contours, 2
+    )
     t = np.arange(0, timesteps, 1)
     interpolated_foreset_depth = (
         foreset_fit[0] * t**2 + foreset_fit[1] * t + foreset_fit[2]
@@ -165,7 +194,7 @@ def get_deltafront_contour_depth(bottom_depth, slope, model_boundary):
     return interpolated_foreset_depth
 
 
-def numpy_mode(array):
+def numpy_mode(array: np.ndarray):
     vals, counts = np.unique(array, return_counts=True)
     index = np.argmax(counts)
     return vals[index]

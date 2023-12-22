@@ -5,6 +5,7 @@ import pytest
 from numpy.testing import assert_allclose
 
 from gtpost import utils
+from gtpost.analyze.surface import slope
 
 
 class TestUtils:
@@ -21,6 +22,34 @@ class TestUtils:
                 [-999, -999, -999, -999, -999],
             ]
         )
+
+    @pytest.fixture
+    def mean_depth_t(self):
+        # Generate a depth array with 10 timesteps that becomes steeper over time.
+        result = np.zeros([10, 6, 8])
+        result[0, :, :] = np.array(
+            [
+                [-999, -999, -999, -999, -999, -999, -999, -999],
+                [-999, 4, 4, 3.5, 3.5, 4, 4, -999],
+                [-999, 5, 5, 4, 4, 5, 5, -999],
+                [-999, 6, 6, 5, 5, 6, 6, -999],
+                [-999, 7, 7, 6, 6, 7, 7, -999],
+                [-999, -999, -999, -999, -999, -999, -999, -999],
+            ]
+        )
+        adjustment_array = np.array(
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0],
+                [0, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0],
+                [0, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+            ]
+        )
+        for i in range(1, len(result)):
+            result[i, :, :] = result[i - 1, :, :] + adjustment_array
+        return result
 
     @pytest.mark.unittest
     def test_get_template_name(self):
@@ -81,3 +110,35 @@ class TestUtils:
     def test_get_river_width(self, mean_depth):
         river_width = utils.get_river_width_at_mouth(mean_depth, [2, 2])
         assert river_width == 1
+
+    @pytest.mark.unittest
+    def test_get_deltafront_contour_depth(self, mean_depth_t):
+        model_bound = utils.get_model_bound(mean_depth_t[0, :, :])
+        slope_t = slope(mean_depth_t)
+        interpolated_df_depth = utils.get_deltafront_contour_depth(
+            mean_depth_t,
+            slope_t,
+            model_bound,
+            contour_depths=[4, 4.5, 5, 5.5, 6, 6.5],
+            first_timestep=0,
+            timestep_resolution=1,
+            buffersize=1,
+        )
+
+        assert_allclose(
+            interpolated_df_depth,
+            np.array(
+                [
+                    4.93181818,
+                    5.04090909,
+                    5.16893939,
+                    5.31590909,
+                    5.48181818,
+                    5.66666667,
+                    5.87045455,
+                    6.09318182,
+                    6.33484848,
+                    6.59545455,
+                ]
+            ),
+        )

@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 from pathlib import Path
-from typing import List
+from typing import List, Self
 
 import numpy as np
 import xarray as xr
@@ -71,7 +71,7 @@ class ModelResult:
         delft3d_folder: str | Path,
         settings_file: str | Path = default_settings_file,
         post: bool = True,
-    ):
+    ) -> Self:
         """
         Constructor for ModelResult class from Delft3D i/o folder
 
