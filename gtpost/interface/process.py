@@ -1,17 +1,13 @@
 from pathlib import Path
 
 from gtpost.model import ModelResult
+from gtpost.utils import get_template_name
 from gtpost.visualize import plot
-
-default_settings_file = (
-    Path(__file__).parents[2].joinpath(r"config\default_settings.ini")
-)
 
 
 def main(
     fpath_input: str | Path = "/data/input",
     fpath_output: str | Path = "/data/output",
-    fpath_settings: str | Path = default_settings_file,
 ) -> None:
     """
     main function that interfaces with the Delft3D Geotool backend for processing during
@@ -37,8 +33,13 @@ def main(
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
 
+    template_name = get_template_name(fpath_input)
+    settings_file = (
+        Path(__file__).parents[2].joinpath(f"config\\settings_{template_name}.ini")
+    )
+
     modelresult = ModelResult.from_folder(
-        fpath_input, post=False, settings_file=fpath_settings
+        fpath_input, post=False, settings_file=settings_file
     )
     modelresult.process()
 

@@ -2,19 +2,13 @@ import json
 from pathlib import Path
 
 from gtpost.model import ModelResult
+from gtpost.utils import get_template_name
 from gtpost.visualize import plot
-
-default_settings_file = (
-    Path(__file__).parents[2].joinpath(r"config\default_settings.ini")
-)
-
-# TODO: input.ini uitlezen voor template naam.
 
 
 def main(
     fpath_input: str | Path = "/data/input",
     fpath_output: str | Path = "/data/output",
-    fpath_settings: str | Path = default_settings_file,
 ) -> None:
     """
     main function that interfaces with the Delft3D Geotool backend for postprocessing
@@ -45,8 +39,13 @@ def main(
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
 
+    template_name = get_template_name(fpath_input)
+    settings_file = (
+        Path(__file__).parents[2].joinpath(f"config\\settings_{template_name}.ini")
+    )
+
     modelresult = ModelResult.from_folder(
-        fpath_input, post=True, settings_file=fpath_settings
+        fpath_input, post=True, settings_file=settings_file
     )
     modelresult.postprocess()
     modelresult.export_sediment_and_object_data(
@@ -108,12 +107,7 @@ if __name__ == "__main__":
     #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
     # )
     main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_054_Reference",
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_054_Reference_new",
-        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
-    )
-    main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058",
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058_Reference",
         r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_058",
         Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
     )
