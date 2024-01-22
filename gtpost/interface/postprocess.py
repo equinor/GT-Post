@@ -45,7 +45,7 @@ def main(
 
     template_name = get_template_name(fpath_input)
     settings_file = (
-        Path(__file__).parents[2].joinpath(f"config\\settings_{template_name}.ini")
+        Path(__file__).parents[2].joinpath(f"config/settings_{template_name}.ini")
     )
 
     modelresult = ModelResult.from_folder(
@@ -85,7 +85,10 @@ def main(
     logger.info(f"{get_current_time()}: Plotting archel maps")
     map_plotter = plot.MapPlot(modelresult)
     map_plotter.twopanel_map("bottom_depth", "architectural_elements")
-    map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
+    # map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
+    map_plotter.save_figures(
+        fpath_output, "subenvironment"
+    )  # to integrate with existing GUI
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
