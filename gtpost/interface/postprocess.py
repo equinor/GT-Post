@@ -1,9 +1,13 @@
 import json
+import logging
 from pathlib import Path
 
 from gtpost.model import ModelResult
-from gtpost.utils import get_template_name
+from gtpost.utils import get_current_time, get_template_name
 from gtpost.visualize import plot
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 def main(
@@ -47,9 +51,17 @@ def main(
     modelresult = ModelResult.from_folder(
         fpath_input, post=True, settings_file=settings_file
     )
+    logger.info(
+        f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
+    )
+    logger.info(f"{get_current_time()}: Starting postprocessing")
     modelresult.postprocess()
+    logger.info(f"{get_current_time()}: Postprocessing completed, exporting data...")
     modelresult.export_sediment_and_object_data(
         fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
+    )
+    logger.info(
+        f"{get_current_time()}: Created {modelresult.modelname + '_sed_and_obj_data.nc'}"
     )
 
     with open(
@@ -59,13 +71,18 @@ def main(
             modelresult.delta_stats,
             f,
         )
+    logger.info(
+        f"{get_current_time()}: Created {modelresult.modelname + '_statistics_summary.json'}"
+    )
 
     # Summary plot
+    logger.info(f"{get_current_time()}: Plotting stats")
     stat_plotter = plot.StatPlot(modelresult)
     stat_plotter.plot_histograms()
     stat_plotter.save_figures(fpath_output, "archel_summary")
 
     # Map plots
+    logger.info(f"{get_current_time()}: Plotting archel maps")
     map_plotter = plot.MapPlot(modelresult)
     map_plotter.twopanel_map("bottom_depth", "architectural_elements")
     map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
@@ -75,51 +92,18 @@ def main(
     xsect_end = (modelresult.mouth_position[1] + 100, modelresult.mouth_position[0])
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
+    logger.info(f"{get_current_time()}: Plotting D50 x-sections")
     xsect_plotter.twopanel_xsection("bottom_depth", "d50")
     xsect_plotter.save_figures(fpath_output, "xsect_diameter")
 
+    logger.info(f"{get_current_time()}: Plotting archel x-sections")
     xsect_plotter.twopanel_xsection("bottom_depth", "architectural_elements")
     xsect_plotter.save_figures(fpath_output, "xsect_archels")
 
+    logger.info(f"{get_current_time()}: Plotting deposition age x-sections")
     xsect_plotter.twopanel_xsection("bottom_depth", "deposition_age")
     xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
 
 
 if __name__ == "__main__":
-    # main(
-    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_045_Reference",
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_045_Reference_new",
-    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
-    # )
-    # main(
-    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_048",
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_048",
-    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
-    # )
-    # main(
-    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_049",
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_049",
-    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
-    # )
-    # main(
-    #     r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_050",
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_050",
-    #     Path(__file__).parents[2].joinpath(r"config\settings_sobrarbe.ini"),
-    # )
-    main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058_Reference",
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_058",
-        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
-    )
-    main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_059",
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_059",
-        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
-    )
-    main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_060",
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_060",
-        Path(__file__).parents[2].joinpath(r"config\settings_roda.ini"),
-    )
-
-    # main()
+    main()

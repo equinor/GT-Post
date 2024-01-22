@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
@@ -8,6 +9,15 @@ from shapely import buffer
 from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import nearest_points
 from skimage import measure
+
+
+def get_current_time():
+    time_now = datetime.now()
+    return f"{time_now.hour}:{time_now.minute}:{time_now.second}"
+
+
+def get_last_processed_timestep():
+    pass
 
 
 def get_template_name(input_path: str | Path) -> str:

@@ -1,8 +1,12 @@
+import logging
 from pathlib import Path
 
 from gtpost.model import ModelResult
-from gtpost.utils import get_template_name
+from gtpost.utils import get_current_time, get_template_name
 from gtpost.visualize import plot
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 def main(
@@ -41,9 +45,14 @@ def main(
     modelresult = ModelResult.from_folder(
         fpath_input, post=False, settings_file=settings_file
     )
+    logger.info(
+        f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
+    )
+    logger.info(f"{get_current_time()}: Starting processing")
     modelresult.process()
 
     # Map plots
+    logger.info(f"{get_current_time()}: Plotting maps")
     map_plotter = plot.MapPlot(modelresult)
     map_plotter.twopanel_map("bottom_depth", "deposit_height")
     map_plotter.save_figures(fpath_output, "map_bottomdepth_deposition")
@@ -53,13 +62,10 @@ def main(
     xsect_end = (modelresult.mouth_position[1] + 100, modelresult.mouth_position[0])
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
+    logger.info(f"{get_current_time()}: Plotting D50 x-sections")
     xsect_plotter.twopanel_xsection("bottom_depth", "d50")
     xsect_plotter.save_figures(fpath_output, "xsect_diameter")
 
 
 if __name__ == "__main__":
-    main(
-        fpath_input=r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_049",
-        fpath_output=r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_049",
-    )
-    # main()
+    main()
