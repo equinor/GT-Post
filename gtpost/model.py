@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 from pathlib import Path
-from typing import List, Self
+from typing import Self
 
 import numpy as np
 import xarray as xr
@@ -9,7 +9,6 @@ import gtpost.utils as utils
 from gtpost.analyze import layering, sediment, statistics, surface
 from gtpost.analyze.classifications import sorting_classifier
 from gtpost.io import ENCODINGS, export, read_d3d_input
-from gtpost.visualize import plot
 
 default_settings_file = (
     Path(__file__).parents[1].joinpath(r"config\default_settings.ini")
@@ -373,67 +372,3 @@ class ModelResult:
     def export_sediment_and_object_data(self, out_file: str | Path):
         ds = export.create_sed_and_obj_dataset(self)
         ds.to_netcdf(out_file, engine="h5netcdf", encoding=ENCODINGS)
-
-
-if __name__ == "__main__":
-    # Below code is all for testing/debugging purposes.
-
-    d3d_folders = Path(r"p:\11209074-002-Geotool-new-deltas\01_modelling").glob("*")
-
-    for d3d_folder in d3d_folders:
-        d3d_folder = Path(
-            r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrabre_045_Reference"
-        )
-        folder_name = d3d_folder.stem
-        config_file = (
-            Path(__file__).parents[1].joinpath(r"config\settings_sobrarbe.ini")
-        )
-        output_folder = Path(
-            f"n:\\Projects\\11209000\\11209074\\B. Measurements and calculations\\test_results\\{folder_name}"
-        )
-
-        if not output_folder.is_dir():
-            Path.mkdir(output_folder)
-
-        test = ModelResult.from_folder(d3d_folder, settings_file=config_file)
-        test.postprocess()
-        # test.export_sediment_and_object_data(
-        #     output_folder.joinpath("Sed_and_Obj_data.nc")
-        # )
-
-        # mapplotter = plot.MapPlot(test)
-        # mapplotter.twopanel_map("bottom_depth", "architectural_elements")
-        # mapplotter.save_figures(output_folder, "maps_wd_ae")
-
-        xsectplotter_xshore = plot.CrossSectionPlot(test, (10, 155), (80, 155))
-        # xsectplotter_xshore = plot.CrossSectionPlot(test, (100, 140), (220, 140))
-        xsectplotter_xshore.twopanel_xsection(
-            "deposition_age",
-            "deposition_age",
-        )
-        xsectplotter_xshore.save_figures(output_folder, "depage_xshore")
-        xsectplotter_xshore.twopanel_xsection(
-            "architectural_elements",
-            "architectural_elements",
-        )
-        xsectplotter_xshore.save_figures(output_folder, "archels_xshore")
-
-        xsectplotter_xshore.twopanel_xsection("d50", "d50")
-        xsectplotter_xshore.save_figures(output_folder, "d50_xshore")
-
-        # xsectplotter_lshore = plot.CrossSectionPlot(test, (10, 60), (70, 240))
-        xsectplotter_lshore = plot.CrossSectionPlot(test, (115, 80), (115, 220))
-        xsectplotter_lshore.twopanel_xsection(
-            "architectural_elements",
-            "architectural_elements",
-        )
-        xsectplotter_lshore.save_figures(output_folder, "archels_lshore")
-
-        xsectplotter_lshore.twopanel_xsection("d50", "d50")
-        xsectplotter_lshore.save_figures(output_folder, "d50_lshore")
-        xsectplotter_lshore.twopanel_xsection(
-            "deposition_age",
-            "deposition_age",
-        )
-        xsectplotter_lshore.save_figures(output_folder, "depage_lshore")
-        print("stop")
