@@ -99,7 +99,7 @@ def fraction_classifier(values: list | np.ndarray) -> np.ndarray:
         Classified result.
     """
     fraction_classes = Classifier(
-        [0, 0.063, 0.125, 0.25, 0.5, 1, 2], ["s/c", "vf", "f", "m", "c", "vc"]
+        [-1, 0.063, 0.125, 0.25, 0.5, 1, 2], ["s/c", "vf", "f", "m", "c", "vc"]
     )
     return fraction_classes.classify(values)
 
@@ -127,7 +127,7 @@ def sorting_classifier(values: list | np.ndarray) -> np.ndarray:
         Classified result.
     """
     sorting_classes = Classifier(
-        [0, 0.35, 0.5, 0.71, 1, 2, 4, 999],
+        [-1, 0.35, 0.5, 0.71, 1, 2, 4, 999],
         [
             "Very well",
             "Well",

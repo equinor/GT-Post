@@ -46,14 +46,19 @@ def get_stats_per_archel(
             archels[:, coastline_y:, :] == i
         )
         preserved_thickness_sel = preserved_thickness[:, coastline_y:, :][idxs]
-        volumes[i - 1] = np.sum(preserved_thickness_sel)
-        archel_d50s[i - 1] = np.average(
-            d50[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
-        )
-        archel_fractions[i - 1] = np.average(
-            fractions[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
-        )
-        archel_sorting[i - 1] = np.nanmean(sorting[:, coastline_y:, :][idxs])
+        if len(preserved_thickness_sel) != 0:
+            volumes[i - 1] = np.sum(preserved_thickness_sel)
+            archel_d50s[i - 1] = np.average(
+                d50[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
+            )
+            archel_fractions[i - 1] = np.average(
+                fractions[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
+            )
+            archel_sorting[i - 1] = np.nanmean(sorting[:, coastline_y:, :][idxs])
+        else:
+            archel_d50s[i - 1] = 0
+            archel_fractions[i - 1] = 0
+            archel_sorting[i - 1] = 0
     delta_volume, archel_volumes = volume_stats(volumes)
     return delta_volume, archel_volumes, archel_d50s, archel_fractions, archel_sorting
 

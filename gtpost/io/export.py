@@ -159,7 +159,7 @@ def create_sed_and_obj_dataset(p):
         ),
         subenv=(
             ("dimen_t", "dimen_x", "dimen_y"),
-            p.dep_env,
+            p.subenvironment,
             dict(
                 long_name="subenvironment",
                 variable_type="calculated",

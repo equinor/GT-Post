@@ -97,15 +97,22 @@ class BedlevelchangeColormap(NamedTuple):
 
 
 class BottomDepthColormap(NamedTuple):
-    c0 = (0.0, "green")
-    c1 = (0.2, "gold")
-    c2 = (0.5, "deepskyblue")
-    c3 = (1, "midnightblue")
+    c0 = (0, "#182514")
+    c1 = (0.143, "#0C672C")
+    c2 = (0.286, "#829E06")
+    c3 = (0.429, "#E5D37F")
+    c4 = (0.5, "#FDFAE6")
+    c5 = (0.571, "#C4DAD0")
+    c6 = (0.714, "#45A2AE")
+    c7 = (0.857, "#1B5A9E")
+    c8 = (1, "#172313")
     name = "Bottom depth"
     type = "mappable"
-    vmin = 0
-    vmax = 12
-    cmap, mappable, norm = continuous_cmap([c0, c1, c2, c3], name, vmin, vmax)
+    vmin = -6
+    vmax = 8
+    cmap, mappable, norm = continuous_cmap(
+        [c0, c1, c2, c3, c4, c5, c6, c7, c8], name, vmin, vmax
+    )
 
 
 class PorosityColormap(NamedTuple):
