@@ -41,6 +41,7 @@ dependencies = [
     "scikit-image",
     "shapely",
     "h5netcdf",
+    "mako",
 ]
 
 
