@@ -133,6 +133,7 @@ def delta_areas_from_boundaries(
 
 def detect_channel_network(dataset, subenvironment, resolution, config):
     # Unpack config settings
+    channel_detection_method = config["classification"]["channel_detection_method"]
     channel_detection_range = int(
         config["classification"]["channel_detection_windowsize"]
     )
@@ -150,29 +151,28 @@ def detect_channel_network(dataset, subenvironment, resolution, config):
         subenvironment_now = subenvironment[t, :, :]
         min_depth_now = dataset.MEAN_H1[t, :, :].values
         max_flow_now = dataset.MAX_UV[t, :, :].values
+        min_flow_now = dataset.MIN_UV[t, :, :].values
+        min_sediment = dataset.MIN_SBUV[t, :, :].values
 
-        # Get local (within channel detection range window) differences for flow and
-        # water depth.
-        min_depth_now[subenvironment_now != 1] = np.nan
-        min_depth_now[min_depth_now > 500] = np.nan
-        local_depth = window_ops.numba_window_difference_between_minimum(
-            min_depth_now, channel_detection_range
-        )
-        max_flow_now[subenvironment_now != 1] = np.nan
-        max_flow_now[max_flow_now < -500] = np.nan
-        local_flow = window_ops.numba_window_difference_between_minimum(
-            max_flow_now, channel_detection_range
-        )
+        if channel_detection_method == "local":
+            channels_now = channel_detection_local(
+                min_depth_now,
+                max_flow_now,
+                subenvironment_now,
+                channel_detection_range,
+                channel_detection_sensitivity,
+            )
+            channels_now = morphology.remove_small_objects(channels_now, min_size=100)
+            channels_now = morphology.binary_closing(channels_now, morphology.disk(2))
+        elif channel_detection_method == "static":
+            channels_now = channel_detection_static(
+                min_depth_now,
+                max_flow_now,
+                subenvironment_now,
+                channel_detection_sensitivity,
+            )
+            channels_now = morphology.remove_small_objects(channels_now, min_size=100)
 
-        # Detect active channels and parameters (skeleton, width, depth)
-        channels_now = np.full_like(subenvironment_now, False).astype(bool)
-        channels_now[
-            (local_depth < channel_detection_sensitivity)
-            & (local_flow < channel_detection_sensitivity)
-        ] = True
-        channels_now[subenvironment_now != SubEnv.deltatop.value] = False
-        channels_now = morphology.remove_small_objects(channels_now, min_size=100)
-        channels_now = morphology.binary_closing(channels_now, morphology.disk(2))
         channels[t, :, :] = channels_now
         channel_skel[t, :, :] = skeletonize(channels_now)
         channel_width[t, :, :] = resolution * ndimage.distance_transform_edt(
@@ -183,6 +183,39 @@ def detect_channel_network(dataset, subenvironment, resolution, config):
         )
 
     return (channels, channel_skel, channel_width, channel_depth)
+
+
+def channel_detection_local(depth, flow, subenvironment, range, sensitivity):
+    # Get local (within channel detection range window) differences for flow and
+    # water depth.
+    depth[subenvironment != 1] = np.nan
+    depth[depth > 500] = np.nan
+    local_depth = window_ops.numba_window_difference_between_minimum(depth, range)
+    flow[subenvironment != 1] = np.nan
+    flow[flow < -500] = np.nan
+    local_flow = window_ops.numba_window_difference_between_minimum(flow, range)
+
+    # Detect active channels and parameters (skeleton, width, depth)
+    channels_now = np.full_like(subenvironment, False).astype(bool)
+    channels_now[(local_depth < sensitivity) & (local_flow < sensitivity)] = True
+
+    return channels_now
+
+
+def channel_detection_static(depth, max_flow, subenvironment, sensitivity):
+    channel_depth_requirement = 2.5 * (1 + sensitivity)
+    channel_max_flow_requirement = 3 * (1 + sensitivity)
+    depth[subenvironment != 1] = np.nan
+    depth[depth > 500] = np.nan
+    max_flow[subenvironment != 1] = np.nan
+    max_flow[max_flow < -500] = np.nan
+    channels_now = np.full_like(subenvironment, False).astype(bool)
+
+    channels_now[
+        (max_flow > channel_max_flow_requirement) | (depth > channel_depth_requirement)
+    ] = True
+
+    return channels_now
 
 
 def detect_elements(
