@@ -354,7 +354,7 @@ def main(
     fpath_output="/data/output",
     fpath_template="/data/svn/template",
 ):
-    fpath_template = Path(__file__).parents[2].joinpath(f"gt_templates")
+    fpath_template = Path(__file__).parents[2].joinpath("gt_templates")
     PP = PreProcess(fpath_input, fpath_output, fpath_template)
     PP.preprocess()
 

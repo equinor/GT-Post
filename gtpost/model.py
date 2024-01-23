@@ -11,7 +11,7 @@ from gtpost.analyze.classifications import sorting_classifier
 from gtpost.io import ENCODINGS, export, read_d3d_input
 
 default_settings_file = (
-    Path(__file__).parents[1].joinpath(r"config\default_settings.ini")
+    Path(__file__).parents[1].joinpath("config/default_settings.ini")
 )
 
 
