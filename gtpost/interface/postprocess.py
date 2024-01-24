@@ -92,7 +92,7 @@ def main(
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
-    xsect_end = (modelresult.mouth_position[1] + 100, modelresult.mouth_position[0])
+    xsect_end = (modelresult.mouth_position[1] + 150, modelresult.mouth_position[0])
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")

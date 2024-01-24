@@ -151,8 +151,6 @@ def detect_channel_network(dataset, subenvironment, resolution, config):
         subenvironment_now = subenvironment[t, :, :]
         min_depth_now = dataset.MEAN_H1[t, :, :].values
         max_flow_now = dataset.MAX_UV[t, :, :].values
-        min_flow_now = dataset.MIN_UV[t, :, :].values
-        min_sediment = dataset.MIN_SBUV[t, :, :].values
 
         if channel_detection_method == "local":
             channels_now = channel_detection_local(
@@ -203,8 +201,9 @@ def channel_detection_local(depth, flow, subenvironment, range, sensitivity):
 
 
 def channel_detection_static(depth, max_flow, subenvironment, sensitivity):
-    channel_depth_requirement = 2.5 * (1 + sensitivity)
-    channel_max_flow_requirement = 3 * (1 + sensitivity)
+    channel_depth_requirement = 2.5 * -sensitivity
+    channel_max_flow_requirement = 3 * -sensitivity
+    channel_min_max_flow_requirement = 1.2 * -sensitivity
     depth[subenvironment != 1] = np.nan
     depth[depth > 500] = np.nan
     max_flow[subenvironment != 1] = np.nan
@@ -212,7 +211,11 @@ def channel_detection_static(depth, max_flow, subenvironment, sensitivity):
     channels_now = np.full_like(subenvironment, False).astype(bool)
 
     channels_now[
-        (max_flow > channel_max_flow_requirement) | (depth > channel_depth_requirement)
+        (
+            (max_flow > channel_max_flow_requirement)
+            | (depth > channel_depth_requirement)
+        )
+        & (max_flow > channel_min_max_flow_requirement)
     ] = True
 
     return channels_now
