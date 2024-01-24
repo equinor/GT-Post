@@ -43,7 +43,8 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset.isel(time=slice(0, 250))  # time slice for manual testing
+        self.dataset = dataset  # .isel(time=slice(0, 250))# time slice for testing
+
         if post:
             self.complete_init_for_postprocess()
             self.processing_state = "postprocessing"
