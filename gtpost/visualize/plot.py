@@ -222,6 +222,65 @@ class PlotBase:
             colorbar.set_ticks(colormap.ticks + 0.5)
             colorbar.set_ticklabels(colormap.labels)
 
+    def draw_last_xsection(self, axis_idx, timestep, data, colormap):
+        axis = self.ax[axis_idx]
+        caxis = self.cax[axis_idx]
+
+        for i, x in enumerate(self.anchor_x):
+            current_surface = self.anchor_y[timestep, i]
+            preserved = self.preserved[:-1, i]
+
+            if colormap.type == "mappable":
+                color = colormap.mappable.to_rgba(data[1:, i])
+            elif colormap.type == "categorical":
+                color = [colormap.colors[c] for c in data[1:, i]]
+
+            accumulated_thickness = 0
+            for lyr_number, layer_thickness in enumerate(preserved[::-1]):
+                if layer_thickness > 0:
+                    self.patches_per_position[i].append(
+                        patches.Rectangle(
+                            xy=(x, current_surface - accumulated_thickness),
+                            width=self.width,
+                            height=-layer_thickness,
+                            color=color[-lyr_number - 1],
+                            linewidth=0,
+                        )
+                    )
+                    accumulated_thickness += layer_thickness
+
+        selected_patches = list(
+            chain.from_iterable(
+                [value for key, value in self.patches_per_position.items()]
+            )
+        )
+        p = PatchCollection(selected_patches)
+        p.set_color([p.get_facecolor() for p in selected_patches])
+        axis.add_collection(p)
+        axis.plot(self.anchor_y[timestep, :])
+
+        axis.set_xlim(self.xlim)
+        axis.set_ylim(self.ylim)
+        axis.set_xticks(axis.get_xticks())
+        axis.set_yticks(axis.get_yticks())
+        axis.set_xticklabels(
+            axis.get_xticks() * self.tickfactor, fontsize=self.ticksize
+        )
+        axis.set_yticklabels(axis.get_yticks(), fontsize=self.ticksize)
+
+        axis.set_xlabel("Distance along profile line (km)", fontsize=self.axlabelsize)
+        axis.set_ylabel("Vertical position (m)", fontsize=self.axlabelsize)
+        axis.set_title(
+            colormap.name + f" (t = {timestep})", fontsize=self.titlesize, loc="left"
+        )
+
+        colorbar = self.fig.colorbar(
+            colormap.mappable, cax=caxis, orientation="horizontal"
+        )
+        if colormap.type == "categorical":
+            colorbar.set_ticks(colormap.ticks + 0.5)
+            colorbar.set_ticklabels(colormap.labels)
+
     def draw_map(self, axis_idx, timestep, data, colormap):
         axis = self.ax[axis_idx]
         caxis = self.cax[axis_idx]
@@ -313,6 +372,7 @@ class CrossSectionPlot(PlotBase):
         )
         self.dh = self.model.deposit_height[:, self.xc, self.yc]
         self.dsub = self.model.subsidence_per_t[self.xc, self.yc]
+        self.preserved = self.model.preserved_thickness[:, self.xc, self.yc]
         self.width = 1
         self.xlim = [self.anchor_x[0], self.anchor_x[-1]]
         self.ylim = [
@@ -321,7 +381,9 @@ class CrossSectionPlot(PlotBase):
             # np.round(self.anchor_y.max() + 1),
         ]
 
-    def twopanel_xsection(self, variable_basemap, variable_xsect):
+    def twopanel_xsection(
+        self, variable_basemap, variable_xsect, only_last_timestep=False
+    ):
         data_xsect = self.model.__dict__[variable_xsect][:, self.xc, self.yc]
         data_base = self.model.__dict__[variable_basemap]
         colormap_xsect = self.colormaps[variable_xsect]
@@ -338,43 +400,22 @@ class CrossSectionPlot(PlotBase):
             )
         )
 
-        for t in range(data_xsect.shape[0]):
+        if only_last_timestep:
+            t = data_base.shape[0] - 1
             self.create_figure("x-2panels")
             self.draw_map(0, t, data_base, colormap_base)
             self.draw_profile_line(0, self.start, self.finish)
-            self.draw_xsection(1, t, data_xsect, colormap_xsect)
+            self.draw_last_xsection(1, t, data_xsect, colormap_xsect)
             self.figures.append(self.fig)
             plt.close()
-
-    def threepanel_xsection(self, variable_basemap, variable_xsect1, variable_xsect2):
-        data_xsect1 = self.model.__dict__[variable_xsect1][:, self.xc, self.yc]
-        data_xsect2 = self.model.__dict__[variable_xsect2][:, self.xc, self.yc]
-        data_base = self.model.__dict__[variable_basemap]
-        colormap_xsect1 = self.colormaps[variable_xsect1]
-        colormap_xsect2 = self.colormaps[variable_xsect2]
-        colormap_base = self.colormaps[variable_basemap]
-
-        self.figures = []
-        self.patchlist_1 = []
-        self.colorlist_1 = []
-        self.patchlist_2 = []
-        self.colorlist_2 = []
-
-        self.patches_per_position = dict(
-            zip(
-                [i for i in range(len(self.anchor_x))],
-                [[] for i in range(len(self.anchor_x))],
-            )
-        )
-
-        for t in range(data_xsect1.shape[0]):
-            self.create_figure("x-3panels")
-            self.draw_map(0, t, data_base, colormap_base)
-            self.draw_profile_line(0, self.start, self.finish)
-            self.draw_xsection(1, t, data_xsect1, colormap_xsect1)
-            self.draw_xsection(2, t, data_xsect2, colormap_xsect2)
-            self.figures.append(self.fig)
-            plt.close()
+        else:
+            for t in range(data_xsect.shape[0]):
+                self.create_figure("x-2panels")
+                self.draw_map(0, t, data_base, colormap_base)
+                self.draw_profile_line(0, self.start, self.finish)
+                self.draw_xsection(1, t, data_xsect, colormap_xsect)
+                self.figures.append(self.fig)
+                plt.close()
 
     @staticmethod
     def profile_line_coordinates(start, finish):
