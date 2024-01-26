@@ -1,88 +1,109 @@
-import numpy as np
-import pyvista as pv
-from pyvista import CellType
-import xarray as xr
 from itertools import product
 
-
-def to_pv_model(xc, yc, array, bottom, file, binary=True):
-    x, y = np.meshgrid(np.float32(yc), np.float32(xc))
-    pv_model = pv.StructuredGrid(x, y, array)
-    pv_top = pv_model.points.copy()
-    pv_bottom = pv_model.points.copy()
-    pv_bottom[:, -1] = bottom
-    pv_model.points = np.vstack((pv_top, pv_bottom))
-    pv_model.dimensions = [*pv_model.dimensions[0:2], 2]
-    data_flat = projected_array.flatten(order="F")
-    pv_model.point_data["values"] = np.hstack((data_flat, data_flat))
-
-    # To pv.UnstructuredGrid by removing NaN cells from the StructuredGrid
-    pv_model = pv_model.threshold()
-    pv_model.save(file, binary=binary)
+import numpy as np
+import pyvista as pv
+import xarray as xr
+from pyvista import CellType
 
 
-if __name__ == "__main__":
-    ds = xr.open_dataset(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\MS_12_10\MS2_12_10plusNewSedClasses_rerun_mod - coarse-sand_sed_and_obj_data.nc"
-    )
-    g = 1
-    x = 121
-    y = 100
-
+def to_voxel_model(
+    dataset,
+    xbnds,
+    ybnds,
+    res=1,
+    displayed_variables=[
+        "archel",
+        "diameter",
+        "fraction",
+        "sorting",
+        "porosity",
+        "permeability",
+        "deposition_age",
+    ],
+):
     grids = []
-    for x, y in product(range(60, 200), range(100, 160)):
-        current_surface = ds.zcor[-1, x, y].values
-        preserved = ds.preserved_thickness[:-1, x, y].values
+    for x, y in product(range(xbnds[0], xbnds[1]), range(ybnds[0], ybnds[1])):
+        preserved = dataset.preserved_thickness[:-1, y, x].values
+        # If no material was ever preserved at this location, skip to next location.
         if all(preserved == 0):
             continue
-        archel = ds.archel[1:, x, y].values
+
+        current_surface = dataset.zcor[-1, y, x].values
+        variable_data = {}
+        variable_cell_data = {}
+        for displayed_variable in displayed_variables:
+            variable_data[displayed_variable] = dataset[displayed_variable][
+                1:, y, x
+            ].values
+            variable_cell_data[displayed_variable] = []
 
         voxels = []
         accumulated_thickness = 0
         number_of_cells = 0
-        archel_values = []
         for i, thickness in enumerate(preserved[::-1]):
             if thickness > 0:
                 z_low = current_surface - accumulated_thickness - thickness
                 z_high = current_surface - accumulated_thickness
                 voxel = np.array(
                     [
-                        [x * g, y * g, z_low],
-                        [x * g + g, y * g, z_low],
-                        [x * g, y * g + g, z_low],
-                        [x * g + g, y * g + g, z_low],
-                        [x * g, y * g, z_high],
-                        [x * g + g, y * g, z_high],
-                        [x * g, y * g + g, z_high],
-                        [x * g + g, y * g + g, z_high],
+                        [x * res, y * res, z_low],
+                        [x * res + res, y * res, z_low],
+                        [x * res, y * res + res, z_low],
+                        [x * res + res, y * res + res, z_low],
+                        [x * res, y * res, z_high],
+                        [x * res + res, y * res, z_high],
+                        [x * res, y * res + res, z_high],
+                        [x * res + res, y * res + res, z_high],
                     ]
                 )
                 voxels.append(voxel)
                 number_of_cells += 1
                 accumulated_thickness += thickness
-                archel_values.append(archel[-i - 1])
+                for displayed_variable in displayed_variables:
+                    variable_cell_data[displayed_variable].append(
+                        variable_data[displayed_variable][-i - 1]
+                    )
 
         points = np.vstack(voxels)
         cells_voxel = np.arange(number_of_cells * 8).reshape([number_of_cells, 8])
         grid = pv.UnstructuredGrid({CellType.VOXEL: cells_voxel}, points)
-        grid.cell_data["Archel"] = archel_values
+
+        for displayed_variable in displayed_variables:
+            grid.cell_data[displayed_variable] = variable_cell_data[displayed_variable]
         grids.append(grid)
 
-    block = pv.MultiBlock(grids)
-    grid_comb = block.combine()
-    grid_comb.save(file, binary=True)
+    blocks = pv.MultiBlock(grids)
+    final_grid = blocks.combine()
 
-    [ds[da].nbytes / 1e9 for da in ds.data_vars]
-    xc = ds.dimen_x.values
-    yc = ds.dimen_y.values
-    bottom = -10
+    return final_grid
 
-    i = len(ds.dimen_t)
-    file = (
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\MS_12_10"
-        + f"\\test_{i}.vtk"
+
+def to_surface_model(dataset, bottom_level, projected_variable="archel"):
+    xc = dataset.dimen_x.values
+    yc = dataset.dimen_y.values
+    x, y = np.meshgrid(np.float32(yc), np.float32(xc))
+    grid = pv.StructuredGrid(x, y, dataset["zcor"][-1, :, :].values)
+    pv_top = grid.points.copy()
+    pv_bottom = grid.points.copy()
+    pv_bottom[:, -1] = bottom_level
+    grid.points = np.vstack((pv_top, pv_bottom))
+    grid.dimensions = [*grid.dimensions[0:2], 2]
+    data_flat = dataset[projected_variable][-1, :, :].values.flatten(order="F")
+    grid.point_data["values"] = np.hstack((data_flat, data_flat))
+
+    # To pv.UnstructuredGrid by removing NaN cells from the StructuredGrid
+    final_grid = grid.threshold()
+    return final_grid
+
+
+if __name__ == "__main__":
+    ds = xr.open_dataset(
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\MS_12_10\MS2_12_10plusNewSedClasses_rerun_mod - coarse-sand_sed_and_obj_data.nc"
     )
-    array = ds["zcor"][-1, :, :].values
-    projected_array = ds["archel"][-1, :, :].values
-    print("writing timestep last")
-    to_pv_model(xc, yc, array, bottom, file, binary=True)
+    save_file_voxels = r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\MS_12_10\MS2_12_10_voxel.vtk"
+    save_file_surface = r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\MS_12_10\MS2_12_10_surface.vtk"
+    voxel_model = to_voxel_model(ds, (100, 120), (100, 120))
+    voxel_model.save(save_file_voxels, binary=True)
+
+    surface_model = to_surface_model(ds, -10)
+    surface_model.save(save_file_surface, binary=True)
