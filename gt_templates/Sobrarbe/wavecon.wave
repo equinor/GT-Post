@@ -1,0 +1,5 @@
+*Itdate		Hs	Tp	Dir(°) 	ms	wl	windspeed	wind dir.(°)
+SOBRARBE
+2  8
+0		${waveheightini}	${waveperiodini}	${wavedirection}	5	0	0	0
+${t_stop}	${waveheightfin}	${waveperiodfin}	${wavedirection}	5	0	0	0

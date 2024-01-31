@@ -1,0 +1,52 @@
+table-name           'Boundary Section : 4'
+contents             'Uniform             '
+location             'River 1             '
+time-function        'non-equidistant'
+reference-time       20131201
+time-unit            'minutes'
+interpolation        'linear'
+parameter            'time                '                     unit '[min]'
+parameter            'total discharge (t)  end A'               unit '[m3/s]'
+parameter            'total discharge (t)  end B'               unit '[m3/s]'
+records-in-table     2
+ 0.000  	${riverdischargeini}	9.9999900e+002
+ ${t_stop} 	${riverdischargefin} 	9.9999900e+002
+table-name           'Boundary Section : 5'
+contents             'Uniform             '
+location             'River 2             '
+time-function        'non-equidistant'
+reference-time       20131201
+time-unit            'minutes'
+interpolation        'linear'
+parameter            'time                '                     unit '[min]'
+parameter            'total discharge (t)  end A'               unit '[m3/s]'
+parameter            'total discharge (t)  end B'               unit '[m3/s]'
+records-in-table     2
+ 0.000  	${riverdischargeini}	9.9999900e+002
+ ${t_stop} 	${riverdischargefin} 	9.9999900e+002 
+table-name           'Boundary Section : 6'
+contents             'Uniform             '
+location             'River 3             '
+time-function        'non-equidistant'
+reference-time       20131201
+time-unit            'minutes'
+interpolation        'linear'
+parameter            'time                '                     unit '[min]'
+parameter            'total discharge (t)  end A'               unit '[m3/s]'
+parameter            'total discharge (t)  end B'               unit '[m3/s]'
+records-in-table     2
+ 0.000  	${riverdischargeini}	9.9999900e+002
+ ${t_stop} 	${riverdischargefin} 	9.9999900e+002 
+table-name           'Boundary Section : 7'
+contents             'Uniform             '
+location             'River 4             '
+time-function        'non-equidistant'
+reference-time       20131201
+time-unit            'minutes'
+interpolation        'linear'
+parameter            'time                '                     unit '[min]'
+parameter            'total discharge (t)  end A'               unit '[m3/s]'
+parameter            'total discharge (t)  end B'               unit '[m3/s]'
+records-in-table     2
+ 0.000  	${riverdischargeini}	9.9999900e+002
+ ${t_stop} 	${riverdischargefin} 	9.9999900e+002
