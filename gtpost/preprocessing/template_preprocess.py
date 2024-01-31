@@ -6,15 +6,6 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class IniParser(configparser.ConfigParser):
-    def as_dict(self):
-        d = dict(self._sections)
-        for k in d:
-            d[k] = dict(self._defaults, **d[k])
-            d[k].pop("__name__", None)
-        return d
-
-
 class TemplatePreProcess:
     inifile = None
     inidata = {}
@@ -41,7 +32,7 @@ class TemplatePreProcess:
         elif os.path.exists(self.inifile):
             p = IniParser()
             p.read(self.inifile)
-            self.inidata = p.as_dict()
+            self.inidata = p.as_dict
         else:
             logger.warning('inifile "%s" not found, nothing to read' % self.inifile)
 

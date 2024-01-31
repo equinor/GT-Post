@@ -1,20 +1,187 @@
 import logging
 import math
-import os
 import shutil
 from pathlib import Path
+from typing import Protocol
 
 import numpy as np
 from mako.lookup import TemplateLookup
 
 from gtpost.preprocessing.inidata import revise
+from gtpost.preprocessing.preprocessing_utils import (
+    IniParser,
+    get_shape_from_grd_file,
+    read_dep_file,
+)
 from gtpost.preprocessing.template_preprocess import TemplatePreProcess
+from gtpost.utils import numpy_mode
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING)
 
+compositions = (
+    "veryfine-sand",
+    "medium-sand",
+    "fine-sand",
+    "coarse-silt",
+    "coarse-sand",
+)
 
-class PreProcess(TemplatePreProcess):
+
+class PreProcess:
+    # Constants
+    g = 9.81
+    nx_bathymetry = 302
+    ny_bathymetry = 282
+    nx_wave = 102
+    ny_wave = 162
+    dx = 50
+    dy = 50
+    nodata_value = -999
+    tfactor = 1440
+    waveheight = 0.0
+    baselevel_change = 0.0
+    distal_depth = 50
+    depth_edit_range = 5
+    river_length = 100
+    clayvolcomposition = 0
+    sandvolcomposition = 0
+
+    # Default values for parameters derived from the input.ini
+    template_name = "test"
+    simulation_stop_t = 320.5
+    output_interval = 1
+    basin_slope = 0.04
+    river_initial_discharge = 1000
+    river_final_discharge = 1000
+    tidal_amplitude = 3
+    wave_initial_height = 1
+    wave_final_height = 1
+    wave_direction = 0
+    subsidence_land = 5
+    subsidence_sea = 5
+    composition = "coarse-sand"
+
+    # Default folders
+    templates_folder = Path(__file__).parents[2].joinpath("gt_templates")
+    parameter_file = Path(__file__).parent.joinpath("model_builder_defaults.json")
+
+    def __init__(self, inifile: str | Path, fpath_output: str | Path):
+        self.inifile = Path(inifile)
+        self.read_ini()
+        self.load_ini_parameters()
+        self.fpath_template = self.templates_folder.joinpath(self.template_name)
+        self.fpath_output = Path(fpath_output)
+
+    def read_ini(self) -> None:
+        """Read inifile and parse as dict"""
+        if self.inifile.exists():
+            parser = IniParser()
+            parser.read(self.inifile)
+            self.inidata = parser.as_dict
+        else:
+            logger.warning(f'inifile "{self.inifile}" not found, nothing to read')
+
+    def load_ini_parameters(self) -> None:
+        # Template name
+        self.template_name = str(self.inidata["template"]["value"])
+        # Model simulation stop time [min]
+        self.simulation_stop_t = self.tfactor * float(
+            self.inidata["simstoptime"]["value"]
+        )
+        # Output interval
+        self.simulation_stop_t = self.tfactor * float(
+            self.inidata["outputinterval"]["value"]
+        )
+        # Basin slope
+        self.basin_slope = float(self.inidata["basinslope"]["value"])
+        # Initial river discharge
+        self.river_initial_discharge = float(self.inidata["riverdischargeini"]["value"])
+        # Final river discharge
+        self.river_final_discharge = float(self.inidata["riverdischargefin"]["value"])
+        # Tidal amplitude
+        self.tidal_amplitude = float(self.inidata["tidalamplitude"]["value"])
+        # Initial wave height
+        self.wave_initial_height = float(self.inidata["waveheightini"]["value"])
+        # Final wave height
+        self.wave_final_height = float(self.inidata["waveheightfin"]["value"])
+        # Wave direction
+        self.wave_direction = float(self.inidata["wavedirection"]["value"])
+        # Subsidence in fluvial domain
+        self.subsidence_land = float(self.inidata["subsidenceland"]["value"])
+        # Subsidence in delta/marine domain
+        self.subsidence_sea = float(self.inidata["subsidencesea"]["value"])
+        # Sediment composition type
+        self.composition = str(self.inidata["composition"]["value"])
+
+    def load_template(self) -> None:
+        """Move all template files to the output folder
+
+         Raises
+         ------
+        FileNotFoundError
+             If the folder in which to create the preprocessing output folder does not
+             exist
+
+        """
+        if self.fpath_output.parent.is_dir():
+            shutil.copytree(self.fpath_template, self.fpath_output, dirs_exist_ok=True)
+        else:
+            raise FileNotFoundError(
+                f"Cannot create a new folder in {self.fpath_output.parent}"
+            )
+
+        # Remove files associated with other sediment compositions
+        compositions_to_remove = [x for x in compositions if self.composition != x]
+        for composition_to_remove in compositions_to_remove:
+            for file in self.fpath_output.glob(f"{composition_to_remove}*"):
+                file.unlink()
+
+        # Define filenames and initialize additional template data
+        self.mdf_file = self.fpath_output.joinpath(f"{self.composition}.mdf")
+        self.dep_file = self.fpath_output.joinpath("a.dep")
+        self.sdu_file = self.fpath_output.joinpath(f"{self.template_name}.sdu")
+
+        self.nx_bathymetry, self.ny_bathymetry = get_shape_from_grd_file(
+            self.fpath_output.joinpath("a.grd")
+        )
+        self.nx_wave, self.ny_wave = get_shape_from_grd_file(
+            self.fpath_output.joinpath("wave.grd")
+        )
+        self.initial_bathymetry = read_dep_file(
+            self.dep_file, self.nx_bathymetry, self.ny_bathymetry
+        )
+        self.initial_wave_grid = read_dep_file(
+            self.fpath_output.joinpath("wave.dep"), self.nx_wave, self.ny_wave
+        )
+
+    def compute_parameters(self) -> None:
+        """Some D3D wave parameters are computed from the user-defined parameters"""
+
+        # Wave period is estimated based on wave height
+        self.wave_initial_period = 0
+        self.wave_final_period = 0
+        # TODO
+
+    def adjust_initial_bathymetry(self) -> None:
+        """Adjust .dep file with initial bathymetry"""
+        basin_bathymetry = self.initial_bathymetry[:, self.river_length :]
+        dz_per_cell = self.dx * np.tan(np.deg2rad(self.basin_slope))
+        adjustment_array = np.cumsum(
+            np.full_like(basin_bathymetry, dz_per_cell), axis=1
+        )
+
+    def adjust_subsidence_bathymetry(self) -> None:
+        """Adjust .sdu file with subsidence information"""
+        pass
+
+    def preprocess(self):
+        self.load_template()
+        self.adjust_initial_bathymetry()
+        self.compute_parameters()
+
+
+class PreProcess2(TemplatePreProcess):
     template_dir = None
     dest_dir = None
     src_dir = None
@@ -360,7 +527,13 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    pp = PreProcess(
+        r"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\GuleHorn_Neslen\input.ini",
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_output2",
+    )
+    pp.preprocess()
+
+    # main()
     # main(
     #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_input",
     #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_output",
