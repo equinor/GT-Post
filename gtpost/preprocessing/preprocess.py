@@ -170,6 +170,9 @@ class PreProcess:
         adjustment_array = np.cumsum(
             np.full_like(basin_bathymetry, dz_per_cell), axis=1
         )
+        adjustment_array[basin_bathymetry == self.nodata_value] = 0
+        basin_bathymetry += adjustment_array
+        self.initial_bathymetry[:, self.river_length :] = basin_bathymetry
 
     def adjust_subsidence_bathymetry(self) -> None:
         """Adjust .sdu file with subsidence information"""
@@ -528,8 +531,8 @@ def main(
 
 if __name__ == "__main__":
     pp = PreProcess(
-        r"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\GuleHorn_Neslen\input.ini",
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_output2",
+        r"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\Roda\input.ini",
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_output_roda",
     )
     pp.preprocess()
 
