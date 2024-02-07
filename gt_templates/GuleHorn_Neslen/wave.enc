@@ -1,9 +1,9 @@
-    28     1   *** begin external enclosure 
+    34     1   *** begin left orientated grid enclosure    1
    102     1
    102   162
-    28   162
-    28    88
-     1    88
-     1    75
-    28    75
-    28     1   *** end external grid enclosure
+    34   162
+    34    89
+     1    89
+     1    74
+    34    74
+    34     1   *** end left orientated grid enclosure   1
