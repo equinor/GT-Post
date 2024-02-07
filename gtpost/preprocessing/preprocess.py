@@ -10,8 +10,10 @@ from mako.lookup import TemplateLookup
 from gtpost.preprocessing.inidata import revise
 from gtpost.preprocessing.preprocessing_utils import (
     IniParser,
+    edit_sdu_file,
     get_shape_from_grd_file,
     read_dep_file,
+    write_dep_file,
 )
 from gtpost.preprocessing.template_preprocess import TemplatePreProcess
 from gtpost.utils import numpy_mode
@@ -140,6 +142,7 @@ class PreProcess:
         # Define filenames and initialize additional template data
         self.mdf_file = self.fpath_output.joinpath(f"{self.composition}.mdf")
         self.dep_file = self.fpath_output.joinpath("a.dep")
+        self.wave_dep_file = self.fpath_output.joinpath("wave.dep")
         self.sdu_file = self.fpath_output.joinpath(f"{self.template_name}.sdu")
 
         self.nx_bathymetry, self.ny_bathymetry = get_shape_from_grd_file(
@@ -148,12 +151,13 @@ class PreProcess:
         self.nx_wave, self.ny_wave = get_shape_from_grd_file(
             self.fpath_output.joinpath("wave.grd")
         )
-        self.initial_bathymetry = read_dep_file(
+        self.bathymetry = read_dep_file(
             self.dep_file, self.nx_bathymetry, self.ny_bathymetry
         )
-        self.initial_wave_grid = read_dep_file(
-            self.fpath_output.joinpath("wave.dep"), self.nx_wave, self.ny_wave
+        self.wave_bathymetry = read_dep_file(
+            self.wave_dep_file, self.nx_wave, self.ny_wave
         )
+        self.wave_grid_factor = int(np.round(self.nx_bathymetry / self.nx_wave))
 
     def compute_parameters(self) -> None:
         """Some D3D wave parameters are computed from the user-defined parameters"""
@@ -163,24 +167,65 @@ class PreProcess:
         self.wave_final_period = 0
         # TODO
 
-    def adjust_initial_bathymetry(self) -> None:
-        """Adjust .dep file with initial bathymetry"""
-        basin_bathymetry = self.initial_bathymetry[:, self.river_length :]
+    def set_bathymetry(self) -> None:
+        """Adjust a.dep file with initial bathymetry"""
+        basin_bathymetry = self.bathymetry[:, self.river_length :]
         dz_per_cell = self.dx * np.tan(np.deg2rad(self.basin_slope))
         adjustment_array = np.cumsum(
             np.full_like(basin_bathymetry, dz_per_cell), axis=1
         )
         adjustment_array[basin_bathymetry == self.nodata_value] = 0
         basin_bathymetry += adjustment_array
-        self.initial_bathymetry[:, self.river_length :] = basin_bathymetry
+        self.bathymetry[:, self.river_length :] = basin_bathymetry
 
-    def adjust_subsidence_bathymetry(self) -> None:
+    def set_wave_bathymetry(self) -> None:
+        """Adjust wave.dep file with initial bathymetry"""
+        wave_grid_river_length = int(
+            np.round(self.river_length / self.wave_grid_factor)
+        )
+        wave_bathymetry = self.wave_bathymetry[:, wave_grid_river_length:]
+        dz_per_cell = (self.dx * self.wave_grid_factor) * np.tan(
+            np.deg2rad(self.basin_slope)
+        )
+        adjustment_array = np.cumsum(np.full_like(wave_bathymetry, dz_per_cell), axis=1)
+        adjustment_array[wave_bathymetry == self.nodata_value] = 0
+        wave_bathymetry += adjustment_array
+        self.wave_bathymetry[:, wave_grid_river_length:] = wave_bathymetry
+
+    def set_subsidence_bathymetry(self) -> None:
         """Adjust .sdu file with subsidence information"""
-        pass
+        initial_subsidence_array = np.zeros_like(self.bathymetry)
+        initial_subsidence_array[self.bathymetry == self.nodata_value] = (
+            self.nodata_value
+        )
+        final_subsidence_array = np.zeros_like(initial_subsidence_array)
+        final_subsidence_array[:, : self.river_length] = self.subsidence_land
+        sea_length = self.nx_bathymetry - self.river_length
+        dsubsidence_dx = (self.subsidence_sea - self.subsidence_land) / sea_length
+        subsidence_sea_array = (
+            np.cumsum(
+                np.full_like(
+                    final_subsidence_array[:, self.river_length :], dsubsidence_dx
+                ),
+                axis=1,
+            )
+            + self.subsidence_land
+        )
+        final_subsidence_array[:, self.river_length :] = subsidence_sea_array
+        final_subsidence_array[self.bathymetry == self.nodata_value] = self.nodata_value
+        self.initial_subsidence_array = initial_subsidence_array
+        self.final_subsidence_array = final_subsidence_array
 
     def preprocess(self):
         self.load_template()
-        self.adjust_initial_bathymetry()
+        self.set_bathymetry()
+        write_dep_file(self.dep_file, self.bathymetry)
+        self.set_wave_bathymetry()
+        write_dep_file(self.wave_dep_file, self.wave_bathymetry)
+        self.set_subsidence_bathymetry()
+        edit_sdu_file(
+            self.sdu_file, self.initial_subsidence_array, self.final_subsidence_array
+        )
         self.compute_parameters()
 
 
