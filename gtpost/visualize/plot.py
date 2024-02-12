@@ -23,10 +23,10 @@ class PlotBase:
         "bottom_depth": colormaps.BottomDepthColormap(),
         "deposition_age": colormaps.DepositionageColormap(),
     }
-    axlabelsize = 10
-    axtitlesize = 12
-    ticksize = 9
-    titlesize = 14
+    axlabelsize = 14
+    axtitlesize = 16
+    ticksize = 12
+    titlesize = 18
 
     def __init__(self, modelresult):
         self.model = modelresult
@@ -61,7 +61,7 @@ class PlotBase:
             self.fig.dpi = 72
             self.ax = ax
             divider1 = make_axes_locatable(ax)
-            cax = divider1.append_axes("bottom", size="5%", pad="8%")
+            cax = divider1.append_axes("bottom", size="5%", pad="12%")
             self.cax = cax
             dpi = self.fig.get_dpi()
             self.fig.set_size_inches(800.0 / float(dpi), 600.0 / float(dpi))
@@ -74,8 +74,8 @@ class PlotBase:
             ax2 = self.fig.add_subplot(gs[0, 1], sharex=ax1, sharey=ax1)
             divider1 = make_axes_locatable(ax1)
             divider2 = make_axes_locatable(ax2)
-            cax1 = divider1.append_axes("bottom", size="5%", pad="8%")
-            cax2 = divider2.append_axes("bottom", size="5%", pad="8%")
+            cax1 = divider1.append_axes("bottom", size="5%", pad="12%")
+            cax2 = divider2.append_axes("bottom", size="5%", pad="12%")
             self.ax = [ax1, ax2]
             self.cax = [cax1, cax2]
             dpi = self.fig.get_dpi()
@@ -88,8 +88,8 @@ class PlotBase:
             ax2 = self.fig.add_subplot(gs[0, 1:])
             divider1 = make_axes_locatable(ax1)
             divider2 = make_axes_locatable(ax2)
-            cax1 = divider1.append_axes("bottom", size="5%", pad="8%")
-            cax2 = divider2.append_axes("bottom", size="5%", pad="8%")
+            cax1 = divider1.append_axes("bottom", size="5%", pad="12%")
+            cax2 = divider2.append_axes("bottom", size="5%", pad="12%")
             self.ax = [ax1, ax2]
             self.cax = [cax1, cax2]
             dpi = self.fig.get_dpi()
@@ -104,9 +104,9 @@ class PlotBase:
             divider1 = make_axes_locatable(ax1)
             divider2 = make_axes_locatable(ax2)
             divider3 = make_axes_locatable(ax3)
-            cax1 = divider1.append_axes("bottom", size="5%", pad="8%")
-            cax2 = divider2.append_axes("bottom", size="5%", pad="8%")
-            cax3 = divider3.append_axes("bottom", size="5%", pad="8%")
+            cax1 = divider1.append_axes("bottom", size="5%", pad="12%")
+            cax2 = divider2.append_axes("bottom", size="5%", pad="12%")
+            cax3 = divider3.append_axes("bottom", size="5%", pad="12%")
             self.ax = [ax1, ax2, ax3]
             self.cax = [cax1, cax2, cax3]
             dpi = self.fig.get_dpi()
@@ -220,7 +220,7 @@ class PlotBase:
         )
         if colormap.type == "categorical":
             colorbar.set_ticks(colormap.ticks + 0.5)
-            colorbar.set_ticklabels(colormap.labels)
+            colorbar.set_ticklabels(colormap.labels, fontsize=self.ticksize)
 
     def draw_last_xsection(self, axis_idx, timestep, data, colormap):
         axis = self.ax[axis_idx]
@@ -279,7 +279,7 @@ class PlotBase:
         )
         if colormap.type == "categorical":
             colorbar.set_ticks(colormap.ticks + 0.5)
-            colorbar.set_ticklabels(colormap.labels)
+            colorbar.set_ticklabels(colormap.labels, fontsize=self.ticksize)
 
     def draw_map(self, axis_idx, timestep, data, colormap):
         axis = self.ax[axis_idx]
@@ -320,7 +320,7 @@ class PlotBase:
         )
         if colormap.type == "categorical":
             colorbar.set_ticks(colormap.ticks + 0.5)
-            colorbar.set_ticklabels(colormap.labels)
+            colorbar.set_ticklabels(colormap.labels, fontsize=self.ticksize)
 
     def draw_profile_line(self, axis_idx, start, finish):
         """
@@ -339,14 +339,14 @@ class PlotBase:
             axis.text(
                 start[1] - 10,
                 start[0],
-                "Right",
+                "Left",
                 color="red",
                 ha="right",
             )
-            axis.text(finish[1] + 10, finish[0], "Left", color="red")
+            axis.text(finish[1] + 10, finish[0], "Right", color="red")
         else:
-            axis.text(start[1] + 10, start[0], "Right", color="red")
-            axis.text(finish[1] - 10, finish[0], "Left", color="red", ha="right")
+            axis.text(start[1] + 10, start[0], "Left", color="red")
+            axis.text(finish[1] - 10, finish[0], "Right", color="red", ha="right")
 
     def draw_colorbar(self, axis):
         pass
@@ -377,7 +377,7 @@ class CrossSectionPlot(PlotBase):
         self.xlim = [self.anchor_x[0], self.anchor_x[-1]]
         self.ylim = [
             np.round(self.anchor_y.min() - 1),
-            2
+            2,
             # np.round(self.anchor_y.max() + 1),
         ]
 
