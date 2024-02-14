@@ -1,4 +1,4 @@
-*Itdate		Hs	Tp	Dir(°) 	ms	wl	windspeed	wind dir.(°)
+*Itdate		Hs	Tp	Dir 	ms	wl	windspeed	wind dir.
 RODA
 2  8
 0		${waveheightini}	${waveperiodini}	${wavedirection}	5	0	0	0
