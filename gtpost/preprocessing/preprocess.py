@@ -2,11 +2,11 @@ import logging
 import math
 import shutil
 from pathlib import Path
-from typing import Protocol
 
 import numpy as np
 from mako.lookup import TemplateLookup
 
+from gtpost.preprocessing.bathymetry_builder import BathymetryBuilder
 from gtpost.preprocessing.inidata import revise
 from gtpost.preprocessing.preprocessing_utils import (
     IniParser,
@@ -43,7 +43,7 @@ class PreProcess:
     tfactor = 1440
     distal_depth = 50
     depth_edit_range = 5
-    river_length = 100
+    river_length = 100  # TODO: read from ini file
     clayvolcomposition = 0
     sandvolcomposition = 0
 
@@ -106,9 +106,11 @@ class PreProcess:
             self.inidata["simstoptime"]["value"]
         )
         # Output interval
-        self.simulation_stop_t = self.tfactor * float(
+        self.output_interval = self.tfactor * float(
             self.inidata["outputinterval"]["value"]
         )
+        # River length (this is a fixed value in the input.ini)
+        self.river_length = int(self.inidata["riverlength"]["value"])
         # Basin slope
         self.basin_slope = float(self.inidata["basinslope"]["value"])
         # Initial river discharge
@@ -124,7 +126,7 @@ class PreProcess:
         self.wave_final_height = float(self.inidata["waveheightfin"]["value"])
         self.wave_final_period = 5 * math.sqrt(self.wave_final_height)
         # Wave direction
-        self.wave_direction = float(self.inidata["wavedirection"]["value"])
+        self.wave_direction = 90 + float(self.inidata["wavedirection"]["value"])
         # Subsidence in fluvial domain
         self.subsidence_land = float(self.inidata["subsidenceland"]["value"])
         # Subsidence in delta/marine domain
@@ -177,6 +179,8 @@ class PreProcess:
 
     def set_bathymetry(self) -> None:
         """Adjust a.dep file with initial bathymetry"""
+        builder = BathymetryBuilder(self.bathymetry, coast_angle=45)
+        bathy = builder.make_bathymetry()
         basin_bathymetry = self.bathymetry[:, self.river_length :]
         dz_per_cell = self.dx * np.tan(np.deg2rad(self.basin_slope))
         adjustment_array = np.cumsum(
@@ -184,6 +188,12 @@ class PreProcess:
         )
         adjustment_array[basin_bathymetry == self.nodata_value] = 0
         basin_bathymetry += adjustment_array
+        most_seaward_value = basin_bathymetry[1, -3 - self.wave_grid_factor]
+        seaward_boundary_dz = (50 - most_seaward_value) / self.wave_grid_factor
+        for i in range(self.wave_grid_factor):
+            basin_bathymetry[:-1, -1 - self.wave_grid_factor + i] = (
+                most_seaward_value + (i + 1) * seaward_boundary_dz
+            )
         self.bathymetry[:, self.river_length :] = basin_bathymetry
 
     def set_wave_bathymetry(self) -> None:
@@ -198,6 +208,8 @@ class PreProcess:
         adjustment_array = np.cumsum(np.full_like(wave_bathymetry, dz_per_cell), axis=1)
         adjustment_array[wave_bathymetry == self.nodata_value] = 0
         wave_bathymetry += adjustment_array
+        wave_bathymetry[:-1, -2] = 50
+        wave_bathymetry[:-1, -3] = (50 + wave_bathymetry[1, -3]) / 2
         self.wave_bathymetry[:, wave_grid_river_length:] = wave_bathymetry
 
     def set_subsidence_bathymetry(self) -> None:
@@ -235,6 +247,7 @@ class PreProcess:
             "config_d_hydro.xml",
             "a.mor",
             "wave.mdw",
+            "wavecon.wave",
         ]
 
         lookup = TemplateLookup(
@@ -249,16 +262,25 @@ class PreProcess:
                 f.write(result)
 
     def preprocess(self):
+        logger.info("Copying template files into new folder")
         self.load_template()
+        logger.info("Generating bathymetric grid")
         self.set_bathymetry()
+        logger.info("Writing bathymetric grid to a.dep file")
         write_dep_file(self.dep_file, self.bathymetry)
+        logger.info("Generating bathymetric grid for waves")
         self.set_wave_bathymetry()
+        logger.info("Writing wave bathymetric grid to wave.dep file")
         write_dep_file(self.wave_dep_file, self.wave_bathymetry)
+        logger.info("Generating subsidence grids")
         self.set_subsidence_bathymetry()
+        logger.info("Writing subsidence grids to SDU file")
         edit_sdu_file(
             self.sdu_file, self.initial_subsidence_array, self.final_subsidence_array
         )
+        logger.info("Inserting template values in D3D files")
         self.write_template_values()
+        logger.info("D3D input files were generated!")
 
 
 # class PreProcess2(TemplatePreProcess):
@@ -607,14 +629,11 @@ class PreProcess:
 
 
 if __name__ == "__main__":
-    pp = PreProcess(
-        r"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\Roda\input.ini",
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_output_roda",
-    )
-    pp.preprocess()
 
-    # main()
-    # main(
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_input",
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\test_output",
-    # )
+    for template in ["GuleHorn_Neslen", "River_dominated_delta", "Roda", "Sobrarbe"]:
+
+        pp = PreProcess(
+            rf"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\{template}\input.ini",
+            rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_test",
+        )
+        pp.preprocess()
