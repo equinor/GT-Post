@@ -12,7 +12,7 @@ class BathymetryBuilder:
         initial_grid: np.ndarray,
         nan_value: int | float = -999.0,
         basin_slope: float = 0.1,
-        fluvial_slope: float = 0.04,
+        fluvial_slope: float = 0.01,
         coast_angle: float = 0,
         fluvial_length: int = 100,
         fluvial_width: int = 20,
@@ -22,7 +22,7 @@ class BathymetryBuilder:
         channel_count: int = 1,
         channel_separation: bool = False,
     ):
-        self.grid = np.zeros_like(initial_grid)
+        self.grid = np.full_like(initial_grid, channel_depth)
         self.nx, self.ny = self.grid.shape
         self.nan_value = nan_value
         self.basin_slope = basin_slope
@@ -80,6 +80,7 @@ class BathymetryBuilder:
                 self.grid[-coastline_cells_i:, self.fluvial_length + 1 + i] = -5
 
     def add_channels_and_floodplains(self):
+        # TODO: perhaps make separation obstacles in different method...
         self.combined_fluvial_width
         channel_width = int(
             np.round(self.fluvial_width * self.channel_floodplain_ratio)
@@ -88,9 +89,45 @@ class BathymetryBuilder:
             np.round((self.fluvial_width - channel_width) / 2)
         )
         if self.channel_separation:
-            obstacle_width = 0
+            obstacle_width = int(np.ceil(0.4 * floodplain_single_side_width))
+            fluvial_single_row = np.hstack(
+                [
+                    np.full(obstacle_width, self.nan_value),
+                    np.full(
+                        floodplain_single_side_width - obstacle_width,
+                        self.floodplain_depth,
+                    ),
+                    np.full(channel_width, self.channel_depth),
+                    np.full(
+                        floodplain_single_side_width - obstacle_width,
+                        self.floodplain_depth,
+                    ),
+                    np.full(obstacle_width, self.nan_value),
+                ]
+            )
+            fluvial_row_data = np.hstack(
+                [fluvial_single_row for c in range(self.channel_count)]
+            )
         else:
-            obstacle_width = 0
+            fluvial_single_row = np.hstack(
+                [
+                    np.full(floodplain_single_side_width, self.floodplain_depth),
+                    np.full(channel_width, self.channel_depth),
+                    np.full(floodplain_single_side_width, self.floodplain_depth),
+                ]
+            )
+            fluvial_row_data = np.hstack(
+                [fluvial_single_row for c in range(self.channel_count)]
+            )
+
+        fluvial_start_idx = int(
+            np.round((self.nx / 2) - (self.combined_fluvial_width / 2))
+        )
+
+        for i in range(self.fluvial_length):
+            self.grid[
+                fluvial_start_idx : fluvial_start_idx + self.combined_fluvial_width, i
+            ] = fluvial_row_data
 
     def make_bathymetry(self) -> np.ndarray:
         self.computational_grid_mask()
