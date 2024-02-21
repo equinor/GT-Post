@@ -19,13 +19,15 @@ from gtpost.preprocessing.preprocessing_utils import (
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING)
 
-compositions = (
+composition_options = (
     "veryfine-sand",
     "medium-sand",
     "fine-sand",
     "coarse-silt",
     "coarse-sand",
 )
+
+channel_width_options = (500, 1000, 1500)
 
 
 class PreProcess:
@@ -110,6 +112,8 @@ class PreProcess:
         )
         # River length (this is a fixed value in the input.ini)
         self.river_length = int(self.inidata["riverlength"]["value"])
+        # channel width
+        self.channel_width = int(self.inidata["channelwidth"]["value"])
         # Basin slope
         self.basin_slope = float(self.inidata["basinslope"]["value"])
         # Initial river discharge
@@ -150,11 +154,7 @@ class PreProcess:
                 f"Cannot create a new folder in {self.fpath_output.parent}"
             )
 
-        # Remove files associated with other sediment compositions
-        compositions_to_remove = [x for x in compositions if self.composition != x]
-        for composition_to_remove in compositions_to_remove:
-            for file in self.fpath_output.glob(f"{composition_to_remove}*"):
-                file.unlink()
+        self.__remove_obsolete_files()
 
         # Define filenames and initialize additional template data
         self.mdf_file = self.fpath_output.joinpath(f"{self.composition}.mdf")
@@ -176,6 +176,23 @@ class PreProcess:
         )
         self.wave_grid_factor = int(np.round(self.nx_bathymetry / self.nx_wave))
 
+    def __remove_obsolete_files(self):
+        # Remove files associated with other sediment compositions
+        compositions_to_remove = [
+            x for x in composition_options if self.composition != x
+        ]
+        for composition_to_remove in compositions_to_remove:
+            for file in self.fpath_output.glob(f"{composition_to_remove}*"):
+                file.unlink()
+
+        # Remove files associated with other channel widths and rename to a- or wave.dep
+        channelwidths_to_remove = [
+            x for x in channel_width_options if self.channel_width != x
+        ]
+        for channelwidth_to_remove in channelwidths_to_remove:
+            for file in self.fpath_output.glob(f"*{str(channelwidth_to_remove)}*"):
+                file.unlink()
+
     def set_bathymetry(self) -> None:
         """Adjust a.dep file with initial bathymetry"""
         # builder = BathymetryBuilder(
@@ -188,12 +205,30 @@ class PreProcess:
         # )
         # bathy = builder.make_bathymetry()
         basin_bathymetry = self.bathymetry[:, self.river_length :]
-        dz_per_cell = self.dx * np.tan(np.deg2rad(self.basin_slope))
-        adjustment_array = np.cumsum(
-            np.full_like(basin_bathymetry, dz_per_cell), axis=1
+
+        # At the seaward boundary the depth is equal, but close to the shore depth
+        # isolines follow the coastline. So the further the coast extends seawards, the
+        # higher the basin slope has to become to reach equal seaward boundary depth.
+        bathymetry_cell_counts = np.count_nonzero(basin_bathymetry > 0, axis=1)
+        bathymetry_slope_factor = (
+            np.max(bathymetry_cell_counts) / bathymetry_cell_counts
         )
+        dz_per_cell = (
+            self.dx * np.tan(np.deg2rad(self.basin_slope)) * bathymetry_slope_factor
+        )
+
+        # Create the adjustment array and apply to the initial (zero-slope) bathymetry
+        adjustment_array = np.zeros_like(basin_bathymetry)
+        for i in range(self.ny_bathymetry):
+            cell_count = bathymetry_cell_counts[i]
+            adjustment_array[i, adjustment_array.shape[1] - cell_count :] = np.cumsum(
+                np.full(cell_count, dz_per_cell[i])
+            )
+
         adjustment_array[basin_bathymetry == self.nodata_value] = 0
         basin_bathymetry += adjustment_array
+
+        # Adjust seaward boundary such that it has a gentle slope towards 50 m depth
         most_seaward_value = basin_bathymetry[1, -3 - self.wave_grid_factor]
         seaward_boundary_dz = (50 - most_seaward_value) / self.wave_grid_factor
         for i in range(self.wave_grid_factor):
@@ -208,12 +243,31 @@ class PreProcess:
             np.round(self.river_length / self.wave_grid_factor)
         )
         wave_bathymetry = self.wave_bathymetry[:, wave_grid_river_length:]
-        dz_per_cell = (self.dx * self.wave_grid_factor) * np.tan(
-            np.deg2rad(self.basin_slope)
+
+        # At the seaward boundary the depth is equal, but close to the shore depth
+        # isolines follow the coastline. So the further the coast extends seawards, the
+        # higher the basin slope has to become to reach equal seaward boundary depth.
+        wavebath_cell_counts = np.count_nonzero(wave_bathymetry > 0, axis=1)
+        wavebath_slope_factor = np.max(wavebath_cell_counts) / wavebath_cell_counts
+        dz_per_cell = (
+            self.dx
+            * self.wave_grid_factor
+            * np.tan(np.deg2rad(self.basin_slope))
+            * wavebath_slope_factor
         )
-        adjustment_array = np.cumsum(np.full_like(wave_bathymetry, dz_per_cell), axis=1)
+
+        # Create the adjustment array and apply to the initial (zero-slope) bathymetry
+        adjustment_array = np.zeros_like(wave_bathymetry)
+        for i in range(self.ny_wave):
+            cell_count = wavebath_cell_counts[i]
+            adjustment_array[i, adjustment_array.shape[1] - cell_count :] = np.cumsum(
+                np.full(cell_count, dz_per_cell[i])
+            )
+
         adjustment_array[wave_bathymetry == self.nodata_value] = 0
         wave_bathymetry += adjustment_array
+
+        # Adjust seaward boundary such that it has a gentle slope towards 50 m depth
         wave_bathymetry[:-1, -2] = 50
         wave_bathymetry[:-1, -3] = (50 + wave_bathymetry[1, -3]) / 2
         self.wave_bathymetry[:, wave_grid_river_length:] = wave_bathymetry
@@ -294,12 +348,18 @@ class PreProcess:
         logger.info("D3D input files were generated!")
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     for template in ["GuleHorn_Neslen", "River_dominated_delta", "Roda", "Sobrarbe"]:
+    for template in [
+        "Roda",
+        # "GuleHorn_Neslen",
+        # "River_dominated_delta",
+        # "Roda",
+        # "Sobrarbe",
+    ]:
 
-#         pp = PreProcess(
-#             rf"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\{template}\input.ini",
-#             rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_test",
-#         )
-#         pp.preprocess()
+        pp = PreProcess(
+            rf"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\{template}\input.ini",
+            rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_test_newbathymetry",
+        )
+        pp.preprocess()
