@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from gtpost.preprocessing import preprocess
+from gtpost.preprocessing import preprocessing
 
 
 class TestPreprocess:
@@ -61,7 +61,7 @@ class TestPreprocess:
         fpath_output = self.temp_output_folder.joinpath(template)
 
         # Create preprocessing object
-        preprocessor = preprocess.PreProcess(ini_file, fpath_output)
+        preprocessor = preprocessing.PreProcess(ini_file, fpath_output)
         assert preprocessor.template_name == template
         mandatory_files = self.mandatory_files + (
             f"{preprocessor.composition}.bcc",

@@ -43,7 +43,7 @@ class PreProcess:
     tfactor = 1440
     distal_depth = 50
     depth_edit_range = 5
-    river_length = 100  # TODO: read from ini file
+    river_length = 100
     clayvolcomposition = 0
     sandvolcomposition = 0
 
@@ -347,6 +347,7 @@ class PreProcess:
                 logger.info(file)
 
     def preprocess(self):
+        """Carry out all preprocessing steps in order based on the loaded input.ini"""
         logger.info("Copying template files into new folder")
         self.load_template()
         logger.info("Generating bathymetric grid")
@@ -365,20 +366,4 @@ class PreProcess:
         )
         logger.info("Inserting template values in D3D files...")
         self.write_template_values()
-        logger.info("D3D input files were generated!")
-
-
-if __name__ == "__main__":
-
-    for template in [
-        "River_dominated_delta",
-        "GuleHorn_Neslen",
-        "Roda",
-        "Sobrarbe",
-    ]:
-
-        pp = PreProcess(
-            rf"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\{template}\input.ini",
-            rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_test_newbathymetry",
-        )
-        pp.preprocess()
+        logger.info("D3D input files were generated!\n----------------------------\n\n")

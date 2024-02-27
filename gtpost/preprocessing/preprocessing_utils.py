@@ -19,17 +19,17 @@ def read_dep_file(dep_file: str | Path, nx: int, ny: int) -> np.ndarray:
 
     Parameters
     ----------
-    dep_file : _type_
-        _description_
-    nx : _type_
-        _description_
-    ny : _type_
-        _description_
+    dep_file : str
+        Path of the Delft3D .dep file to read
+    nx : int
+        Number of cells along the x-axis
+    ny : int
+        Number of cell along the y-axis
 
     Returns
     -------
-    _type_
-        _description_
+    np.ndarray
+        The Delft3D .dep file data as a Numpy array.
     """
     with open(dep_file, "r") as f:
         dep_values = f.read()
@@ -43,10 +43,10 @@ def write_dep_file(file: str | Path, array: np.ndarray) -> None:
 
     Parameters
     ----------
-    file : _type_
-        _description_
-    array : _type_
-        _description_
+    file : str | Path
+        Path to write the Delft3D .dep file to
+    array : np.ndarray
+        Numpy array to write as Delft3D .dep file
     """
     np.savetxt(file, array, fmt="%.7e", delimiter="  ")
 
@@ -56,6 +56,17 @@ def edit_sdu_file(
     initial_subsidence_array: np.ndarray,
     final_subsidence_array: np.ndarray,
 ):
+    """Function to edit a Delft3D subsidence (.sdu) file
+
+    Parameters
+    ----------
+    file : str | Path
+        Path to the Delft3D .sdu file to write to
+    initial_subsidence_array : np.ndarray
+        Initial subsidence array
+    final_subsidence_array : np.ndarray
+        Final subsidence array (amount of subsidence per cell at the last timestep)
+    """
     with open(file, "r") as sdu_file:
         header_line = ""
         for i in range(20):
@@ -85,17 +96,17 @@ def edit_sdu_file(
 
 
 def get_shape_from_grd_file(grd_file: str | Path) -> tuple:
-    """_summary_
+    """Get grid shape information from Delft3D .grd files
 
     Parameters
     ----------
-    grd_file : _type_
-        _description_
+    grd_file : str | Path
+        Path to Delft3D .grd file to extract grid shape information from
 
     Returns
     -------
-    _type_
-        _description_
+    tuple
+        Tuple with (nx, ny) grid shape.
     """
     with open(grd_file, "r") as f:
         lines = f.readlines()
