@@ -114,6 +114,11 @@ class PreProcess:
         self.river_length = int(self.inidata["riverlength"]["value"])
         # channel width
         self.channel_width = int(self.inidata["channelwidth"]["value"])
+        if self.channel_width not in channel_width_options:
+            logger.warning(
+                f"Channel width of {self.channel_width} m is not an option, using 500 m"
+            )
+            self.channel_width = 500
         # Basin slope
         self.basin_slope = float(self.inidata["basinslope"]["value"])
         # Initial river discharge
@@ -186,12 +191,26 @@ class PreProcess:
                 file.unlink()
 
         # Remove files associated with other channel widths and rename to a- or wave.dep
+        # This is a temporary workaround to give the user a choice of channel width
+        # until we use the bathymetry builder for full flexibility.
         channelwidths_to_remove = [
             x for x in channel_width_options if self.channel_width != x
         ]
-        for channelwidth_to_remove in channelwidths_to_remove:
-            for file in self.fpath_output.glob(f"*{str(channelwidth_to_remove)}*"):
-                file.unlink()
+        if self.template_name not in ("Roda", "Sobrarbe"):
+            for channelwidth_to_remove in channelwidths_to_remove:
+                for file in self.fpath_output.glob("*.dep"):
+                    width_in_filename = file.name.split("_")[-1].split(".")[0]
+                    if str(channelwidth_to_remove) + "m" == width_in_filename:
+                        file.unlink()
+
+            Path(self.fpath_output / "a.dep").unlink(missing_ok=True)
+            Path(self.fpath_output / f"a_00deg_slope_{self.channel_width}m.dep").rename(
+                self.fpath_output / "a.dep"
+            )
+            Path(self.fpath_output / "wave.dep").unlink(missing_ok=True)
+            Path(
+                self.fpath_output / f"wave_00deg_slope_{self.channel_width}m.dep"
+            ).rename(self.fpath_output / "wave.dep")
 
     def set_bathymetry(self) -> None:
         """Adjust a.dep file with initial bathymetry"""
@@ -325,6 +344,7 @@ class PreProcess:
             # result = result.replace("\r\n", "\r")
             with open(completename, "wb") as f:
                 f.write(result)
+                logger.info(file)
 
     def preprocess(self):
         logger.info("Copying template files into new folder")
@@ -343,7 +363,7 @@ class PreProcess:
         edit_sdu_file(
             self.sdu_file, self.initial_subsidence_array, self.final_subsidence_array
         )
-        logger.info("Inserting template values in D3D files")
+        logger.info("Inserting template values in D3D files...")
         self.write_template_values()
         logger.info("D3D input files were generated!")
 
@@ -351,11 +371,10 @@ class PreProcess:
 if __name__ == "__main__":
 
     for template in [
+        "River_dominated_delta",
+        "GuleHorn_Neslen",
         "Roda",
-        # "GuleHorn_Neslen",
-        # "River_dominated_delta",
-        # "Roda",
-        # "Sobrarbe",
+        "Sobrarbe",
     ]:
 
         pp = PreProcess(

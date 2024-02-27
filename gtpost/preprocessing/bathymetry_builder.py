@@ -5,6 +5,11 @@ class BathymetryValidationError(Exception):
     pass
 
 
+"""
+BATHYMETRY BUILDER IS WORK IN PROGRESS AND NOT TO BE USED YET
+"""
+
+
 class BathymetryBuilder:
 
     def __init__(
