@@ -1,13 +1,78 @@
 from pathlib import Path
-from typing import Union
+from typing import NamedTuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
+from matplotlib import cm
+from matplotlib.colors import (
+    BoundaryNorm,
+    LinearSegmentedColormap,
+    ListedColormap,
+    Normalize,
+)
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from gtpost.visualize import colormaps
+
+def categorical_cmap(alphas, colors, name):
+    cmap = ListedColormap(
+        colors=colors,
+        name=name,
+    )
+    cmap = cmap(np.arange(cmap.N))
+    cmap[:, -1] = alphas
+
+    cmap = ListedColormap(cmap)
+    bounds = np.arange(cmap.N + 1)
+    vals = bounds[:-1]
+    norm = BoundaryNorm(bounds, cmap.N)
+    mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
+    return cmap, mappable, bounds, vals, norm
+
+
+def continuous_cmap(colorlist, name, vmin, vmax):
+    norm = Normalize(vmin=vmin, vmax=vmax)
+    cmap = LinearSegmentedColormap.from_list(name, colorlist)
+    mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
+    return cmap, mappable, norm
+
+
+class ArchelColormap(NamedTuple):
+    alphas = [1, 1, 1, 1, 1, 1, 1]
+    colors = [
+        "snow",
+        "yellowgreen",
+        "mediumseagreen",
+        "deepskyblue",
+        "yellow",
+        "turquoise",
+        "mediumblue",
+    ]
+    labels = ["N/A", "DT-subar", "DT-subaq", "AC", "MB", "DF", "PD"]
+    ticks = np.arange(0, 7)
+    name = "Architectural elements"
+    type = "categorical"
+    cmap, mappable, bounds, values, norm = categorical_cmap(alphas, colors, name)
+
+
+class BottomDepthColormap(NamedTuple):
+    c0 = (0, "#182514")
+    c1 = (0.143, "#0C672C")
+    c2 = (0.286, "#829E06")
+    c3 = (0.429, "#E5D37F")
+    c4 = (0.5, "#FDFAE6")
+    c5 = (0.571, "#C4DAD0")
+    c6 = (0.714, "#45A2AE")
+    c7 = (0.857, "#1B5A9E")
+    c8 = (1, "#172313")
+    name = "Bottom depth"
+    type = "mappable"
+    vmin = -6
+    vmax = 8
+    cmap, mappable, norm = continuous_cmap(
+        [c0, c1, c2, c3, c4, c5, c6, c7, c8], name, vmin, vmax
+    )
 
 
 class SedimentaryLog:
@@ -17,17 +82,20 @@ class SedimentaryLog:
     def plot_log_summary_four_locations(self, data_var, xc, yc, bnd):
         fig, ax1, ax2, ax3, ax4, ax5, ax6, cax = self.four_log_figure_base()
 
-        ax1.imshow(self.data["zcor"].values[-1, :, :], vmin=-6, vmax=1)
-        ax2.imshow(
-            self.data["archel"].values[-1, :, :], cmap=colormaps.ArchelColormap.cmap
+        ax1.imshow(
+            self.data["zcor"].values[-1, :, :],
+            vmin=-15,
+            vmax=8,
+            cmap=BottomDepthColormap.cmap.reversed(),
         )
+        ax2.imshow(self.data["archel"].values[-1, :, :], cmap=ArchelColormap.cmap)
 
         colorbar = fig.colorbar(
-            colormaps.ArchelColormap.mappable, cax=cax, orientation="horizontal"
+            ArchelColormap.mappable, cax=cax, orientation="horizontal"
         )
-        if colormaps.ArchelColormap.type == "categorical":
-            colorbar.set_ticks(colormaps.ArchelColormap.ticks + 0.5)
-            colorbar.set_ticklabels(colormaps.ArchelColormap.labels, size=8)
+        if ArchelColormap.type == "categorical":
+            colorbar.set_ticks(ArchelColormap.ticks + 0.5)
+            colorbar.set_ticklabels(ArchelColormap.labels, size=8)
 
         for i, (ax, x, y) in enumerate(zip([ax3, ax4, ax5, ax6], xc, yc)):
             ax1.scatter(x, y, color="red")
@@ -49,7 +117,7 @@ class SedimentaryLog:
                     xbnd,
                     y1,
                     y2,
-                    color=colormaps.ArchelColormap.colors[int(logdata_ae[j])],
+                    color=ArchelColormap.colors[int(logdata_ae[j])],
                 )
 
             ax1.text(x + 2, y, f"{i+1}", color="black")
@@ -127,8 +195,8 @@ class SedimentaryLog:
         fig, ax = plt.subplots()
         ax.pie(
             volume_percentage,
-            labels=colormaps.ArchelColormap.labels[1:],
-            colors=colormaps.ArchelColormap.colors[1:],
+            labels=ArchelColormap.labels[1:],
+            colors=ArchelColormap.colors[1:],
             autopct="%1.1f%%",
         )
         ax.set_title(
@@ -150,7 +218,7 @@ class SedimentaryLog:
             y_pos,
             volume_percentage,
             align="center",
-            color=colormaps.ArchelColormap.colors[1:],
+            color=ArchelColormap.colors[1:],
         )
         axs[0, 0].set_yticks(y_pos, labels=aelabels)
         axs[0, 0].invert_yaxis()
@@ -166,10 +234,8 @@ class SedimentaryLog:
                 weights=d50_distribution_weights[i],
             )
             if i != 0:
-                ax.bar(binlabels, counts, color=colormaps.ArchelColormap.colors[i])
-                ax.set_title(
-                    colormaps.ArchelColormap.labels[i], y=1, pad=-14, loc="right"
-                )
+                ax.bar(binlabels, counts, color=ArchelColormap.colors[i])
+                ax.set_title(ArchelColormap.labels[i], y=1, pad=-14, loc="right")
             else:
                 ax.bar(binlabels, counts)
                 ax.set_title("All AEs", y=1, pad=-14, loc="right")
@@ -220,26 +286,12 @@ class SedimentaryLog:
 
 if __name__ == "__main__":
     log = SedimentaryLog(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrabre_048\Sobrabre_048 - coarse-sand_sed_and_obj_data.nc"
+        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sobrarbe_048_Reference\Sobrarbe_048_Reference - coarse-sand_sed_and_obj_data.nc"
     )
-    # log = SedimentaryLog(
-    #     r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_049\Sed_and_Obj_data.nc"
-    # )
+    print(log.data.data_vars)
+
     log.plot_d50_histograms(20, 100)
     log.plot_log_summary_four_locations(
         "diameter", [120, 120, 120, 120], [10, 30, 50, 70], [0, 1.4]
     )
-    # log.plot_log_summary_four_locations(
-    #     "diameter", [120, 155, 120, 155], [160, 160, 150, 170], [0, 1.4]
-    # )
     plt.show()
-
-    log.plot_volume_piechart(20, 100)
-    # log.plot_volume_piechart(100, 220)
-
-    ds = xr.open_dataset(
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Sed_And_Obj_Data.nc"
-    )
-
-    for data_var in ds.data_vars.variables:
-        print(type(ds[data_var].attrs["long_name"]))
