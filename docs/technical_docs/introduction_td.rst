@@ -96,9 +96,11 @@ The following parameters are used to calculate sediment properties:
 
    Sediment classes are defined by the 'composition' parameter in the input.ini
 
+2.1.1 - D50 input data
+----------------------
 D50 per input sediment type is directly taken from the sed-file if the sediment class 
-type is sand. In the case of mud, the settling velocity is used to derive a D50-value,
-using:
+type is sand. In the case of mud, Stokes' law for settling velocity is used to derive 
+a D50-value:
 
 .. math:: 
    D_{50} = \sqrt{18 * \mu * \eta / g / (\rho_p - \rho_f)}
@@ -107,6 +109,8 @@ where :math:`{\mu}` is the settling velocity, :math:`{\eta}` is dynamic viscosit
 :math:`{\rho_p}` is the specific density of the material, :math:`{\rho_f}` is the 
 density of water and :math:`{g}` is the acceleration due to gravity.
 
+2.1.2 - D-values from a CDF
+---------------------------
 At a given time and location, positive mass fluxes per sediment class directly determine 
 the composition of sediment preserved during the given output timestep. Combined with 
 the dry bed density of each sediment class, the mass distribution of deposited sediment 
@@ -119,7 +123,7 @@ model has the following proportions of six sediment classes, with associated med
 grain size for that class, at a single location in the model output:
 
 .. csv-table:: 
-   :header: Sediment class,Grain size :math:`{\theta}` (:math:`{\mu}`m),Example volume fractions
+   :header: Sediment class,Grain size :math:`{\phi}` (:math:`{\mu}`m),Example volume fractions
    :delim: |
    :file: example_vfractions.csv
 
@@ -149,10 +153,69 @@ this interpolated CDF.
   Note that due to use of the phi scale the coarsest grain sizes occur on the left and 
   the finest on the right of the graph.
 
+2.1.3 - Porosity
+----------------
+Porosity of the unconsolidated sediments was calculated using the empirical fit by 
+Takebayashi & Fijita (2014). Their equation is based on the grain size standard 
+deviation of a sediment sample, the logic behind this being that a high standard 
+deviation means more grains of different sizes that effectively fill each other’s pore 
+spaces, reducing porosity. The empirical equation is given by:
+
+.. math:: 
+   \varphi = C_1 * \frac{C_2\sigma^{C_3}}{1 + C_2\sigma^{C_3'}}
+
+with constants :math:`{C_1}` = 0.38; :math:`{C_2}` = 3.7632; and :math:`{C_3}` = -0.7552. 
+In our case :math:`{\sigma}` is the standard deviation of a synthetic sediment sample. 
+This is a possible collection of grains that is derived from the CDF, that, unlike the 
+CDF, allows for the computation of n-th order moments of the distribution. This is 
+essentially a fitted sediment sample, which retains the simplicity and limitations of 
+the input data consisting of six discrete grain size classes. E.g. a sample could then 
+be defined as 20 x grainsize 1, 40 x grainsize 2, 1 x grainsize 3 etc, derived from the 
+fractions of each sediment class in a cell.
+
+2.1.4 - Permeability
+--------------------
+Permeability was calculated using the empirical relation by Panda & Lake (1994) given by:
+
+.. math:: 
+   k = \frac{D_p^2\varphi^3}{72\tau(1-\varphi)^2} \left [\frac{(\gamma C_{D_p}^3 + 3C_{D_p}^2 + 1)^2}{(1 + C_{D_p}^2)^2}  \right ]
+
+where :math:`{k}` = permeability in m2, :math:`{D_p}` = the weighted mean grain size in 
+m, :math:`{\varphi}` = porosity, :math:`{\tau}` = tortuosity, :math:`{C_{D_p}}` = Coefficient 
+of variation, and :math:`{\gamma}` = skewness of sediment distribution. 
+
+Here permeability is assumed to be a direct function of porosity and, in addition, 
+indirectly also related to porosity through tortuosity. Tortuosity is the ratio between 
+the length of a flow path between two points (say A and B) and the shortest distance 
+between these points. If the porosity is high, the flow path from point A to B is more 
+likely to be direct, with less twisting and bending to pass between grains. The 
+tortuosity consequently approaches 1 for a straight flow path. With less winding and 
+obstructed flow pathways between grains, permeability becomes higher and is therefore 
+inversely related to tortuosity. In other words: a lower tortuosity (closer to 1) leads 
+to higher permeability. Tortuosity was computed using the analytical model of Ahmadi et 
+al. (2011), which is given as a function of porosity by:
+
+.. math:: 
+   \tau = \sqrt{\frac{2\varphi}{3[1-1.209(1-\varphi)^{2/3}]} + \frac{1}{3}}
+
+Permeability in equation 2 furthermore depends on the skewness (bias) of the 
+distribution. E.g., a positive skewness, which means that there is a bias towards 
+smaller grains, leads to a lower permeability. Finally, a higher coefficient of 
+variation also leads to a lower permeability, following the logic that a heterogenous 
+sample of grains fills pore spaces more effectively compared to a homogenous one.
+
+No assumptions are made regarding post-depositional diagenesis of the deposits, as this 
+is not data that can be obtained from the Delft3D simulation output. Permeability values 
+are thus much larger that is observed in field measurements of subsurface deposits.
+
 
 2.2 - Preservation and deposition age
 *************************************
-Blabla
+.. figure:: ../images/steepest_df.png
+  :width: 400
+
+  In an example with a seaward-increasing subsidence rate, the steepest part of the
+  delta front is located at greater depths as time progresses
 
 2.3 - Subenvironment classification
 ***********************************
@@ -164,6 +227,10 @@ Blabla
 
 2.5 - Architectural element classification
 ******************************************
+.. figure:: ../images/channel_endpoints.png
+  :width: 600
+
+  Example of detected endpoints in a channel network
 
 3 - Data export
 ###############

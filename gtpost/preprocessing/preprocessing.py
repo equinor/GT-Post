@@ -134,7 +134,7 @@ class PreProcess:
         self.wave_final_height = float(self.inidata["waveheightfin"]["value"])
         self.wave_final_period = np.round(5 * math.sqrt(self.wave_final_height), 2)
         # Wave direction
-        self.wave_direction = 90 + float(self.inidata["wavedirection"]["value"])
+        self.wave_direction = 90 - float(self.inidata["wavedirection"]["value"])
         # Subsidence in fluvial domain
         self.subsidence_land = -float(self.inidata["subsidenceland"]["value"])
         # Subsidence in delta/marine domain

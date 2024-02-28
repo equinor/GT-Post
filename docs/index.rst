@@ -15,7 +15,7 @@ Technical documentation
 -----------------------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
    technical_docs/introduction_td
 
@@ -24,7 +24,7 @@ User guide (local use)
 ----------------------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
    user_guide/introduction_ug
 
