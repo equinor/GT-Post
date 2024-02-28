@@ -136,9 +136,9 @@ class PreProcess:
         # Wave direction
         self.wave_direction = 90 + float(self.inidata["wavedirection"]["value"])
         # Subsidence in fluvial domain
-        self.subsidence_land = float(self.inidata["subsidenceland"]["value"])
+        self.subsidence_land = -float(self.inidata["subsidenceland"]["value"])
         # Subsidence in delta/marine domain
-        self.subsidence_sea = float(self.inidata["subsidencesea"]["value"])
+        self.subsidence_sea = -float(self.inidata["subsidencesea"]["value"])
         # Sediment composition type
         self.composition = str(self.inidata["composition"]["value"])
 
