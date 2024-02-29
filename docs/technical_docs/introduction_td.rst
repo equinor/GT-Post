@@ -131,7 +131,7 @@ These fractions are used to compute the CDF by linear interpolation within a phi
 range of [coarsest – 0.5] to [finest + 0.5]. Hence for the above example, the 
 distribution is calculated between -0.5 and 4.84, corresponding to grain sizes of 1414 
 to 36 μm. Since the grain sizes in the above table represent median grain size of the 
-sediment class, the interpolation points were are inbetween sediment classes. Thus, 
+sediment class, the interpolation points are inbetween sediment classes. Thus, 
 the following points are used for interpolation of the given example:
 
 .. csv-table:: 
@@ -198,7 +198,7 @@ al. (2011), which is given as a function of porosity by:
 .. math:: 
    \tau = \sqrt{\frac{2\varphi}{3[1-1.209(1-\varphi)^{2/3}]} + \frac{1}{3}}
 
-Permeability in equation 2 furthermore depends on the skewness (bias) of the 
+Permeability in furthermore depends on the skewness (bias) of the 
 distribution. E.g., a positive skewness, which means that there is a bias towards 
 smaller grains, leads to a lower permeability. Finally, a higher coefficient of 
 variation also leads to a lower permeability, following the logic that a heterogenous 
@@ -211,15 +211,46 @@ are thus much larger that is observed in field measurements of subsurface deposi
 
 2.2 - Preservation and deposition age
 *************************************
-.. figure:: ../images/steepest_df.png
-  :width: 400
+Blabla
 
-  In an example with a seaward-increasing subsidence rate, the steepest part of the
-  delta front is located at greater depths as time progresses
 
 2.3 - Subenvironment classification
 ***********************************
-Blabla
+The subenvironment is a broad division between delta top, delta front and prodelta
+environments. This division is based on finding the 'edge' of the delta and using this 
+edge along with an expected width of the delta front to divide the grid into
+subenvironments. The algorithm works as follows:
+
+1. Compute slope maps
+2. For every 5 timesteps: find the depth contour between 2.5 and 8 m that samples to the 
+   highest slope on average. This depth contour follows the steepest part of the delta
+   front foresets.
+3. Fit a second-order polynomial function through the depths found in step 2. See Figure
+   below.
+4. This function f(timestep) is used to determine the foreset depth for every timestep.
+5. The depth contour at depth f(timestep) is buffered on both sides by half the expected
+   width of the delta front.
+6. The area inbetween the buffer lines is delta front, seaward of the outer buffer line 
+   is prodelta and landward of the inner buffer line the subenvironment is delta top.
+
+.. note::
+
+   Because of the way the foreset location is determined, it is advised to run the
+   postprocessing only on models with at least 100 completed output timesteps.
+
+.. note::
+
+   Currently, the expected width of the delta front is given in the postprocessing
+   settings per template (see 2.6 below) and is a fixed value. In the future, this
+   expected width will be automatically determined like the foreset depth to ensure 
+   better subenvironment classification with non-default model settings.
+
+.. figure:: ../images/steepest_df.png
+  :width: 600
+
+  The steepest part of the delta front foresets lies progressively deeper as the delta
+  expands into deeper parts of the basin. This is an example with a seaward-increasing 
+  subsidence rate, enhancing this effect even further.
 
 2.4 - Channel classification
 ****************************
@@ -231,6 +262,14 @@ Blabla
   :width: 600
 
   Example of detected endpoints in a channel network
+
+2.6 - Postprocessing settings
+*****************************
+Blabla
+
+2.7 - Changes introduced for Roda/Sobrarbe
+******************************************
+Blabla
 
 3 - Data export
 ###############
