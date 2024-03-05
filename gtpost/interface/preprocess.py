@@ -29,13 +29,17 @@ def main(
 if __name__ == "__main__":
 
     for template in [
-        "River_dominated_delta",
-        "GuleHorn_Neslen",
-        "Roda",
-        "Sobrarbe",
+        "River_dominated_1",
+        "River_dominated_2",
+        "GuleHorn_Neslen_1",
+        "GuleHorn_Neslen_2",
+        "Roda_1",
+        "Roda_2",
+        "Sobrarbe_1",
+        "Sobrarbe_2",
     ]:
 
         main(
-            rf"c:\Users\onselen\OneDrive - Stichting Deltares\Development\D3D GeoTool\gtpost\gt_templates\{template}\input.ini",
-            rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_test_defaultvalues",
+            rf"p:\11209074-002-Geotool-new-deltas\04_input_for_templates\Input_ini_test\{template}\input.ini",
+            rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_initest",
         )

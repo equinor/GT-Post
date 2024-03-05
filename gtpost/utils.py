@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
+from numpy.polynomial.polynomial import Polynomial
 from rasterio.features import rasterize
 from shapely import buffer
 from shapely.geometry import LineString, Point, Polygon
@@ -194,13 +195,11 @@ def get_deltafront_contour_depth(
             slope_mean.append(np.nanmean(sampled_slopes))
         foreset_contours.append(contour_depths[np.nanargmax(slope_mean)])
 
-    foreset_fit = np.polyfit(
-        np.arange(first_timestep, timesteps, timestep_resolution), foreset_contours, 2
-    )
+    # Curve fitting
+    x = np.arange(first_timestep, timesteps, timestep_resolution)
+    a, b, c = quadratic_curve_fit(x, foreset_contours)
     t = np.arange(0, timesteps, 1)
-    interpolated_foreset_depth = (
-        foreset_fit[0] * t**2 + foreset_fit[1] * t + foreset_fit[2]
-    )
+    interpolated_foreset_depth = a * t**2 + b * t + c
     return interpolated_foreset_depth
 
 
@@ -359,3 +358,25 @@ def create_circular_mask(h, w, center=None, radius=None):
 
     mask = dist_from_center <= radius
     return mask
+
+
+def quadratic_curve_fit(x_data, y_data):
+    # Construct the matrix A for the quadratic equation ax^2 + bx + c = y
+    a = np.vstack([x_data**2, x_data, np.ones_like(x_data)]).T
+
+    # Compute A transpose
+    a_T = a.T
+
+    # Compute A transpose times A
+    a_TA = np.dot(a_T, a)
+
+    # Compute the inverse of A transpose times A
+    a_TA_inv = np.linalg.inv(a_TA)
+
+    # Compute A transpose times y_data
+    a_T_y = np.dot(a_T, y_data)
+
+    # Compute the coefficients by multiplying the inverse of A transpose times A with A transpose times y_data
+    coeffs = np.dot(a_TA_inv, a_T_y)
+
+    return coeffs[0], coeffs[1], coeffs[2]

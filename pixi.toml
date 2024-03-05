@@ -1,0 +1,33 @@
+[project]
+name = "gtpost"
+version = "0.1.0"
+description = "Delft3D GeoTool code"
+authors = ["Erik van Onselen <erik.vanonselen@deltares.nl>"]
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[tasks]
+install = "python -m pip install --no-deps --editable ." 
+test = { depends_on = ["install"], cmd = "python -m pytest --verbose --cov=gtpost --cov-config=.coveragerc"}
+docs = { depends_on = ["install"], cmd = "sphinx-build -b html docs ./docs/build"}
+
+[dependencies]
+python = "3.11.*"
+numpy = ">=1.26.4,<1.27"
+numba = "*"
+pandas = ">=2.0.1"
+rasterio = "*"
+xarray = "*"
+matplotlib = "*"
+scikit-image = "*"
+shapely = ">=2.0.1"
+h5netcdf = "*"
+mako = "*"
+pyvista = "*"
+black = "*"
+pytest = "*"
+pytest-cov = "*"
+ruff = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+pip = ">=24.0,<25"

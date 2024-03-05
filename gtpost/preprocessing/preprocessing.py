@@ -103,8 +103,8 @@ class PreProcess:
         # Template name
         self.template_name = str(self.inidata["template"]["value"])
         # Model simulation stop time [min]
-        self.simulation_stop_t = self.tfactor * float(
-            self.inidata["simstoptime"]["value"]
+        self.simulation_stop_t = self.tfactor * (
+            float(self.inidata["simstoptime"]["value"]) + 0.5
         )
         # Output interval
         self.output_interval = self.tfactor * float(
@@ -152,6 +152,7 @@ class PreProcess:
              exist
 
         """
+        # Copy all template base files to output folder
         if self.fpath_output.parent.is_dir():
             shutil.copytree(self.fpath_template, self.fpath_output, dirs_exist_ok=True)
         else:
@@ -159,7 +160,13 @@ class PreProcess:
                 f"Cannot create a new folder in {self.fpath_output.parent}"
             )
 
+        # Remove files that are not needed, like files for other sediment compositions.
         self.__remove_obsolete_files()
+
+        # Delete basic input.ini file, copy currently used ini file to output folder
+        # and make sure it is named "input.ini":
+        self.fpath_output.joinpath("input.ini").unlink(missing_ok=True)
+        shutil.copyfile(self.inifile, self.fpath_output.joinpath("input.ini"))
 
         # Define filenames and initialize additional template data
         self.mdf_file = self.fpath_output.joinpath(f"{self.composition}.mdf")
