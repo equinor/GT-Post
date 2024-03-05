@@ -6,8 +6,6 @@ from pathlib import Path
 import numpy as np
 from mako.lookup import TemplateLookup
 
-from gtpost.preprocessing.bathymetry_builder import BathymetryBuilder
-from gtpost.preprocessing.inidata import revise
 from gtpost.preprocessing.preprocessing_utils import (
     IniParser,
     edit_sdu_file,

@@ -4,7 +4,6 @@ from pathlib import Path
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
-import xarray as xr
 from matplotlib.collections import PatchCollection
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -286,7 +285,7 @@ class PlotBase:
         caxis = self.cax[axis_idx]
 
         if colormap.type == "mappable":
-            im = axis.imshow(
+            axis.imshow(
                 data[timestep, :, :],
                 cmap=colormap.cmap,
                 interpolation="antialiased",
@@ -295,7 +294,7 @@ class PlotBase:
                 vmax=colormap.vmax,
             )
         elif colormap.type == "categorical":
-            im = axis.imshow(
+            axis.imshow(
                 data[timestep, :, :],
                 cmap=colormap.cmap,
                 interpolation="antialiased",

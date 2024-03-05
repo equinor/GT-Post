@@ -113,9 +113,4 @@ def main(
 
 
 if __name__ == "__main__":
-    # main()
-
-    main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_045",
-        r"n:\Projects\11209000\11209074\B. Measurements and calculations\test_results\Roda_045_Reference",
-    )
+    main()

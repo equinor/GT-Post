@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
-from numpy.polynomial.polynomial import Polynomial
 from rasterio.features import rasterize
 from shapely import buffer
 from shapely.geometry import LineString, Point, Polygon
@@ -365,18 +364,18 @@ def quadratic_curve_fit(x_data, y_data):
     a = np.vstack([x_data**2, x_data, np.ones_like(x_data)]).T
 
     # Compute A transpose
-    a_T = a.T
+    a_t = a.T
 
     # Compute A transpose times A
-    a_TA = np.dot(a_T, a)
+    a_ta = np.dot(a_t, a)
 
     # Compute the inverse of A transpose times A
-    a_TA_inv = np.linalg.inv(a_TA)
+    a_ta_inv = np.linalg.inv(a_ta)
 
     # Compute A transpose times y_data
-    a_T_y = np.dot(a_T, y_data)
+    a_t_y = np.dot(a_t, y_data)
 
     # Compute the coefficients by multiplying the inverse of A transpose times A with A transpose times y_data
-    coeffs = np.dot(a_TA_inv, a_T_y)
+    coeffs = np.dot(a_ta_inv, a_t_y)
 
     return coeffs[0], coeffs[1], coeffs[2]

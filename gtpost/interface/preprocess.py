@@ -27,19 +27,20 @@ def main(
 
 
 if __name__ == "__main__":
+    main()
 
-    for template in [
-        "River_dominated_1",
-        "River_dominated_2",
-        "GuleHorn_Neslen_1",
-        "GuleHorn_Neslen_2",
-        "Roda_1",
-        "Roda_2",
-        "Sobrarbe_1",
-        "Sobrarbe_2",
-    ]:
+    # for template in [
+    #     "River_dominated_1",
+    #     "River_dominated_2",
+    #     "GuleHorn_Neslen_1",
+    #     "GuleHorn_Neslen_2",
+    #     "Roda_1",
+    #     "Roda_2",
+    #     "Sobrarbe_1",
+    #     "Sobrarbe_2",
+    # ]:
 
-        main(
-            rf"p:\11209074-002-Geotool-new-deltas\04_input_for_templates\Input_ini_test\{template}\input.ini",
-            rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_initest",
-        )
+    #     main(
+    #         rf"p:\11209074-002-Geotool-new-deltas\04_input_for_templates\Input_ini_test\{template}\input.ini",
+    #         rf"p:\11209074-002-Geotool-new-deltas\01_modelling\{template}_preprocessing_initest",
+    #     )

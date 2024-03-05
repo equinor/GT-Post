@@ -9,7 +9,9 @@ platforms = ["win-64"]
 [tasks]
 install = "python -m pip install --no-deps --editable ." 
 test = { depends_on = ["install"], cmd = "python -m pytest --verbose --cov=gtpost --cov-config=.coveragerc"}
-docs = { depends_on = ["install"], cmd = "sphinx-build -b html docs ./docs/build"}
+docs = "sphinx-build -b html docs ./docs/build"
+format = "black ."
+lint = "ruff check --fix ./gtpost"
 
 [dependencies]
 python = "3.11.*"

@@ -157,8 +157,8 @@ class SedimentaryLog:
                 logdepth.append(float(depth_t))
                 logdata += [float(data_t), float(data_t)]
             elif logdepth[-1] >= depth_t:
-                logdepth = [l for l in logdepth if l < depth_t]
-                logdata = [d for d, l in zip(logdata, logdepth) if l < depth_t]
+                logdepth = [d for d in logdepth if d < depth_t]
+                logdata = [d for d, i in zip(logdata, logdepth) if i < depth_t]
                 logdepth.append(float(depth_t))
                 logdata.append(logdata[-1])
         logdepth = np.array(logdepth)

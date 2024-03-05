@@ -80,11 +80,11 @@ line-length = 88
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
+
+
+[tool.ruff.lint]
 select = ["F", "E", "W", "N", "I001"]
-ignore = ["F401"]
+ignore = ["F401", "E501"]
 unfixable = ["F401"]
-
-
-[tool.ruff.pydocstyle]
-convention = "numpy"
+pydocstyle.convention = "numpy"
