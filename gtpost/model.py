@@ -8,7 +8,7 @@ import xarray as xr
 import gtpost.utils as utils
 from gtpost.analyze import layering, sediment, statistics, surface
 from gtpost.analyze.classifications import sorting_classifier
-from gtpost.io import ENCODINGS, export, read_d3d_input
+from gtpost.io import export, read_d3d_input
 
 default_settings_file = (
     Path(__file__).parents[1].joinpath("config/default_settings.ini")
@@ -372,4 +372,4 @@ class ModelResult:
 
     def export_sediment_and_object_data(self, out_file: str | Path):
         ds = export.create_sed_and_obj_dataset(self)
-        ds.to_netcdf(out_file, engine="h5netcdf", encoding=ENCODINGS)
+        ds.to_netcdf(out_file, engine="h5netcdf", encoding=export.ENCODINGS)
