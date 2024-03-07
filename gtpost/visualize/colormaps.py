@@ -86,9 +86,9 @@ class SandfractionColormap(NamedTuple):
 
 
 class BedlevelchangeColormap(NamedTuple):
-    c0 = (0.0, "darkgreen")  # dark green
+    c0 = (0.0, "darkred")  # dark green
     c1 = (0.5, "lightyellow")  # olivedrab
-    c2 = (1, "darkred")  # yellow
+    c2 = (1, "darkgreen")  # yellow
     name = "Bed level change"
     type = "mappable"
     vmin = -2

@@ -82,17 +82,17 @@ def main(
     stat_plotter.save_figures(fpath_output, "archel_summary")
 
     # Map plots
-    # logger.info(f"{get_current_time()}: Plotting archel maps")
-    # map_plotter = plot.MapPlot(modelresult)
-    # map_plotter.twopanel_map("bottom_depth", "architectural_elements")
-    # # map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
-    # map_plotter.save_figures(
-    #     fpath_output, "subenvironment"
-    # )  # to integrate with existing GUI
+    logger.info(f"{get_current_time()}: Plotting archel maps")
+    map_plotter = plot.MapPlot(modelresult)
+    map_plotter.twopanel_map("bottom_depth", "architectural_elements")
+    # map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
+    map_plotter.save_figures(
+        fpath_output, "subenvironment"
+    )  # to integrate with existing GUI
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
-    xsect_end = (modelresult.mouth_position[1] + 150, modelresult.mouth_position[0])
+    xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")

@@ -435,20 +435,27 @@ class MapPlot(PlotBase):
     def __init__(self, modelresult):
         super().__init__(modelresult)
 
-    def twopanel_map(self, variable_1, variable_2):
+    def twopanel_map(self, variable_1, variable_2, only_last_timestep=False):
         data_1 = self.model.__dict__[variable_1]
         data_2 = self.model.__dict__[variable_2]
         colormap_1 = self.colormaps[variable_1]
         colormap_2 = self.colormaps[variable_2]
 
         self.figures = []
-
-        for t in range(data_1.shape[0]):
+        if only_last_timestep:
             self.create_figure("double")
+            t = data_1.shape[0] - 1
             self.draw_map(0, t, data_1, colormap_1)
             self.draw_map(1, t, data_2, colormap_2)
             self.figures.append(self.fig)
             plt.close()
+        else:
+            for t in range(data_1.shape[0]):
+                self.create_figure("double")
+                self.draw_map(0, t, data_1, colormap_1)
+                self.draw_map(1, t, data_2, colormap_2)
+                self.figures.append(self.fig)
+                plt.close()
 
 
 class StatPlot(PlotBase):
