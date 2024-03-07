@@ -254,7 +254,45 @@ subenvironments. The algorithm works as follows:
 
 2.4 - Channel classification
 ****************************
-Blabla
+There are two methods available for classifying the channel network:
+
+* Static: *classifies channels based on static depth and flow velocity conditions*
+* Local: *classifies channels based on local differences in water depth and flow velocity*
+
+2.4.1 - Static method
+---------------------
+The static channel network classification method uses only the channel classification 
+sensitivity to determine depth and flow velocity cut-off values (see: :ref:`Postprocessing settings <postprocessing-settings>`).
+It uses two D3D model output variables:
+
+* :math:`{Flow_{max}}`: the maximum flow velocity recorded during an output timestep
+* :math:`{Depth}`: the average water depth during the output timestep
+
+The following threshold values are used:
+
+* :math:`{Flow_{max, required}}` = 3 * (1 - sensitivity)
+* :math:`{Flow_{max, minimal required}}` = 1.2 * (1 - sensitivity)
+* :math:`{Depth_{required}}` = 2.5 * (1 - sensitivity)
+
+The condition to classify a cell as a channel is:
+
+.. math:: 
+   [((Flow_{max} > Flow_{max, required}) OR (Depth > Depth_{required})] AND (Flow_{max} > Flow_{max, minimal required})
+   
+For example, if the detection sensitivity is set to 0.5, a cell with a :math:`{Flow_{max}}`
+of 0.7 m/s and a depth of 2 m would classify as a channel because...
+
+.. math:: 
+   [((0.6 > 1.5) OR (2 > 1.25)] AND (0.7 > 0.6)
+
+...is TRUE.
+
+2.4.1 - Local method
+--------------------
+The local method also uses cut-off values, but determines these values based on 
+differences in flow velocity and depth within a user-determined search radius
+(see: :ref:`Postprocessing settings <postprocessing-settings>`).
+
 
 2.5 - Architectural element classification
 ******************************************
