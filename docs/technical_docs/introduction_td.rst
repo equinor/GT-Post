@@ -103,7 +103,7 @@ type is sand. In the case of mud, Stokes' law for settling velocity is used to d
 a D50-value:
 
 .. math:: 
-   D_{50} = \sqrt{18 * \mu * \eta / g / (\rho_p - \rho_f)}
+   D_{50} = \sqrt{18 \cdot \mu \cdot \eta / g / (\rho_p - \rho_f)}
 
 where :math:`{\mu}` is the settling velocity, :math:`{\eta}` is dynamic viscosity, 
 :math:`{\rho_p}` is the specific density of the material, :math:`{\rho_f}` is the 
@@ -162,7 +162,7 @@ deviation means more grains of different sizes that effectively fill each otherâ
 spaces, reducing porosity. The empirical equation is given by:
 
 .. math:: 
-   \varphi = C_1 * \frac{C_2\sigma^{C_3}}{1 + C_2\sigma^{C_3'}}
+   \varphi = C_1 \cdot \frac{C_2\sigma^{C_3}}{1 + C_2\sigma^{C_3'}}
 
 with constants :math:`{C_1}` = 0.38; :math:`{C_2}` = 3.7632; and :math:`{C_3}` = -0.7552. 
 In our case :math:`{\sigma}` is the standard deviation of a synthetic sediment sample. 
@@ -259,39 +259,87 @@ There are two methods available for classifying the channel network:
 * Static: *classifies channels based on static depth and flow velocity conditions*
 * Local: *classifies channels based on local differences in water depth and flow velocity*
 
+By default, the static method is used in the River dominated and Gule Horn / Neslen
+templates, whereas the local method was specifically designed to work better for the 
+Roda and Sobrarbe templates.
+
 2.4.1 - Static method
 ---------------------
 The static channel network classification method uses only the channel classification 
-sensitivity to determine depth and flow velocity cut-off values (see: :ref:`Postprocessing settings <postprocessing-settings>`).
-It uses two D3D model output variables:
+sensitivity to determine depth and flow velocity threshold values (see: :ref:`Postprocessing settings <2.6 - Postprocessing settings>`).
+The method is based on evaluating two D3D model output variables:
 
-* :math:`{Flow_{max}}`: the maximum flow velocity recorded during an output timestep
-* :math:`{Depth}`: the average water depth during the output timestep
+* :math:`{U_{max}}`: the maximum flow velocity recorded during an output timestep
+* :math:`{D}`: the average water depth during the output timestep
 
-The following threshold values are used:
+The following threshold values are defined:
 
-* :math:`{Flow_{max, required}}` = 3 * (1 - sensitivity)
-* :math:`{Flow_{max, minimal required}}` = 1.2 * (1 - sensitivity)
-* :math:`{Depth_{required}}` = 2.5 * (1 - sensitivity)
+* :math:`{U_{max, req}}` = 3 * (1 - sensitivity)
+* :math:`{U_{max, minreq}}` = 1.2 * (1 - sensitivity)
+* :math:`{U_{req}}` = 2.5 * (1 - sensitivity)
 
-The condition to classify a cell as a channel is:
+The condition to classify a cell as a channel based on these threshold values is:
 
 .. math:: 
-   [((Flow_{max} > Flow_{max, required}) OR (Depth > Depth_{required})] AND (Flow_{max} > Flow_{max, minimal required})
+   [(U_{max} > U_{max,req}) OR (Depth > D_{req})] AND (U_{max} > U_{max,minreq})
    
-For example, if the detection sensitivity is set to 0.5, a cell with a :math:`{Flow_{max}}`
-of 0.7 m/s and a depth of 2 m would classify as a channel because...
+For example, if the detection sensitivity is set to 0.5, a cell with a :math:`{U_{max}}`
+of 0.7 m/s and a depth :math:`D` of 1.5 m would classify as a channel because...
 
 .. math:: 
-   [((0.6 > 1.5) OR (2 > 1.25)] AND (0.7 > 0.6)
+   [(0.6 > 1.5) OR (2 > 1.25)] AND (0.7 > 0.6)
 
-...is TRUE.
+...is TRUE. If the sensitivity was set to 0.3 for instance, the conditions would return 
+FALSE because :math:`{U_{max,minreq}}` would be 0.84, whereas :math:`{U_{max}}`
+in our example is 0.7.
 
-2.4.1 - Local method
+.. figure:: ../images/channels_static_anim.gif
+  :width: 600
+
+  Example of channel detection (sensitivity = 0.55) in a Gule Horn / Neslen model run. 
+
+2.4.2 - Local method
 --------------------
-The local method also uses cut-off values, but determines these values based on 
-differences in flow velocity and depth within a user-determined search radius
-(see: :ref:`Postprocessing settings <postprocessing-settings>`).
+The local method considers the difference between :math:`{U_{max}}` and :math:`D` and 
+the lowest values found for these parameters within a user-determined search radius.
+(see: :ref:`Postprocessing settings <2.6 - Postprocessing settings>`). 
+The condition that is checked to determine whether a cell is part of a channel or not is:
+
+.. math:: 
+   [D_{\delta_{local}} < (-1 + sensitivity)] AND [U_{max_{\delta_{local}}} < (-1 + sensitivity)]
+
+For example, suppose the depth is 5 m and the shallowest depth within search radius
+distance is 4 m. This means that :math:`D_{\delta_{local}}` = -1. :math:`{U_{max}}` = 0.7
+m/s wheras the lowest :math:`{U_{max}}` within search radius distance is 0.3 m/s. So 
+:math:`U_{max_{\delta_{local}}}` = -0.4. With a channel detection sensitivity of 0.65
+both conditions are fulfilled because...
+
+.. math:: 
+   [-1 < (-1 + 0.65)] AND [-0.4 < (-1 + 0.65)]
+
+...is TRUE and hence the cell is determined to be part of a channel. Had the sensitivity
+been lower at 0.5, the flow velocity condition would be FALSE and the cell would not be
+classified as part of a channel.
+
+.. figure:: ../images/channels_local_anim.gif
+  :width: 600
+
+  Example of channel detection (sensitivity = 0.65) in a Gule Horn / Neslen model run. 
+
+2.4.3 - Additional channel data
+-------------------------------
+Apart from a boolean raster that indicates whether a cell is part of a channel or not, 
+cells that are classified as channel are used to derive additional channel data:
+
+* Channel skeleton: *binary 1-pixel wide representation of channel network*
+* Channel width: *Maximum width of the channel at this location*
+* Channel depth: *Depth of the channel at this location* 
+
+.. note::
+
+   The additional channel parameters are currently not exported in the output netCDF
+   file, but can be accessed from an instance of the gtpost.model.ModelResult class
+   after running the channel classification process.
 
 
 2.5 - Architectural element classification
