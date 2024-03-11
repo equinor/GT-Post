@@ -118,7 +118,7 @@ is first converted to volume fractions. Sediment volume fraction data is then us
 compute a cumulative sediment distribution function (CDF), from which other parameters 
 such as median grain size (D50), porosity and permeability will be derived. 
 
-The calculation of the CFD can best be described by an example: A ‘coarse-sand’ D3D-GT 
+The calculation of the CDF can best be described by an example: A ‘coarse-sand’ D3D-GT 
 model has the following proportions of six sediment classes, with associated median 
 grain size for that class, at a single location in the model output:
 
@@ -211,7 +211,34 @@ are thus much larger that is observed in field measurements of subsurface deposi
 
 2.2 - Preservation and deposition age
 *************************************
-Blabla
+Preservation data is derived along with the age of deposition, which is used to
+reconstruct the stratigraphy. At any location and output timestep (t, x, y) sediment
+is deposited when the total incoming amount of material exceeds the amount of outgoing
+sediment (i.e. a negative sediment flux). The bed level increases by an amount that is 
+calculated from the total deposited volume and the cell size. If the flux is positive, 
+so if more sediment leaves the cell than what comes in, there is erosion taking place 
+and the bed level is lowered. In addition, the entire stack of already accumulated 
+sediment is lowered by the amount of subsidence that is applied to that location. 
+
+The data variable *preserved_thickness* indicates how much of a deposited layer will 
+make it to the final timestep of the model and can thus be considered to be 'preserved' 
+in the final stratigraphic sequence. Suppose we have a deposit of 0.4 m thick at timestep 
+:math:`t_{current}`. Let's consider the following values of *preserved_thickness* and
+explain what they mean:
+
+* 0   : *The entire 0.4 m will be completely eroded by the end of the model run* 
+* 0.4 : *All of the sediment deposited will make it to the end and is preserved*
+* 0.1 : *0.3 m of our initial deposit will be eroded, but 0.1 m will be preserved*
+
+For every t, x and y, the age of deposition will be recorded in the *deposition_age* 
+data variable. Both *preservation_thickness* an *deposition_age* are part of the 
+postprocessing export, see Chapter 3.
+
+.. figure:: ../images/deposition_age_anim.gif
+  :width: 800
+
+  Example of deposition age visualized in a cross section. You can also see how the
+  position of (until then) preserved layers are lowered due to subsidence. 
 
 
 2.3 - Subenvironment classification
@@ -261,7 +288,19 @@ There are two methods available for classifying the channel network:
 
 By default, the static method is used in the River dominated and Gule Horn / Neslen
 templates, whereas the local method was specifically designed to work better for the 
-Roda and Sobrarbe templates.
+Roda and Sobrarbe templates. As a general guideline to choose between the two methods:
+
+* Choose the static channel classification method if the delta:
+   - Has a strongly braided channel network (see animation below)
+   - Has a pronounced subaerial delta top (less subaqeous channels)
+* Choose the local channel classification method if the delta:
+   - Features less, but wider channels that continue in the subaqeous part of the delta
+   - Has a pronounced subaqeous delta top
+
+.. note::
+
+   In the future we aim to improve channel classification by using a single generic 
+   method that doesn't require fine-tuning by the user.
 
 2.4.1 - Static method
 ---------------------
