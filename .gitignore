@@ -125,3 +125,5 @@ ENV/
 *.code-workspace# pixi environments
 .pixi
 
+.pytest_cache/
+.ruff_cache/
