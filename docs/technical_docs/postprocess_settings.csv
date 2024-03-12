@@ -1,0 +1,10 @@
+channel_detection_method|Channel classification method to use. Either "static" or "local".
+channel_detection_windowsize|If channel detection method is "local": the window size expressed in number of grid cells to be used.
+channel_detection_sensitivity|Value between 0 and 1 to determine channel detection sensitivity. e.g. if the postprocessing is too eager in detecting channels, lower this number.
+delta_top_subaqeous_depth|Delta top with higher depth than this value is considered subaqeous. Value is typically based on tidal range (for parts that are always submerged).
+deltafront_expected_width|Expected width (from an aerial view) of the delta front in number of grid cells
+deltafront_detection_minimal_sandfraction| Minimum sand fraction of deposited material expected in the delta front.
+mouthbar_detection_search_radius|Distance from channel endpoints to look for the 'mouthbar' architectural element
+mouthbar_detection_critical_bl_change_df|Minimum deposition rate in the delta front area for it to be considered a mouthbar (provided that it is located close enough to the endpoint of an active channel)
+mouthbar_detection_critical_bl_change_ch|Minimum deposition rate within a channel system for it to be considered a mouthbar (provided that it is located close enough to subaqeous delta top or delta front)
+mouthbar_detection_critical_bl_change_dt|Minimum deposition rate in the subaqeous delta top area for it to be considered a mouthbar (provided that it is located close enough to the endpoint of an active channel)

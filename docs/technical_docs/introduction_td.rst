@@ -213,7 +213,7 @@ are thus much larger that is observed in field measurements of subsurface deposi
 *************************************
 Preservation data is derived along with the age of deposition, which is used to
 reconstruct the stratigraphy. At any location and output timestep (t, x, y) sediment
-is deposited when the total incoming amount of material exceeds the amount of outgoing
+is deposited when the total incoming amount of sediment exceeds the amount of outgoing
 sediment (i.e. a negative sediment flux). The bed level increases by an amount that is 
 calculated from the total deposited volume and the cell size. If the flux is positive, 
 so if more sediment leaves the cell than what comes in, there is erosion taking place 
@@ -234,7 +234,7 @@ For every t, x and y, the age of deposition will be recorded in the *deposition_
 data variable. Both *preservation_thickness* an *deposition_age* are part of the 
 postprocessing export, see Chapter 3.
 
-.. figure:: ../images/deposition_age_anim.gif
+.. figure:: ../images/deposition_age_anim_loop.gif
   :width: 800
 
   Example of deposition age visualized in a cross section. You can also see how the
@@ -332,7 +332,7 @@ of 0.7 m/s and a depth :math:`D` of 1.5 m would classify as a channel because...
 FALSE because :math:`{U_{max,minreq}}` would be 0.84, whereas :math:`{U_{max}}`
 in our example is 0.7.
 
-.. figure:: ../images/channels_static_anim.gif
+.. figure:: ../images/channels_static_anim_loop.gif
   :width: 600
 
   Example of channel detection (sensitivity = 0.55) in a Gule Horn / Neslen model run. 
@@ -360,7 +360,7 @@ both conditions are fulfilled because...
 been lower at 0.5, the flow velocity condition would be FALSE and the cell would not be
 classified as part of a channel.
 
-.. figure:: ../images/channels_local_anim.gif
+.. figure:: ../images/channels_local_anim_loop.gif
   :width: 600
 
   Example of channel detection (sensitivity = 0.65) in a Gule Horn / Neslen model run. 
@@ -381,8 +381,49 @@ cells that are classified as channel are used to derive additional channel data:
    after running the channel classification process.
 
 
-2.5 - Architectural element classification
-******************************************
+2.5 - Architectural element detection
+*************************************
+The main feature of post-processing is the detection of architectural elements. The
+following architectural elements are available:
+
+.. figure:: ../images/ae_overview.png
+  :width: 900
+
+The actual detection is based on flow and sediment parameters as well as the previously
+determined subenvironments. The following sections dive deeper into the detection of 
+each of the architectural elements.
+
+2.5.1 - Prodelta, Delta front and Delta top
+-------------------------------------------
+The prodelta, delta front and delta top architectural elements are the easiest to
+classify as they are directly related to the already determined subenvironments. The
+only adjustment with respect to the subenvironments is the extent of the delta front. The
+delta front may be expanded into the prodelta subenvironment based on the sand fraction. 
+If the sand fraction is higher than the threshold value *deltafront_detection_minimal_sandfraction*
+(see Postprocessing settings below). 
+
+The subenvironment delta top is divided into a subaerial and subaqeous part based on the 
+setting *delta_top_subaqeous_depth*. Shallow parts of the delta top subenvironment will
+be designated as subaerial delta top, while deeper parts become subaqeous delta top.
+
+.. figure:: ../images/archel_df_expansion.png
+  :width: 900
+
+  Comparison between the extent of the delta front when not considering the additional
+  condition for sand fraction (left) versus extending the delta front area by areas  
+  with deposits that have a sand fraction above 0.2 (right). Example is from a Sobrarbe 
+  model result.
+
+
+2.5.4 - Active channels
+-----------------------
+bla
+
+
+2.5.2 - Mouth bars
+------------------
+bla
+
 .. figure:: ../images/channel_endpoints.png
   :width: 600
 
@@ -390,7 +431,21 @@ cells that are classified as channel are used to derive additional channel data:
 
 2.6 - Postprocessing settings
 *****************************
-Blabla
+There are several settings that govern aspects of the postprocessing such as channel 
+classification and architectural element detection. Below is an overview of available 
+settings:
+
+.. note::
+
+   You can find the settings .ini files in the config folder that comes with the Python
+   package. They are specified for each template and must share the same name as these
+   templates.
+
+.. csv-table:: 
+   :header: Setting name,Description
+   :delim: |
+   :file: postprocess_settings.csv
+
 
 2.7 - Changes introduced for Roda/Sobrarbe
 ******************************************
