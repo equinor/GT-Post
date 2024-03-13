@@ -20,13 +20,13 @@ Technical documentation
    technical_docs/introduction_td
 
 
-User guide (local use)
-----------------------
+.. User guide (local use)
+.. ----------------------
 
-.. toctree::
-   :maxdepth: 4
+.. .. toctree::
+..    :maxdepth: 4
 
-   user_guide/introduction_ug
+..    user_guide/introduction_ug
 
 .. image:: images/vtk_screenshot_depage.png
   :width: 800

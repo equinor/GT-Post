@@ -80,9 +80,9 @@ def create_sed_and_obj_dataset(p):
             ("dimen_t", "dimen_x", "dimen_y"),
             p.deposition_age,
             dict(
-                long_name="Final preserved thickness of deposits",
+                long_name="Timestep at which deposition took place",
                 variable_type="calculated",
-                units="meter",
+                units="-",
             ),
         ),
         diameter=(
@@ -98,7 +98,7 @@ def create_sed_and_obj_dataset(p):
             ("dimen_t", "dimen_x", "dimen_y"),
             p.sandfraction,
             dict(
-                long_name="fraction fo sediment that is sand",
+                long_name="fraction of sediment that is sand",
                 variable_type="calculated",
                 units="-",
             ),
@@ -125,7 +125,7 @@ def create_sed_and_obj_dataset(p):
             ("dimen_t", "dimen_x", "dimen_y"),
             p.permeability,
             dict(
-                long_name="Porosity based on panda and lake 1994",
+                long_name="Permeability based on Panda & Lake 1994",
                 variable_type="calculated",
                 units="m2",
             ),
@@ -154,7 +154,7 @@ def create_sed_and_obj_dataset(p):
             dict(
                 long_name="architectural element",
                 variable_type="calculated",
-                units="nr 0 to 7",
+                units="nr 0 to 6",
             ),
         ),
         subenv=(
