@@ -35,3 +35,6 @@ ruff = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 pip = ">=24.0,<25"
+
+[system-requirements]
+linux = "5.4"

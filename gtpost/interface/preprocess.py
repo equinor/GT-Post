@@ -2,14 +2,15 @@ import logging
 from pathlib import Path
 
 from gtpost.preprocessing.preprocessing import PreProcess
+from gtpost.preprocessing.preprocessing_utils import write_ini
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 def main(
-    inifile: str | Path,
-    fpath_output: str | Path,
+    inifile: str | Path = "/data/input/preprocess/input.ini",
+    fpath_output: str | Path = "/data/output",
 ) -> None:
     """
     main function that interfaces with the Delft3D Geotool backend for preparing the
@@ -22,6 +23,7 @@ def main(
     fpath_output : str | Path, optional
         Relative path within the container folder structure to write results to.
     """
+    write_ini()
     pp = PreProcess(inifile, fpath_output)
     pp.preprocess()
 

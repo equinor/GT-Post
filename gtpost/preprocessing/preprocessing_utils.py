@@ -1,4 +1,6 @@
-from configparser import ConfigParser
+import json
+import os
+from configparser import ConfigParser, SafeConfigParser
 from pathlib import Path
 
 import numpy as np
@@ -115,3 +117,33 @@ def get_shape_from_grd_file(grd_file: str | Path) -> tuple:
                 data = line.replace("\n", "").split("     ")[1:]
                 break
     return (int(data[0]) + 1, int(data[1]) + 1)
+
+
+def write_ini(root: str | Path = "/data/input"):
+    """Write input.ini for containers based on the environment"""
+
+    input = os.environ.get("INPUT", "{}")
+    parameters = json.loads(input)
+    folders = ["simulation", "preprocess", "process", "postprocess", "export"]
+
+    # Create ini file for containers
+    config = SafeConfigParser()
+    for section in parameters:
+        if not config.has_section(section):
+            config.add_section(section)
+        for key, value in parameters[section].items():
+            # TODO: find more elegant solution for this! ugh!
+            if not key == "units":
+                if not config.has_option(section, key):
+                    config.set(*map(str, [section, key, value]))
+
+    for folder in folders:
+        try:
+            os.makedirs(os.path.join(root, folder), 0o2775)
+        # Path already exists, ignore
+        except OSError:
+            if not os.path.isdir(os.path.join(root, folder)):
+                raise
+
+        with open(os.path.join(root, folder, "input.ini"), "w") as f:
+            config.write(f)  # Yes, the ConfigParser writes to f

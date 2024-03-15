@@ -36,7 +36,9 @@ def get_template_name(input_path: str | Path) -> str:
     """
     input_ini = ConfigParser()
     input_ini.read(Path(input_path).joinpath("input.ini"))
-    template_name = input_ini["template"]["value"].lower().replace(" ", "_")
+    template_name = (
+        input_ini["template"]["value"].lower().replace(" ", "_").replace("/", "_")
+    )
     return template_name
 
 

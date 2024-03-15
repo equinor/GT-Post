@@ -1,4 +1,4 @@
-FROM ghcr.io/prefix-dev/pixi:0.16.1
+FROM --platform=linux/amd64 ghcr.io/prefix-dev/pixi:0.16.1
 
 COPY . /app
 WORKDIR /app

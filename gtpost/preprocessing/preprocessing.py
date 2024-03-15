@@ -99,7 +99,9 @@ class PreProcess:
 
     def load_ini_parameters(self) -> None:
         # Template name
-        self.template_name = str(self.inidata["template"]["value"])
+        self.template_name = (
+            str(self.inidata["template"]["value"]).replace(" ", "_").replace("/", "_")
+        )
         # Model simulation stop time [min]
         self.simulation_stop_t = self.tfactor * (
             float(self.inidata["simstoptime"]["value"]) + 0.5
@@ -299,9 +301,9 @@ class PreProcess:
     def set_subsidence_bathymetry(self) -> None:
         """Adjust .sdu file with subsidence information"""
         initial_subsidence_array = np.zeros_like(self.bathymetry)
-        initial_subsidence_array[self.bathymetry == self.nodata_value] = (
-            self.nodata_value
-        )
+        initial_subsidence_array[
+            self.bathymetry == self.nodata_value
+        ] = self.nodata_value
         final_subsidence_array = np.zeros_like(initial_subsidence_array)
         final_subsidence_array[:, : self.river_length] = self.subsidence_land
         sea_length = self.nx_bathymetry - self.river_length
