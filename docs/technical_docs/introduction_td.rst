@@ -55,7 +55,7 @@ Roda
 Sobrarbe
     *Template for the Sobrarbe formation and comparable deltaic systems. Has a straight, 
     and short 20 cell (1 km) river valley. The river valley has four inflow points
-    for channels that are separated by cone-shaped non-eordable obstacles. Simulates a
+    for channels that are separated by cone-shaped non-erodable obstacles. Simulates a
     wide braided floodplain entering a sedimentary basin. Uses Van Rijn sediment 
     transport equation.*
 
@@ -339,7 +339,7 @@ The following threshold values are defined:
 
 * :math:`{U_{max, req}}` = 3 * (1 - sensitivity)
 * :math:`{U_{max, minreq}}` = 1.2 * (1 - sensitivity)
-* :math:`{U_{req}}` = 2.5 * (1 - sensitivity)
+* :math:`{D_{req}}` = 2.5 * (1 - sensitivity)
 
 The condition to classify a cell as a channel based on these threshold values is:
 
@@ -431,7 +431,7 @@ classify as they are directly related to the already determined subenvironments.
 only adjustment with respect to the subenvironments is the extent of the delta front. The
 delta front may be expanded into the prodelta subenvironment based on the sand fraction. 
 If the sand fraction is higher than the threshold value *deltafront_detection_minimal_sandfraction*
-(see Postprocessing settings below). 
+(see :ref:`Postprocessing settings <postprocessing_settings>` below). 
 
 The subenvironment delta top is divided into a subaerial and subaqeous part based on the 
 setting *delta_top_subaqeous_depth*. Shallow parts of the delta top subenvironment will
@@ -493,7 +493,7 @@ mouth bar or not.
 .. math:: 
    \begin{align*}MB_{allowed}\ AND\ [Archel\ is\ 'Active\ channel']\ AND\ [\delta D\ >\ MB_{ch}]\end{align*}
 
-where :math:`MB_{allowed}` is the area where mouth bars may be expected, :math:`\delta D`
+where :math:`MB_{allowed}` is the area where mouth bars may be expected as determined in step 1, :math:`\delta D`
 is bed level change, and :math:`MB_{df}`, :math:`MB_{dt}` and :math:`MB_{ch}` are the 
 threshold values for bed level change that correspond to the settings
 *mouthbar_detection_critical_bl_change_df*, *mouthbar_detection_critical_bl_change_dt*
@@ -631,3 +631,8 @@ for the delta part of the model are generated when running postprocessing:
 .. note::
 
    In the Geotool, these statistics will be displayed in the GUI after postprocessing.
+
+.. figure:: ../images/archel_summary.png
+  :width: 600
+
+  Example of D50 per architectural element statistics
