@@ -55,10 +55,7 @@ def main(
     logger.info(f"{get_current_time()}: Plotting maps")
     map_plotter = plot.MapPlot(modelresult)
     map_plotter.twopanel_map("bottom_depth", "deposit_height", only_last_timestep=True)
-    # map_plotter.save_figures(fpath_output, "map_bottomdepth_deposition")
-    map_plotter.save_figures(
-        fpath_output, "delta_fringe"
-    )  # to integrate with existing GUI
+    map_plotter.save_figures(fpath_output, "map_bottomdepth_deposition")
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])

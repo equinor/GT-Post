@@ -85,10 +85,7 @@ def main(
     logger.info(f"{get_current_time()}: Plotting archel maps")
     map_plotter = plot.MapPlot(modelresult)
     map_plotter.twopanel_map("bottom_depth", "architectural_elements")
-    # map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
-    map_plotter.save_figures(
-        fpath_output, "subenvironment"
-    )  # to integrate with existing GUI
+    map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
