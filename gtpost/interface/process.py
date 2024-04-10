@@ -42,9 +42,13 @@ def main(
         Path(__file__).parents[2].joinpath(f"config/settings_{template_name}.ini")
     )
 
-    modelresult = ModelResult.from_folder(
-        fpath_input, post=False, settings_file=settings_file
-    )
+    try:
+        modelresult = ModelResult.from_folder(
+            fpath_input, post=False, settings_file=settings_file
+        )
+    except Exception as e:
+        logger.error(f"Failed to initialize model results: {e}")
+        return
     logger.info(
         f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
     )
