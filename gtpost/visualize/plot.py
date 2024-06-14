@@ -353,9 +353,9 @@ class PlotBase:
     def save_figures(self, path, name):
         if len(self.figures) > 1:
             for i, f in enumerate(self.figures):
-                f.savefig(Path(path) / f"{i:04}_{name}.png")
+                f.savefig(Path(path) / f"{name}_{i:04}.png")
         else:
-            self.figures[0].savefig(Path(path) / f"{name}.png")
+            self.figures[0].savefig(Path(path) / f"{name}_{self.model.timestep:04}.png")
 
 
 class CrossSectionPlot(PlotBase):

@@ -62,7 +62,7 @@ class ModelResult:
         return (
             f"< {self.modelname} >\n---------------------------\n"
             + f"Processing state      : {self.processing_state}\n"
-            + f"Completed timesteps   : {len(self.dataset.time)}"
+            + f"Completed timesteps   : {self.timestep}"
         )
 
     @classmethod
@@ -109,6 +109,10 @@ class ModelResult:
             )
         else:
             raise TypeError("File is not recognized as a Delft3D trim file")
+
+    @property
+    def timestep(self):
+        return len(self.dataset.time)
 
     def complete_init_for_process(self):
         """
