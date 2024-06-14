@@ -81,6 +81,7 @@ class SedimentaryLog:
 
     def plot_log_summary_four_locations(self, data_var, xc, yc, bnd):
         fig, ax1, ax2, ax3, ax4, ax5, ax6, cax = self.four_log_figure_base()
+        fracbnds = [0.063, 0.125, 0.25, 0.5, 1, 2]
 
         ax1.imshow(
             self.data["zcor"].values[-1, :, :],
@@ -90,12 +91,21 @@ class SedimentaryLog:
         )
         ax2.imshow(self.data["archel"].values[-1, :, :], cmap=ArchelColormap.cmap)
 
+        ax1.set_xticklabels([x._x * 0.05 for x in ax1.get_xticklabels()])
+        ax1.set_yticklabels([y._y * 0.05 for y in ax1.get_yticklabels()])
+        ax2.set_xticklabels([x._x * 0.05 for x in ax2.get_xticklabels()])
+        ax2.set_yticklabels([y._y * 0.05 for y in ax2.get_yticklabels()])
+
+        ax1.set_xlabel("x-position (km)")
+        ax1.set_ylabel("y-position (km)")
+        ax2.set_ylabel("y-position (km)")
+
         colorbar = fig.colorbar(
             ArchelColormap.mappable, cax=cax, orientation="horizontal"
         )
         if ArchelColormap.type == "categorical":
             colorbar.set_ticks(ArchelColormap.ticks + 0.5)
-            colorbar.set_ticklabels(ArchelColormap.labels, size=8)
+            colorbar.set_ticklabels(ArchelColormap.labels, size=9)
 
         for i, (ax, x, y) in enumerate(zip([ax3, ax4, ax5, ax6], xc, yc)):
             ax1.scatter(x, y, color="red")
@@ -105,8 +115,18 @@ class SedimentaryLog:
             logdepth_ae, logdata_ae = self._get_log_data("archel", x, y)
 
             ax.plot(logdata, logdepth, color="black", linewidth=0.5)
-            ax.set_xlabel(data_var)
-            ax.xaxis.set_tick_params(labeltop=True, top=True)
+            ax.set_xlabel(data_var, fontsize=12)
+            ax.semilogx()
+            for fracbnd in fracbnds:
+                ax.axvline(
+                    fracbnd,
+                    ymin=-30,
+                    ymax=30,
+                    color="black",
+                    alpha=0.3,
+                    linewidth=0.5,
+                    linestyle="--",
+                )
 
             # Add architectural element background
             for j in np.arange(0, len(logdepth), 2):
@@ -134,10 +154,37 @@ class SedimentaryLog:
         ax5.set_xbound(bnd)
         ax6.set_xbound(bnd)
 
-        ax3.set_ylabel("Depth (m)")
+        ax3.set_ylabel("Vertical position (m MSL)", fontsize=15)
         ax4.set_yticks([])
         ax5.set_yticks([])
         ax6.set_yticks([])
+
+        for ax in [ax3, ax4, ax5, ax6]:
+            for fracname, position_x in zip(
+                [
+                    "silt/clay",
+                    "very fine sand",
+                    "fine sand",
+                    "medium sand",
+                    "coarse sand",
+                    "very coarse sand",
+                ],
+                [0.04, 0.08, 0.16, 0.325, 0.66, 1.3],
+            ):
+                ax.text(
+                    position_x,
+                    1.05,
+                    f"{fracname}",
+                    rotation=60,
+                )
+                ax.set_xticks([])
+                ax.set_xticks(fracbnds)
+                ax.set_xticklabels(fracbnds, rotation=60)
+                ax.xaxis.set_tick_params(
+                    bottom=False,
+                    top=False,
+                    which="minor",
+                )
 
     def plot_log_summary(self):
         pass
@@ -290,8 +337,8 @@ if __name__ == "__main__":
     )
     print(log.data.data_vars)
 
-    log.plot_d50_histograms(20, 100)
+    # log.plot_d50_histograms(20, 100)
     log.plot_log_summary_four_locations(
-        "diameter", [120, 120, 120, 120], [10, 30, 50, 70], [0, 1.4]
+        "diameter", [120, 120, 120, 120], [10, 30, 50, 70], [0, 2]
     )
     plt.show()

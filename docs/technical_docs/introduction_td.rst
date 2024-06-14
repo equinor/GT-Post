@@ -26,38 +26,38 @@ Upon finishing this process, the newly created Delft3D input folder is ready for
 **********************************
 Currently there are four templates to choose from:
 
-River Dominated delta  
-   *Template for a generic river-dominated delta system. Has a straight coastline and a 
-   v-shaped initial river valley that is 100 cells (5 km) long. Uses Engelund-Hansen  
-   sediment transport equation.*
+| **River Dominated delta**
+| *Template for a generic river-dominated delta system. Has a straight coastline and a 
+  v-shaped initial river valley that is 100 cells (5 km) long. Uses Engelund-Hansen  
+  sediment transport equation.*
 
-GuleHorn_Neslen
-   *Template for Gule Horn and Neslen formations and comparable deltaic systems. Has a 
-   straight coastline and a simple initial river valley that is 100 cells (5 km) long. 
-   The fluvial input location shifts overtime to enforce meandering in the fluvial 
-   domain. Uses Engelund-Hansen sediment transport equation.*
+| **GuleHorn_Neslen**
+| *Template for Gule Horn and Neslen formations and comparable deltaic systems. Has a 
+  straight coastline and a simple initial river valley that is 100 cells (5 km) long. 
+  The fluvial input location shifts overtime to enforce meandering in the fluvial 
+  domain. Uses Engelund-Hansen sediment transport equation.*
 
 .. figure:: ../images/River_dominated_delta_GuleHorn_Neslen.jpg
   :width: 600
 
   Illustration of river dominated and GuleHorn_Neslen templates
 
-Roda
-   *Template for the Roda formation and comparable deltaic systems. Has a straight, but
-   funnel-shaped coastline and a simple initial river valley that is 100 cells (5 km) 
-   long. Uses Van Rijn sediment transport equation.*
+| **Roda**
+| *Template for the Roda formation and comparable deltaic systems. Has a straight, but
+  funnel-shaped coastline and a simple initial river valley that is 100 cells (5 km) 
+  long. Uses Van Rijn sediment transport equation.*
 
 .. figure:: ../images/Roda.jpg
   :width: 600
 
   Illustration of the Roda template
 
-Sobrarbe
-    *Template for the Sobrarbe formation and comparable deltaic systems. Has a straight, 
-    and short 20 cell (1 km) river valley. The river valley has four inflow points
-    for channels that are separated by cone-shaped non-erodable obstacles. Simulates a
-    wide braided floodplain entering a sedimentary basin. Uses Van Rijn sediment 
-    transport equation.*
+| **Sobrarbe**
+| *Template for the Sobrarbe formation and comparable deltaic systems. Has a straight, 
+  and short 20 cell (1 km) river valley. The river valley has four inflow points
+  for channels that are separated by cone-shaped non-erodable obstacles. Simulates a
+  wide braided floodplain entering a sedimentary basin. Uses Van Rijn sediment 
+  transport equation.*
 
 .. figure:: ../images/Sobrarbe.jpg
   :width: 600
