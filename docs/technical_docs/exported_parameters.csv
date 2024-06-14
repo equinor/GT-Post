@@ -1,0 +1,17 @@
+d50_per_sedclass|D50 values defining each sediment class|f|meter|\-
+xcor|x\-coordinates of cells|x, y|meter|\-
+ycor|y\-coordinates of cells|x, y|meter|\-
+zcor|z\-coordinates of cells|t, x, y|meter|Bed level
+subsidence|Subsidence in meter per timestep|x, y|meter|Assumes constant subsidence over timestep
+preserved_thickness|Final preserved thickness of deposits|t, x, y|meter|See :ref:`Ch. 2.2 <preservation_and_deposition_age>`
+deposition_age|Timestep at which deposition took place|t, x, y|\-|See :ref:`Ch. 2.2 <preservation_and_deposition_age>`
+diameter|D50 value for cell, based on combination of classes|t, x, y|meter|See :ref:`Ch. 2.1.2 <d-values_from_a_cdf>`
+fraction|Fraction of sediment that is sand|t, x, y|\-|\-
+sorting|Sorting value based on Folks (1968) method|t, x, y|\-|\-
+porosity|Porosity based on Takebayashi and Fujita (2014)|t, x, y|\-|See :ref:`Ch. 2.1.3 <porosity>`
+permeability|Permeability based on Panda & Lake (1994)|t, x, y|m2|See :ref:`Ch. 2.1.4 <permeability>`
+vfractions|Volume fraction of each grain size class|f, t, x, y|\-|\-
+mfractions|Mass fraction of each grain size class|f, t, x, y|\-|\-
+archel|Architectural element|t, x, y|\-|Codes 0 \- 6, 0 is not classified. :ref:`Ch. 2.5 <architectural_element_detection>`.
+subenv|Subenvironment|t, x, y|\-|Codes 0 \- 3, 0 is not classified. See :ref:`Ch. 2.3 <subenvironment_classification>`.
+
