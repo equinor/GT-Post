@@ -1,3 +1,4 @@
+import shutil
 from configparser import ConfigParser
 from pathlib import Path
 from typing import Self
@@ -98,7 +99,9 @@ class ModelResult:
         trimfile = [f for f in folder.glob("*.nc") if "trim" in f.name][0]
         modelname = delft3d_folder.stem + f" - {sedfile.stem}"
 
-        dataset = xr.open_dataset(trimfile)
+        shutil.copyfile(trimfile, "temp.nc")
+        dataset = xr.open_dataset("temp.nc", engine="h5netcdf")
+
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
                 dataset,

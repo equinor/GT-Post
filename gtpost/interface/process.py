@@ -21,7 +21,7 @@ def main(
     ----------
     fpath_input : str | Path, optional
         Path with input, including at least the .sed file, config ini file, and most
-        importantly the trim.nc file with model results up to the last exported timstep.
+        importantly the trim.nc file with model results up to the last exported timestep.
         by default the relative path is "/data/input" within the container folder
         structure.
     fpath_output : str | Path, optional
