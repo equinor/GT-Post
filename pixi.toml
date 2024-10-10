@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Delft3D GeoTool code"
 authors = ["Erik van Onselen <erik.vanonselen@deltares.nl>"]
 channels = ["conda-forge"]
-platforms = ["win-64", "linux-64", "linux-aarch64", "osx-64", "osx-arm64"]
+platforms = ["win-64"]
 
 [tasks]
 install = "python -m pip install --no-deps --editable ."
@@ -16,10 +16,19 @@ format = "black ."
 lint = "ruff check --fix ./gtpost"
 
 [dependencies]
-python = "3.11.*"
-numpy = ">=1.26.4,<1.27"
+python = "3.12.*"
+numpy = ">=1.22.3,<2.1"
 numba = "*"
-pandas = ">=2.0.1"
+pandas = ">=2.2.3,<3"
+pillow = ">=10.4.0,<11"
+tqdm = ">=4.66.5,<5"
+requests = ">=2.32.3,<3"
+ultralytics = ">=8.2.34,<9"
+imgviz = ">=0.11.1,<0.12"
+labelme = ">=5.2.1,<6"
+pyqt = ">=5.15.9,<6"
+pycocotools = ">=2.0.8,<3"
+nomkl = ">=1.0,<2"
 rasterio = "*"
 xarray = "*"
 matplotlib = "*"
@@ -36,5 +45,8 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 pip = ">=24.0,<25"
 
-[system-requirements]
-linux = "5.4"
+[pypi-dependencies]
+labelme2yolo = ">=0.2.5, <0.3"
+torch = ">=2.2.2, <3"
+torchvision = ">=0.19.1, <0.20"
+
