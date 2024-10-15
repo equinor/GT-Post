@@ -68,7 +68,7 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
     modelresult = ModelResult.from_folder(Path(d3d_folder), post=False)
     depth = modelresult.bottom_depth
 
-    for i in range(-1, -prediction_result.shape[0] - 1, -1):
+    for i in range(0, prediction_result.shape[0], 1):
         fig = plt.figure(dpi=72)
         gs = GridSpec(1, 2, left=0.05, right=0.95, wspace=0.1)
         ax1 = fig.add_subplot(gs[0, 0])
@@ -81,7 +81,7 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
         fig.set_size_inches(1400 / float(dpi), 700 / float(dpi))
 
         ax1.imshow(
-            depth[i, :, :],
+            depth[i + 9, :, :],
             cmap=colormaps.BottomDepthColormap.cmap,
             interpolation="antialiased",
             interpolation_stage="rgba",
@@ -90,7 +90,7 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
         )
         ax2.imshow(
             prediction_result[i, :, :],
-            cmap=colormaps.ArchelColormap.cmap,
+            cmap=colormaps.WaveArchelColormap.cmap,
             interpolation="antialiased",
             interpolation_stage="rgba",
         )
@@ -98,25 +98,30 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
             colormaps.BottomDepthColormap.mappable, cax=cax1, orientation="horizontal"
         )
         colorbar = fig.colorbar(
-            colormaps.ArchelColormap.mappable, cax=cax2, orientation="horizontal"
+            colormaps.WaveArchelColormap.mappable, cax=cax2, orientation="horizontal"
         )
-        colorbar.set_ticks(colormaps.ArchelColormap.ticks + 0.5)
-        colorbar.set_ticklabels(colormaps.ArchelColormap.labels, fontsize=12)
+        colorbar.set_ticks(colormaps.WaveArchelColormap.ticks + 0.5)
+        colorbar.set_ticklabels(colormaps.WaveArchelColormap.labels, fontsize=12)
 
-        plt.savefig(save_folder + f"\\prediction_result_{-i}.png")
+        plt.savefig(save_folder + f"\\prediction_result_{i}.png")
         plt.close()
 
 
 if __name__ == "__main__":
-    image_folder = r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_028\prediction_images"
+    # result = train(
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\training_images_customrgb_4classes\YOLODataset\dataset.yaml",
+    #     282,
+    #     r"c:\Users\onselen\Development\D3D_Geotool\GT-Post\gtpost\experimental\pretrained_yolo_models\yolov8m-seg.pt",
+    # )
+    image_folder = r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\prediction_images"
     model = YOLO(
-        r"c:\Users\onselen\Development\D3D_Geotool\GT-Post\gtpost\experimental\trained_yolo_models\best.pt"
+        r"c:\Users\onselen\Development\D3D_Geotool\GT-Post\runs\segment\train2\weights\best.pt"
     )
     # result = None
     result = predict(image_folder, model, 282, prediction_parameters_wave_dominated)
     prediction_bathymetry_figure(
         result,
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_028",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_028\segmentation_result",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_030",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\segmentation_results",
     )
     print(1)

@@ -51,6 +51,22 @@ class ArchelColormap(NamedTuple):
     cmap, mappable, bounds, values, norm = categorical_cmap(alphas, colors, name)
 
 
+class WaveArchelColormap(NamedTuple):
+    alphas = [1, 1, 1, 1, 1]
+    colors = [
+        "snow",
+        "yellowgreen",
+        "mediumseagreen",
+        "deepskyblue",
+        "yellow",
+    ]
+    labels = ["N/A", "Delta top", "Shoreface", "Channel", "Spit"]
+    ticks = np.arange(0, 5)
+    name = "Architectural elements"
+    type = "categorical"
+    cmap, mappable, bounds, values, norm = categorical_cmap(alphas, colors, name)
+
+
 class GrainsizeColormap(NamedTuple):
     c0 = (0.0, "#006400")  # dark green
     c1 = (0.044, "#6B8E23")  # olivedrab
