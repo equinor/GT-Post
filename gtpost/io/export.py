@@ -1,5 +1,7 @@
 import xarray as xr
 
+from gtpost.analyze import classifications
+
 # Compression parameters
 ENCODINGS = {
     "d50_per_sedclass": {"zlib": True, "complevel": 9},
@@ -168,4 +170,11 @@ def create_sed_and_obj_dataset(p):
         ),
     )
     ds = xr.Dataset(data_vars)
+    ds.attrs["subenv_encoding"] = dict(
+        [[i.name, i.value] for i in classifications.SubEnv.__iter__()]
+    )
+    ds.attrs["archel_encoding"] = dict(
+        [[i.name, i.value] for i in classifications.ArchEl.__iter__()]
+    )
+
     return ds
