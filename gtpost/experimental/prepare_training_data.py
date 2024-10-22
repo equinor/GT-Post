@@ -2,6 +2,7 @@ import json
 import logging
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 
 from gtpost.experimental import segmentation_utils
@@ -11,6 +12,7 @@ from gtpost.visualize import colormaps
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+matplotlib.use("TkAgg")
 
 
 def main(
@@ -61,7 +63,7 @@ def main(
         f"{get_current_time()}: Processing completed, creating training images..."
     )
 
-    for i in range(10, modelresult.timestep, every_nth_image):
+    for i in range(0, modelresult.timestep, every_nth_image):
         # masking_img is an image of the bathymetry that will be used to draw the training
         # image segmentation masks.
         masking_image = plt.imshow(
@@ -115,6 +117,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_028",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_028",
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058_Reference",
+        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo",
     )

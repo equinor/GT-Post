@@ -32,6 +32,7 @@ def predict_units(
             show_boxes=False,
             agnostic_nms=True,
             classes=unit_index,
+            device="cpu",
         )
         mask_array = np.zeros([len(results)] + list(results[-1].masks.data.shape[1:]))
         for i, result in enumerate(results):
