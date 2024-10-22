@@ -17,13 +17,12 @@ lint = "ruff check --fix ./gtpost"
 
 [dependencies]
 python = "3.12.*"
-numpy = ">=1.22.3,<2.1"
+numpy = ">=2.0.2,<3"
 numba = "*"
 pandas = ">=2.2.3,<3"
 pillow = ">=10.4.0,<11"
 tqdm = ">=4.66.5,<5"
 requests = ">=2.32.3,<3"
-ultralytics = ">=8.2.34,<9"
 imgviz = ">=0.11.1,<0.12"
 labelme = ">=5.2.1,<6"
 pyqt = ">=5.15.9,<6"
@@ -44,9 +43,17 @@ ruff = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 pip = ">=24.0,<25"
+cuda-toolkit = "*"
 
 [pypi-dependencies]
-labelme2yolo = ">=0.2.5, <0.3"
-torch = ">=2.2.2, <3"
-torchvision = ">=0.19.1, <0.20"
+labelme2yolo = "*"
+torch = "*"
+torchvision = "*"
+ultralytics = ">=8.3.13, <9"
+
+[pypi-options]
+extra-index-urls = ["https://download.pytorch.org/whl/cu121"]
+
+[system-requirements]
+# cuda = "12.1"
 
