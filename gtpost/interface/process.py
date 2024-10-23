@@ -69,6 +69,7 @@ def main(
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
     xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
     xsect_plotter.save_figures(fpath_output, "xsect_diameter")
+    (fpath_input / "temp.nc").unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
