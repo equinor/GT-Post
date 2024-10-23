@@ -1,5 +1,5 @@
 #!/bin/bash
 
 ulimit -s unlimited
-
-/opt/delft3d_latest/lnx64/bin/run_dflow2d3d_parallel.sh 4 --dockerparallel
+cd /data
+/opt/dimrset/bin/run_dflow2d3d_parallel_dwaves.sh 4 --dockerparallel -w /data/wave.mdw /data/config_d_hydro.xml

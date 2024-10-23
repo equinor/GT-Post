@@ -27,6 +27,8 @@ composition_options = (
 
 channel_width_options = (500, 1000, 1500)
 
+SWAN_TIMESTEP = 1080
+
 
 class PreProcess:
     # Constants
@@ -106,6 +108,9 @@ class PreProcess:
         self.simulation_stop_t = self.tfactor * (
             float(self.inidata["simstoptime"]["value"]) + 0.5
         )
+        # Align timestep with 18h interval of SWAN
+        self.simulation_stop_t += SWAN_TIMESTEP - self.simulation_stop_t % SWAN_TIMESTEP
+        logger.info(f"Aligned stoptime to SWAN timestep: {self.simulation_stop_t}")
         # Output interval
         self.output_interval = self.tfactor * float(
             self.inidata["outputinterval"]["value"]

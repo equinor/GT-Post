@@ -14,7 +14,7 @@
    IniSedThick      =  5.0000000e+000      [m]      Initial sediment layer thickness at bed (uniform value or filename)
    FacDSS           =  0.6000000e+000      [-]      FacDss * SedDia = Initial suspended sediment diameter. Range [0.6 - 1.0]
    TraFrm           =  -1                           Integer selecting the transport formula
-   AksFac           =  1                   [-]      Calibration factor for Van Rijn’s reference height
+   AksFac           =  1                   [-]      Calibration factor for Van Rijn's reference height
    Rwave            =  2                   [-]      Calibration factor wave roughness height
    RDC              =  0.01                [m]      Current related roughness ks
    RDW              =  0.02                [m]      Wave related roughness kw
@@ -29,7 +29,7 @@
    IniSedThick      =  5.0000000e+000      [m]      Initial sediment layer thickness at bed (uniform value or filename)
    FacDSS           =  0.6000000e+000      [-]      FacDss * SedDia = Initial suspended sediment diameter. Range [0.6 - 1.0]
    TraFrm           =  -1                           Integer selecting the transport formula
-   AksFac           =  1                   [-]      Calibration factor for Van Rijn’s reference height
+   AksFac           =  1                   [-]      Calibration factor for Van Rijn's reference height
    Rwave            =  2                   [-]      Calibration factor wave roughness height
    RDC              =  0.01                [m]      Current related roughness ks
    RDW              =  0.02                [m]      Wave related roughness kw
@@ -44,7 +44,7 @@
    IniSedThick      =  5.0000000e+000      [m]      Initial sediment layer thickness at bed (uniform value or filename)
    FacDSS           =  0.6000000e+000      [-]      FacDss * SedDia = Initial suspended sediment diameter. Range [0.6 - 1.0]
    TraFrm           =  -1                           Integer selecting the transport formula
-   AksFac           =  1                   [-]      Calibration factor for Van Rijn’s reference height
+   AksFac           =  1                   [-]      Calibration factor for Van Rijn's reference height
    Rwave            =  2                   [-]      Calibration factor wave roughness height
    RDC              =  0.01                [m]      Current related roughness ks
    RDW              =  0.02                [m]      Wave related roughness kw
@@ -59,7 +59,7 @@
    IniSedThick      =  5.0000000e+000      [m]      Initial sediment layer thickness at bed (uniform value or filename)
    FacDSS           =  0.6000000e+000      [-]      FacDss * SedDia = Initial suspended sediment diameter. Range [0.6 - 1.0]
    TraFrm           =  -1                           Integer selecting the transport formula
-   AksFac           =  1                   [-]      Calibration factor for Van Rijn’s reference height
+   AksFac           =  1                   [-]      Calibration factor for Van Rijn's reference height
    Rwave            =  2                   [-]      Calibration factor wave roughness height
    RDC              =  0.01                [m]      Current related roughness ks
    RDW              =  0.02                [m]      Wave related roughness kw
