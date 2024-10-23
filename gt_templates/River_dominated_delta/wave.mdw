@@ -46,7 +46,7 @@
 [Output]
    TestOutputLevel      = 0                            
    TraceCalls           = false                        
-   UseHotFile           = true                         
+   UseHotFile           = false                         
    MapWriteInterval     = 1080              
    WriteCOM             = true                         
    COMWriteInterval     = 1080              

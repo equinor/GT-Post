@@ -5,7 +5,7 @@ from rasterio.features import rasterize
 from scipy import ndimage
 from scipy.signal import convolve2d
 from shapely import offset_curve
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, MultiLineString, Polygon
 from shapely.ops import split
 from skimage import measure, morphology
 from skimage.morphology import skeletonize
@@ -71,6 +71,10 @@ def detect_depositional_environments(
             snap_distance=8,
         )
         topset_contour = offset_curve(foreset_contour, df_average_width / 2)
+        if type(topset_contour) is MultiLineString:
+            topset_contour = [
+                g for g in topset_contour.geoms if g.crosses(model_boundary)
+            ][0]
 
         environments_t = delta_areas_from_boundaries(
             foreset_contour, topset_contour, model_boundary, environments[t - 1, :, :]
