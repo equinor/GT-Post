@@ -33,6 +33,7 @@ class TestPreprocess:
         "md-tran.tr5",
         "wavecon.wave",
         "config_d_hydro.xml",
+        "run_loop.sh",
     )
 
     @pytest.mark.integrationtest
