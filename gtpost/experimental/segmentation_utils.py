@@ -30,8 +30,9 @@ def predict_units(
             conf=pc.min_confidence,
             max_det=pc.max_instances,
             show_boxes=False,
-            agnostic_nms=True,
+            retina_masks=True,
             classes=unit_index,
+            device="cpu",
         )
         mask_array = np.zeros([len(results)] + list(results[-1].masks.data.shape[1:]))
         for i, result in enumerate(results):

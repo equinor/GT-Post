@@ -200,7 +200,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/libzlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libzopfli-1.0.3-h0e60522_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/llvm-meta-5.0.0-0.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/win-64/llvmlite-0.43.0-py312h1f7db74_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/llvmlite-0.42.0-py312h7894644_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/loguru-0.7.2-py312h2e8e312_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/lz4-c-1.9.4-hcfcfb64_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/lzo-2.10-hcfcfb64_1001.conda
@@ -224,8 +224,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/nlohmann_json-3.11.3-he0c23c2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/nomkl-1.0-h5ca1d4c_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/nsight-compute-2024.3.1.2-h2483172_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/numba-0.60.0-py312hcccf92d_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/numpy-2.0.2-py312h49bc9c5_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/numba-0.59.1-py312h115d327_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/numpy-1.26.4-py312h8753938_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/openh264-2.4.1-h63175ca_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/openjpeg-2.5.2-h3d672ee_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/openmp-5.0.0-vc14_1.tar.bz2
@@ -4069,15 +4069,15 @@ packages:
   size: 2667
 - kind: conda
   name: llvmlite
-  version: 0.43.0
-  build: py312h1f7db74_1
+  version: 0.42.0
+  build: py312h7894644_1
   build_number: 1
   subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/llvmlite-0.43.0-py312h1f7db74_1.conda
-  sha256: 77e37e8b6223d185e1a3a1dfda5c5d9eb940e4935d06de3bab74c881b69ac873
-  md5: 570a33dbbfdb2f497cac407f41a8e1b7
+  url: https://conda.anaconda.org/conda-forge/win-64/llvmlite-0.42.0-py312h7894644_1.conda
+  sha256: ecc36569c8c657e478bfd8673bd376581bef46197625ff59a1dc603060f30aa1
+  md5: b0c8b1ebd145b7810cf30258115624ab
   depends:
-  - libzlib >=1.3.1,<2.0a0
+  - libzlib >=1.2.13,<2.0.0a0
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
   - ucrt >=10.0.20348.0
@@ -4088,8 +4088,8 @@ packages:
   license_family: BSD
   purls:
   - pkg:pypi/llvmlite?source=hash-mapping
-  size: 17112697
-  timestamp: 1725305550641
+  size: 17125461
+  timestamp: 1706922264652
 - kind: conda
   name: loguru
   version: 0.7.2
@@ -4544,42 +4544,42 @@ packages:
   timestamp: 1724959305096
 - kind: conda
   name: numba
-  version: 0.60.0
-  build: py312hcccf92d_0
+  version: 0.59.1
+  build: py312h115d327_0
   subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/numba-0.60.0-py312hcccf92d_0.conda
-  sha256: cb2b0dd6ddc65c83dc9fb759b5cdbeb53261e1e3fbaa5415c99493fa73940ece
-  md5: 4df11a0943ff8658df9aba7e5de92040
+  url: https://conda.anaconda.org/conda-forge/win-64/numba-0.59.1-py312h115d327_0.conda
+  sha256: 9a04cfd0886170036bdbc3c2b3e4805e8629c126c0b55e498e3401d4aee9331c
+  md5: 514d477e6114b692d400ed23deb73348
   depends:
-  - llvmlite >=0.43.0,<0.44.0a0
-  - numpy >=1.19,<3
-  - numpy >=1.22.3,<2.1
+  - llvmlite >=0.42.0,<0.43.0a0
+  - numpy >=1.26.4,<2.0a0
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
   - ucrt >=10.0.20348.0
   - vc >=14.2,<15
   - vc14_runtime >=14.29.30139
   constrains:
-  - libopenblas !=0.3.6
   - tbb >=2021.6.0
-  - cuda-python >=11.6
-  - scipy >=1.0
   - cuda-version >=11.2
   - cudatoolkit >=11.2
+  - scipy >=1.0
+  - numpy >=1.22.3,<1.27
+  - libopenblas !=0.3.6
+  - cuda-python >=11.6
   license: BSD-2-Clause
   license_family: BSD
   purls:
   - pkg:pypi/numba?source=hash-mapping
-  size: 5677692
-  timestamp: 1718888811663
+  size: 5591106
+  timestamp: 1711475839209
 - kind: conda
   name: numpy
-  version: 2.0.2
-  build: py312h49bc9c5_0
+  version: 1.26.4
+  build: py312h8753938_0
   subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/numpy-2.0.2-py312h49bc9c5_0.conda
-  sha256: 14f0707f73ea97579b8400e55bc394b9ddf7fdbcc87eb8ad9068b6ebbe62b97c
-  md5: 6be606bcfd79a5958b19a437b16028aa
+  url: https://conda.anaconda.org/conda-forge/win-64/numpy-1.26.4-py312h8753938_0.conda
+  sha256: 73570817a5109d396b4ebbe5124a89525959269fd33fa33fd413700289fbe0ef
+  md5: f9ac74c3b07c396014434aca1e58d362
   depends:
   - libblas >=3.9.0,<4.0a0
   - libcblas >=3.9.0,<4.0a0
@@ -4595,8 +4595,8 @@ packages:
   license_family: BSD
   purls:
   - pkg:pypi/numpy?source=hash-mapping
-  size: 6889345
-  timestamp: 1724749766610
+  size: 6495445
+  timestamp: 1707226412944
 - kind: pypi
   name: opencv-python
   version: 4.10.0.84

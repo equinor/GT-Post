@@ -2,15 +2,18 @@ import json
 import logging
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 
 from gtpost.experimental import segmentation_utils
 from gtpost.model import ModelResult
 from gtpost.utils import get_current_time, get_template_name
 from gtpost.visualize import colormaps
+from gtpost.analyze import surface
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+matplotlib.use("TkAgg")
 
 
 def main(
@@ -56,12 +59,13 @@ def main(
         f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
     )
     logger.info(f"{get_current_time()}: Starting processing")
-    modelresult.process()
+    modelresult.slope = surface.slope(modelresult.bottom_depth)
+    # modelresult.process()
     logger.info(
         f"{get_current_time()}: Processing completed, creating training images..."
     )
 
-    for i in range(10, modelresult.timestep, every_nth_image):
+    for i in range(0, modelresult.timestep, every_nth_image):
         # masking_img is an image of the bathymetry that will be used to draw the training
         # image segmentation masks.
         masking_image = plt.imshow(
@@ -77,11 +81,11 @@ def main(
         training_image = segmentation_utils.arrays_to_8bit_rgb(
             [
                 modelresult.bottom_depth[i, :, :],
-                modelresult.d50[i, :, :],
-                modelresult.deposit_height[i, :, :],
+                modelresult.dataset["DM"].values[i, :, :],
+                modelresult.dataset["MAX_UV"].values[i, :, :],
             ],
-            [-5, 0, -1],
-            [20, 2, 1],
+            [0, 0, 0],
+            [12, 0.0005, 1],
         )
         plt.imsave(
             fpath_masking_images.joinpath(f"seg_image_{i}.png"),
@@ -100,11 +104,11 @@ def main(
         pred_image = segmentation_utils.arrays_to_8bit_rgb(
             [
                 modelresult.bottom_depth[i, :, :],
-                modelresult.d50[i, :, :],
-                modelresult.deposit_height[i, :, :],
+                modelresult.dataset["DM"].values[i, :, :],
+                modelresult.dataset["MAX_UV"].values[i, :, :],
             ],
-            [-5, 0, -1],
-            [20, 2, 1],
+            [0, 0, 0],
+            [12, 0.0005, 1],
         )
         plt.imsave(
             fpath_prediction_images.joinpath(f"seg_image_{i}.png"),
@@ -115,6 +119,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_028",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_028",
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrarbe_048_Reference",
+        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference",
     )
