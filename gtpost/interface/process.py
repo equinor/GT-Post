@@ -21,7 +21,7 @@ def main(
     ----------
     fpath_input : str | Path, optional
         Path with input, including at least the .sed file, config ini file, and most
-        importantly the trim.nc file with model results up to the last exported timstep.
+        importantly the trim.nc file with model results up to the last exported timestep.
         by default the relative path is "/data/input" within the container folder
         structure.
     fpath_output : str | Path, optional
@@ -69,6 +69,7 @@ def main(
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
     xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
     xsect_plotter.save_figures(fpath_output, "xsect_diameter")
+    (fpath_input / "temp.nc").unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
