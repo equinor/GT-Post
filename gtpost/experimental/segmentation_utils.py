@@ -10,6 +10,7 @@ from ultralytics import YOLO
 @dataclass
 class PredictionParams:
     unit_name: str
+    encoding: int
     min_confidence: float = 0.01
     max_instances: int = 99
 
@@ -38,7 +39,7 @@ def predict_units(
         for i, result in enumerate(results):
             if result.masks is not None:
                 array = result.masks.data.max(axis=0).values
-                mask_array[i, :, :][array == 1.0] = unit_index[0] + 1
+                mask_array[i, :, :][array == 1.0] = pc.encoding
         mask_arrays.append(mask_array)
     stacked_arrays = np.stack(mask_arrays)
     result = np.flip(stacked_arrays, axis=0)
@@ -64,6 +65,13 @@ def arrays_to_8bit_rgb(variables, min_values, max_values):
         normalized_variables.append(variable_normalized.astype(np.uint8))
     rgb_image = np.stack(normalized_variables, axis=2)
     return rgb_image
+
+
+def merge_arrays_in_order(list_of_arrays):
+    result = list_of_arrays[0].copy()
+    for next_layer in list_of_arrays[1:]:
+        result[next_layer != 0] = next_layer[next_layer != 0]
+    return result
 
 
 def export_image():

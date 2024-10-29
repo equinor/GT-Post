@@ -71,12 +71,12 @@ class ExperimentalArchelColormap(NamedTuple):
     alphas = [1, 1, 1, 1, 1]
     colors = [
         "snow",
-        "mediumseagreen",
+        "yellowgreen",
         "deepskyblue",
         "yellow",
-        "yellowgreen",
+        "turquoise",
     ]
-    labels = ["N/A", "Delta front", "Channel", "Mouth bar", "Delta top"]
+    labels = ["N/A", "Delta top", "Channel", "Mouth bar", "Delta front"]
     ticks = np.arange(0, 5)
     name = "Architectural elements"
     type = "categorical"
