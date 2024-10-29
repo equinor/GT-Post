@@ -9,6 +9,7 @@ from gtpost.experimental import segmentation_utils
 from gtpost.model import ModelResult
 from gtpost.utils import get_current_time, get_template_name
 from gtpost.visualize import colormaps
+from gtpost.analyze import surface
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -58,7 +59,8 @@ def main(
         f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
     )
     logger.info(f"{get_current_time()}: Starting processing")
-    modelresult.process()
+    modelresult.slope = surface.slope(modelresult.bottom_depth)
+    # modelresult.process()
     logger.info(
         f"{get_current_time()}: Processing completed, creating training images..."
     )
@@ -79,11 +81,11 @@ def main(
         training_image = segmentation_utils.arrays_to_8bit_rgb(
             [
                 modelresult.bottom_depth[i, :, :],
-                modelresult.d50[i, :, :],
-                modelresult.deposit_height[i, :, :],
+                modelresult.dataset["DM"].values[i, :, :],
+                modelresult.dataset["MAX_UV"].values[i, :, :],
             ],
-            [-5, 0, -1],
-            [20, 2, 1],
+            [0, 0, 0],
+            [12, 0.0005, 1],
         )
         plt.imsave(
             fpath_masking_images.joinpath(f"seg_image_{i}.png"),
@@ -102,11 +104,11 @@ def main(
         pred_image = segmentation_utils.arrays_to_8bit_rgb(
             [
                 modelresult.bottom_depth[i, :, :],
-                modelresult.d50[i, :, :],
-                modelresult.deposit_height[i, :, :],
+                modelresult.dataset["DM"].values[i, :, :],
+                modelresult.dataset["MAX_UV"].values[i, :, :],
             ],
-            [-5, 0, -1],
-            [20, 2, 1],
+            [0, 0, 0],
+            [12, 0.0005, 1],
         )
         plt.imsave(
             fpath_prediction_images.joinpath(f"seg_image_{i}.png"),
@@ -117,6 +119,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058_Reference",
-        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo",
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrarbe_058",
+        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Sobrarbe_058",
     )

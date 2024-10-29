@@ -136,6 +136,7 @@ class ModelResult:
             + self.subsidence_per_t
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
+        self.slope = surface.slope(self.dataset["MEAN_H1"].values)
 
     def complete_init_for_postprocess(self):
         """
