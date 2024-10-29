@@ -1,0 +1,7 @@
+path: \\?\UNC\storage011.directory.intra\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Instance segmentation\images_for_training_deltatop\YOLODataset
+train: images/train
+val: images/val
+test:
+
+names:
+    0: Delta area

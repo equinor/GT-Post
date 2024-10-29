@@ -1,0 +1,10 @@
+path: \\?\UNC\storage011.directory.intra\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Instance segmentation\images_for_training_deltafront\YOLODataset
+train: images/train
+val: images/val
+test:
+
+names:
+    0: Delta front
+    1: Delta area
+    2: Mouth bar
+    3: Channel
