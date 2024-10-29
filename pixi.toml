@@ -50,6 +50,7 @@ labelme2yolo = "*"
 torch = "*"
 torchvision = "*"
 ultralytics = ">=8.3.13, <9"
+gtpost = { path = ".", editable = true }
 
 [pypi-options]
 extra-index-urls = ["https://download.pytorch.org/whl/cu121"]

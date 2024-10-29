@@ -21,6 +21,13 @@ prediction_parameters_wave_dominated = [
     PredictionParams(unit_name="spit", max_instances=4, min_confidence=0.1),
 ]
 
+prediction_parameters_sobrarbe = [
+    PredictionParams(unit_name="Delta area", max_instances=1),
+    PredictionParams(unit_name="Delta front", max_instances=1),
+    PredictionParams(unit_name="Channel", max_instances=99, min_confidence=0.05),
+    PredictionParams(unit_name="Mouth bar", max_instances=10, min_confidence=0.02),
+]
+
 
 def tune():
     pass
@@ -85,7 +92,7 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
         fig.set_size_inches(1400 / float(dpi), 700 / float(dpi))
 
         ax1.imshow(
-            depth[i + 9, :, :],
+            depth[i, :, :],
             cmap=colormaps.BottomDepthColormap.cmap,
             interpolation="antialiased",
             interpolation_stage="rgba",
@@ -94,7 +101,7 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
         )
         ax2.imshow(
             prediction_result[i, :, :],
-            cmap=colormaps.WaveArchelColormap.cmap,
+            cmap=colormaps.ExperimentalArchelColormap.cmap,
             interpolation="antialiased",
             interpolation_stage="rgba",
         )
@@ -112,7 +119,9 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
 
 
 if __name__ == "__main__":
-    # model = YOLO(r"c:\Users\onselen\Development\D3D_Geotool\GT-Post\gtpost\experimental\pretrained_yolo_models\yolo11m-seg.pt")
+    # model = YOLO(
+    #     r"c:\Users\onselen\Development\D3D_Geotool\GT-Post\gtpost\experimental\pretrained_yolo_models\yolo11m-seg.pt"
+    # )
     # # results = model.tune(
     # #     data=r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\training_images_customrgb_4classes\YOLODataset\dataset.yaml",
     # #     epochs=30,
@@ -125,7 +134,7 @@ if __name__ == "__main__":
     # #     val=False,
     # # )
     # results = model.train(
-    #     data=r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\training_images_customrgb_4classes\YOLODataset\dataset.yaml",
+    #     data=r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference\images_for_training\YOLODataset\dataset.yaml",
     #     epochs=100,
     #     imgsz=282,
     #     device="cpu",
@@ -153,15 +162,15 @@ if __name__ == "__main__":
     #     mixup=0.0,
     #     copy_paste=0.0,
     # )
-    image_folder = r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\prediction_images_customrgb"
+    image_folder = r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference\prediction_images"
     model = YOLO(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\trained_yolo_models\best.pt"
+        r"c:\Users\onselen\Development\GT-Post\runs\segment\train2\weights\best.pt"
     )
     # result = None
-    result = predict(image_folder, model, 282, prediction_parameters_wave_dominated)
+    result = predict(image_folder, model, 282, prediction_parameters_sobrarbe)
     prediction_bathymetry_figure(
         result,
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_030",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\segmentation_results_2",
+        r"p:\11209074-002-geotool-new-deltas\01_modelling\Sobrarbe_048_Reference",
+        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference\segmentation_results",
     )
     print(1)

@@ -119,6 +119,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrarbe_048_Reference",
-        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference",
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrarbe_058",
+        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Sobrarbe_058",
     )
