@@ -21,38 +21,65 @@ default_yolo_model = Path(__file__).parent.joinpath(
 
 matplotlib.use("TkAgg")
 
-prediction_parameters_wave_dominated = [
-    PredictionParams(unit_name="delta", encoding=1, max_instances=1),
-    PredictionParams(unit_name="upper_shoreface", encoding=2, max_instances=1),
-    PredictionParams(unit_name="main_channel", encoding=3, max_instances=2),
-    PredictionParams(unit_name="spit", encoding=4, max_instances=4, min_confidence=0.1),
-]
+# prediction_parameters_wave_dominated = [
+#     PredictionParams(unit_name="delta", encoding=1, max_instances=1),
+#     PredictionParams(unit_name="upper_shoreface", encoding=2, max_instances=1),
+#     PredictionParams(unit_name="main_channel", encoding=3, max_instances=2),
+#     PredictionParams(unit_name="spit", encoding=4, max_instances=4, min_confidence=0.1),
+# ]
 
-prediction_parameters_sobrarbe = [
-    PredictionParams(unit_name="Delta area", encoding=1, max_instances=1),
-    PredictionParams(unit_name="Delta front", encoding=2, max_instances=1),
-    PredictionParams(
-        unit_name="Channel", encoding=3, max_instances=99, min_confidence=0.05
-    ),
-    PredictionParams(
-        unit_name="Mouth bar", encoding=4, max_instances=10, min_confidence=0.02
-    ),
-]
+# prediction_parameters_sobrarbe = [
+#     PredictionParams(unit_name="Delta area", encoding=1, max_instances=1),
+#     PredictionParams(unit_name="Delta front", encoding=2, max_instances=1),
+#     PredictionParams(
+#         unit_name="Channel", encoding=3, max_instances=99, min_confidence=0.05
+#     ),
+#     PredictionParams(
+#         unit_name="Mouth bar", encoding=4, max_instances=10, min_confidence=0.02
+#     ),
+# ]
 
 prediction_parameters_delta_top = [
-    PredictionParams(unit_name="Delta area", encoding=1, max_instances=1),
+    PredictionParams(
+        unit_name="Delta area",
+        encoding=1,
+        trained_model=Path(__file__).parent.joinpath(
+            "trained_yolo_models/best_deltatop.pt"
+        ),
+        max_instances=1,
+    ),
 ]
 
 prediction_parameters_delta_front = [
-    PredictionParams(unit_name="Delta front", encoding=4, max_instances=1),
+    PredictionParams(
+        unit_name="Delta front",
+        encoding=4,
+        trained_model=Path(__file__).parent.joinpath(
+            "trained_yolo_models/best_deltafront.pt"
+        ),
+        max_instances=4,
+        min_confidence=0.1,
+    ),
 ]
 
 prediction_parameters_ch_mb = [
     PredictionParams(
-        unit_name="Channel", encoding=2, max_instances=99, min_confidence=0.05
+        unit_name="Channel",
+        encoding=2,
+        trained_model=Path(__file__).parent.joinpath(
+            "trained_yolo_models/best_ch_mb.pt"
+        ),
+        max_instances=99,
+        min_confidence=0.12,
     ),
     PredictionParams(
-        unit_name="Mouth bar", encoding=3, max_instances=99, min_confidence=0.1
+        unit_name="Mouth bar",
+        encoding=3,
+        trained_model=Path(__file__).parent.joinpath(
+            "trained_yolo_models/best_ch_mb.pt"
+        ),
+        max_instances=99,
+        min_confidence=0.16,
     ),
 ]
 
@@ -118,12 +145,13 @@ def train(
 
 def predict(
     image_folder: str | WindowsPath,
-    trained_yolo_model: YOLO,
+    prediction_parameters: PredictionParams | list[PredictionParams],
     imgsz: int,
-    parameter_classes,
 ) -> np.array:
+    if isinstance(prediction_parameters, PredictionParams):
+        prediction_parameters = [prediction_parameters]
     images = sorted([str(f) for f in Path(image_folder).glob("*.png")])
-    prediction = predict_units(images, trained_yolo_model, imgsz, parameter_classes)
+    prediction = predict_units(images, prediction_parameters, imgsz)
     return prediction
 
 
@@ -192,26 +220,17 @@ if __name__ == "__main__":
     #     288,
     # )
 
-    image_folder = r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference\prediction_images"
-    model_dt = YOLO(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\trained_yolo_models\best_deltatop.pt"
-    )
-    model_df = YOLO(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\trained_yolo_models\best_deltafront.pt"
-    )
-    model_ch_mb = YOLO(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\trained_yolo_models\best_ch_mb.pt"
-    )
+    image_folder = r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo\prediction_images"
     # result = None
-    result_dt = predict(image_folder, model_dt, 282, prediction_parameters_delta_top)
-    result_df = predict(image_folder, model_df, 282, prediction_parameters_delta_front)
-    result_ch_mb = predict(image_folder, model_ch_mb, 282, prediction_parameters_ch_mb)
+    result_dt = predict(image_folder, prediction_parameters_delta_top, 282)
+    result_df = predict(image_folder, prediction_parameters_delta_front, 282)
+    result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
 
     result = merge_arrays_in_order([result_dt, result_df, result_ch_mb])
 
     prediction_bathymetry_figure(
         result,
-        r"p:\11209074-002-geotool-new-deltas\01_modelling\Sobrarbe_048_Reference",
-        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference\segmentation_results_dt",
+        r"p:\11209074-002-geotool-new-deltas\01_modelling\Roda_058_Reference",
+        r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo\segmentation_result",
     )
     print(1)

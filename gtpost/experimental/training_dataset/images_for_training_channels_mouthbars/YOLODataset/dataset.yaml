@@ -4,5 +4,5 @@ val: images/val
 test:
 
 names:
-    0: Channel
-    1: Mouth bar
+    0: Mouth bar
+    1: Channel

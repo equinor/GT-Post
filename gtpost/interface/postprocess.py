@@ -57,29 +57,29 @@ def main(
     logger.info(f"{get_current_time()}: Starting postprocessing")
     modelresult.postprocess()
     logger.info(f"{get_current_time()}: Postprocessing completed, exporting data...")
-    modelresult.export_sediment_and_object_data(
-        fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
-    )
-    logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname + '_sed_and_obj_data.nc'}"
-    )
+    # modelresult.export_sediment_and_object_data(
+    #     fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
+    # )
+    # logger.info(
+    #     f"{get_current_time()}: Created {modelresult.modelname + '_sed_and_obj_data.nc'}"
+    # )
 
-    with open(
-        fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"
-    ) as f:
-        json.dump(
-            modelresult.delta_stats,
-            f,
-        )
-    logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname + '_statistics_summary.json'}"
-    )
+    # with open(
+    #     fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"
+    # ) as f:
+    #     json.dump(
+    #         modelresult.delta_stats,
+    #         f,
+    #     )
+    # logger.info(
+    #     f"{get_current_time()}: Created {modelresult.modelname + '_statistics_summary.json'}"
+    # )
 
-    # Summary plot
-    logger.info(f"{get_current_time()}: Plotting stats")
-    stat_plotter = plot.StatPlot(modelresult)
-    stat_plotter.plot_histograms()
-    stat_plotter.save_figures(fpath_output, "archel_summary")
+    # # Summary plot
+    # logger.info(f"{get_current_time()}: Plotting stats")
+    # stat_plotter = plot.StatPlot(modelresult)
+    # stat_plotter.plot_histograms()
+    # stat_plotter.save_figures(fpath_output, "archel_summary")
 
     # Map plots
     logger.info(f"{get_current_time()}: Plotting archel maps")
@@ -102,12 +102,15 @@ def main(
     )
     xsect_plotter.save_figures(fpath_output, "xsect_archels")
 
-    logger.info(f"{get_current_time()}: Plotting deposition age x-sections")
-    xsect_plotter.twopanel_xsection(
-        "bottom_depth", "deposition_age", only_last_timestep=True
-    )
-    xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
+    # logger.info(f"{get_current_time()}: Plotting deposition age x-sections")
+    # xsect_plotter.twopanel_xsection(
+    #     "bottom_depth", "deposition_age", only_last_timestep=True
+    # )
+    # xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
 
 
 if __name__ == "__main__":
-    main()
+    main(
+        r"p:\11209074-002-geotool-new-deltas\01_modelling\Sobrarbe_048_Reference",
+        r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference_integtest",
+    )

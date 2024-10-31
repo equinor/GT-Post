@@ -5,11 +5,11 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 
+from gtpost.analyze import surface
 from gtpost.experimental import segmentation_utils
 from gtpost.model import ModelResult
 from gtpost.utils import get_current_time, get_template_name
 from gtpost.visualize import colormaps
-from gtpost.analyze import surface
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -119,6 +119,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Sobrarbe_058",
-        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Sobrarbe_058",
+        r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058_Reference",
+        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo",
     )

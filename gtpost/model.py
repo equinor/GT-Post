@@ -6,6 +6,7 @@ import numpy as np
 import xarray as xr
 
 import gtpost.utils as utils
+from gtpost.experimental import detect_archels
 from gtpost.analyze import layering, sediment, statistics, surface
 from gtpost.analyze.classifications import sorting_classifier
 from gtpost.io import export, read_d3d_input
@@ -43,7 +44,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset  # .isel(time=slice(0, 100))  # time slice for testing
+        self.dataset = dataset.isel(time=slice(0, 100))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -249,16 +250,17 @@ class ModelResult:
         -------
         None (attribute architectural_elements is created)
         """
-        self.architectural_elements = surface.detect_elements(
-            self.subenvironment,
-            self.channels,
-            self.channel_skeleton,
-            self.bottom_depth,
-            self.deposit_height,
-            self.sandfraction,
-            self.foreset_depth,
-            self.config,
-        )
+        self.architectural_elements = detect_archels.detect(self)
+        # self.architectural_elements = surface.detect_elements(
+        #     self.subenvironment,
+        #     self.channels,
+        #     self.channel_skeleton,
+        #     self.bottom_depth,
+        #     self.deposit_height,
+        #     self.sandfraction,
+        #     self.foreset_depth,
+        #     self.config,
+        # )
 
     def compute_sediment_parameters(self):
         """
@@ -370,10 +372,10 @@ class ModelResult:
         - Detect architectural elements
         """
         self.compute_sediment_parameters()
-        self.detect_subenvironments()
-        self.detect_channel_network()
+        # self.detect_subenvironments()
+        # self.detect_channel_network()
         self.detect_architectural_elements()
-        self.statistics_summary()
+        # self.statistics_summary()
 
     def export_sediment_and_object_data(self, out_file: str | Path):
         ds = export.create_sed_and_obj_dataset(self)

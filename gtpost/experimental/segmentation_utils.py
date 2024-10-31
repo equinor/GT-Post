@@ -11,25 +11,27 @@ from ultralytics import YOLO
 class PredictionParams:
     unit_name: str
     encoding: int
+    trained_model: YOLO
     min_confidence: float = 0.01
     max_instances: int = 99
 
 
 def predict_units(
     images: list[str],
-    trained_model: YOLO,
+    prediction_parameters: list[PredictionParams],
     imgsz: int,
-    parameter_classes: list[PredictionParams],
 ):
     mask_arrays = []
-    for pc in tqdm(parameter_classes):
-        unit_index = [n[0] for n in trained_model.names.items() if n[1] == pc.unit_name]
-        results = trained_model.predict(
+    for pp in tqdm(prediction_parameters):
+        unit_index = [
+            n[0] for n in pp.trained_model.names.items() if n[1] == pp.unit_name
+        ]
+        results = pp.trained_model.predict(
             images,
             save=False,
             imgsz=imgsz,
-            conf=pc.min_confidence,
-            max_det=pc.max_instances,
+            conf=pp.min_confidence,
+            max_det=pp.max_instances,
             show_boxes=False,
             retina_masks=True,
             classes=unit_index,
@@ -39,7 +41,7 @@ def predict_units(
         for i, result in enumerate(results):
             if result.masks is not None:
                 array = result.masks.data.max(axis=0).values
-                mask_array[i, :, :][array == 1.0] = pc.encoding
+                mask_array[i, :, :][array == 1.0] = pp.encoding
         mask_arrays.append(mask_array)
     stacked_arrays = np.stack(mask_arrays)
     result = np.flip(stacked_arrays, axis=0)
@@ -57,6 +59,7 @@ def predict_units(
 def arrays_to_8bit_rgb(variables, min_values, max_values):
     normalized_variables = []
     for variable, min_value, max_value in zip(variables, min_values, max_values):
+        variable = variable.copy()
         variable[variable < min_value] = min_value
         variable[variable > max_value] = max_value
         variable_normalized = np.floor(
