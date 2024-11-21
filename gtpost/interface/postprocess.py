@@ -76,10 +76,10 @@ def main(
     # )
 
     # # Summary plot
-    # logger.info(f"{get_current_time()}: Plotting stats")
-    # stat_plotter = plot.StatPlot(modelresult)
-    # stat_plotter.plot_histograms()
-    # stat_plotter.save_figures(fpath_output, "archel_summary")
+    logger.info(f"{get_current_time()}: Plotting stats")
+    stat_plotter = plot.StatPlot(modelresult)
+    stat_plotter.plot_histograms()
+    stat_plotter.save_figures(fpath_output, "archel_summary")
 
     # Map plots
     logger.info(f"{get_current_time()}: Plotting archel maps")
@@ -89,7 +89,10 @@ def main(
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
-    xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
+    xsect_end = (
+        modelresult.mouth_position[1] + 120,
+        modelresult.mouth_position[0],
+    )
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
@@ -111,6 +114,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11209074-002-geotool-new-deltas\01_modelling\Sobrarbe_048_Reference",
-        r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference_integtest",
+        r"p:\11209074-002-geotool-new-deltas\01_modelling\Roda_058_Reference",
+        r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Roda_058_Reference_integtest",
     )

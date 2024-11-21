@@ -3,13 +3,14 @@ from pathlib import Path, WindowsPath
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.gridspec import GridSpec
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ultralytics import YOLO
 
 from gtpost.analyze import classifications
 from gtpost.experimental import segmentation_utils
-from gtpost.experimental.segmentation_utils import PredictionParams
+from gtpost.experimental.segmentation_utils import (
+    PredictionImageParams,
+    PredictionParams,
+)
 
 type ModelResult = None
 
@@ -20,6 +21,7 @@ prediction_images_temp_folder = Path(__file__).parent.joinpath(
 prediction_parameters_delta_top = [
     PredictionParams(
         unit_name="Delta area",
+        string_code="dt",
         encoding=1,
         trained_model=YOLO(
             Path(__file__).parent.joinpath("trained_yolo_models/best_deltatop.pt")
@@ -31,6 +33,7 @@ prediction_parameters_delta_top = [
 prediction_parameters_delta_front = [
     PredictionParams(
         unit_name="Delta front",
+        string_code="df",
         encoding=5,
         trained_model=YOLO(
             Path(__file__).parent.joinpath("trained_yolo_models/best_deltafront.pt")
@@ -43,6 +46,7 @@ prediction_parameters_delta_front = [
 prediction_parameters_ch_mb = [
     PredictionParams(
         unit_name="Channel",
+        string_code="ch",
         encoding=3,
         trained_model=YOLO(
             Path(__file__).parent.joinpath("trained_yolo_models/best_ch_mb.pt")
@@ -52,6 +56,7 @@ prediction_parameters_ch_mb = [
     ),
     PredictionParams(
         unit_name="Mouth bar",
+        string_code="mb",
         encoding=4,
         trained_model=YOLO(
             Path(__file__).parent.joinpath("trained_yolo_models/best_ch_mb.pt")
@@ -94,6 +99,21 @@ def predict(
     return prediction
 
 
+def constrain_ch_mb(modelresult: ModelResult, prediction_result: np.ndarray):
+    # Water depth must be > 1 m to justify a channel prediction
+    prediction_result[
+        (prediction_result == classifications.ArchEl.channel.value)
+        & (modelresult.bottom_depth < 0.5)
+    ] = 0
+
+    # Limit the depth at which mouth bars are expected, based on the delta front depth
+    prediction_result[
+        (prediction_result == classifications.ArchEl.mouthbar.value)
+        & (modelresult.bottom_depth > 5)
+    ] = 0
+    return prediction_result
+
+
 def postprocess_result(
     modelresult: ModelResult, prediction_result: np.ndarray, delta_top_division=1
 ):
@@ -101,6 +121,8 @@ def postprocess_result(
     prediction_result[
         (prediction_result == 1) & (modelresult.bottom_depth > delta_top_division)
     ] = classifications.ArchEl.dtaqua.value
+
+    # Turn the rest of the domain below a certain depth to prodelta
     prediction_result[(prediction_result == 0) & (modelresult.bottom_depth > 4)] = (
         classifications.ArchEl.prodelta.value
     )
@@ -121,6 +143,7 @@ def detect(modelresult: ModelResult):
     result_ch_mb = predict(
         prediction_images_temp_folder, prediction_parameters_ch_mb, imgsz
     )
+    result_ch_mb = constrain_ch_mb(modelresult, result_ch_mb)
     result = segmentation_utils.merge_arrays_in_order(
         [result_dt, result_df, result_ch_mb]
     )

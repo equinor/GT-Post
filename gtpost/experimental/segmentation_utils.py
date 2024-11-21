@@ -8,8 +8,23 @@ from ultralytics import YOLO
 
 
 @dataclass
+class PredictionImageParams:
+    is_postprocessing_result: bool
+    param_red: str
+    param_green: str
+    param_blue: str
+    param_red_min: float
+    param_green_min: float
+    param_blue_min: float
+    param_red_max: float
+    param_green_max: float
+    param_blue_max: float
+
+
+@dataclass
 class PredictionParams:
     unit_name: str
+    string_code: str
     encoding: int
     trained_model: YOLO
     min_confidence: float = 0.01

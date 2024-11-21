@@ -6,9 +6,9 @@ import numpy as np
 import xarray as xr
 
 import gtpost.utils as utils
-from gtpost.experimental import detect_archels
 from gtpost.analyze import layering, sediment, statistics, surface
 from gtpost.analyze.classifications import sorting_classifier
+from gtpost.experimental import detect_archels
 from gtpost.io import export, read_d3d_input
 
 default_settings_file = (
@@ -44,7 +44,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset.isel(time=slice(0, 100))  # time slice for testing
+        self.dataset = dataset  # .isel(time=slice(0, 100))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -361,7 +361,7 @@ class ModelResult:
 
         - Compute sediment parameters
         """
-        self.compute_sediment_parameters()
+        # self.compute_sediment_parameters()
 
     def postprocess(self):
         """
@@ -375,7 +375,7 @@ class ModelResult:
         # self.detect_subenvironments()
         # self.detect_channel_network()
         self.detect_architectural_elements()
-        # self.statistics_summary()
+        self.statistics_summary()
 
     def export_sediment_and_object_data(self, out_file: str | Path):
         ds = export.create_sed_and_obj_dataset(self)

@@ -60,7 +60,7 @@ def main(
     )
     logger.info(f"{get_current_time()}: Starting processing")
     modelresult.slope = surface.slope(modelresult.bottom_depth)
-    # modelresult.process()
+    modelresult.process()
     logger.info(
         f"{get_current_time()}: Processing completed, creating training images..."
     )
@@ -82,10 +82,10 @@ def main(
             [
                 modelresult.bottom_depth[i, :, :],
                 modelresult.dataset["DM"].values[i, :, :],
-                modelresult.dataset["MAX_UV"].values[i, :, :],
+                modelresult.deposit_height[i, :, :],
             ],
-            [0, 0, 0],
-            [12, 0.0005, 1],
+            [0, 0.0001, -0.2],
+            [12, 0.0006, 0.2],
         )
         plt.imsave(
             fpath_masking_images.joinpath(f"seg_image_{i}.png"),
@@ -105,10 +105,10 @@ def main(
             [
                 modelresult.bottom_depth[i, :, :],
                 modelresult.dataset["DM"].values[i, :, :],
-                modelresult.dataset["MAX_UV"].values[i, :, :],
+                modelresult.deposit_height[i, :, :],
             ],
-            [0, 0, 0],
-            [12, 0.0005, 1],
+            [0, 0.0001, -0.2],
+            [12, 0.0006, 0.2],
         )
         plt.imsave(
             fpath_prediction_images.joinpath(f"seg_image_{i}.png"),
@@ -120,5 +120,5 @@ def main(
 if __name__ == "__main__":
     main(
         r"p:\11209074-002-Geotool-new-deltas\01_modelling\Roda_058_Reference",
-        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo",
+        r"p:\11209074-002-Geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo_df",
     )

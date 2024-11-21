@@ -42,9 +42,10 @@ matplotlib.use("TkAgg")
 prediction_parameters_delta_top = [
     PredictionParams(
         unit_name="Delta area",
+        string_code="dt",
         encoding=1,
-        trained_model=Path(__file__).parent.joinpath(
-            "trained_yolo_models/best_deltatop.pt"
+        trained_model=YOLO(
+            Path(__file__).parent.joinpath("trained_yolo_models/best_deltatop.pt")
         ),
         max_instances=1,
     ),
@@ -53,33 +54,36 @@ prediction_parameters_delta_top = [
 prediction_parameters_delta_front = [
     PredictionParams(
         unit_name="Delta front",
-        encoding=4,
-        trained_model=Path(__file__).parent.joinpath(
-            "trained_yolo_models/best_deltafront.pt"
+        string_code="df",
+        encoding=5,
+        trained_model=YOLO(
+            Path(__file__).parent.joinpath("trained_yolo_models/best_deltafront.pt")
         ),
         max_instances=4,
-        min_confidence=0.1,
+        min_confidence=0.25,
     ),
 ]
 
 prediction_parameters_ch_mb = [
     PredictionParams(
         unit_name="Channel",
-        encoding=2,
-        trained_model=Path(__file__).parent.joinpath(
-            "trained_yolo_models/best_ch_mb.pt"
+        string_code="ch",
+        encoding=3,
+        trained_model=YOLO(
+            Path(__file__).parent.joinpath("trained_yolo_models/best_ch_mb.pt")
         ),
         max_instances=99,
-        min_confidence=0.12,
+        min_confidence=0.25,
     ),
     PredictionParams(
         unit_name="Mouth bar",
-        encoding=3,
-        trained_model=Path(__file__).parent.joinpath(
-            "trained_yolo_models/best_ch_mb.pt"
+        string_code="mb",
+        encoding=4,
+        trained_model=YOLO(
+            Path(__file__).parent.joinpath("trained_yolo_models/best_ch_mb.pt")
         ),
         max_instances=99,
-        min_confidence=0.16,
+        min_confidence=0.25,
     ),
 ]
 
