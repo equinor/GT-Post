@@ -44,7 +44,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset  # .isel(time=slice(0, 100))  # time slice for testing
+        self.dataset = dataset  # .isel(time=slice(0, 20))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -101,6 +101,7 @@ class ModelResult:
 
         shutil.copyfile(trimfile, folder / "temp.nc")
         dataset = xr.open_dataset(folder / "temp.nc")
+        dataset = xr.open_dataset(trimfile)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
@@ -129,16 +130,22 @@ class ModelResult:
             self.dataset.M.values,
         )
         self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
-        self.subsidence_per_t = np.diff(self.dataset["SDU"].values, axis=0)[0, :, :]
+        subsidence = np.append(
+            self.dataset["SDU"].values,
+            self.dataset["SDU"].values[-1, :, :][np.newaxis, ...],
+            axis=0,
+        )
+        self.subsidence_per_t = np.diff(subsidence, axis=0)
         self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
         self.deposit_height[1:, :, :] = -(
             (
                 self.dataset["DPS"].values[1:, :, :]
                 - self.dataset["DPS"].values[:-1, :, :]
             )
-            + self.subsidence_per_t
+            + self.subsidence_per_t[1:, :, :]
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
+        print(utils.log_memory_usage())
 
     def complete_init_for_postprocess(self):
         """
@@ -166,14 +173,19 @@ class ModelResult:
         self.model_boundary = utils.get_model_bound(
             self.dataset["MEAN_H1"][1, :, :].values
         )
-        self.subsidence_per_t = np.diff(self.dataset["SDU"].values, axis=0)[0, :, :]
+        subsidence = np.append(
+            self.dataset["SDU"].values,
+            self.dataset["SDU"].values[-1, :, :][np.newaxis, ...],
+            axis=0,
+        )
+        self.subsidence_per_t = np.diff(subsidence, axis=0)
         self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
         self.deposit_height[1:, :, :] = -(
             (
                 self.dataset["DPS"].values[1:, :, :]
                 - self.dataset["DPS"].values[:-1, :, :]
             )
-            + self.subsidence_per_t
+            + self.subsidence_per_t[1:, :, :]
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
         self.dataset["MEAN_H1"] = self.dataset.MEAN_H1.where(self.dataset.MEAN_H1 > -50)
@@ -262,7 +274,7 @@ class ModelResult:
             self.config,
         )
 
-    def compute_sediment_parameters(self):
+    def compute_sediment_parameters_postprocessing(self):
         """
         Compute sediment parameters. Add the following attributes ModelResult:
 
@@ -298,6 +310,42 @@ class ModelResult:
         )
         self.sorting = sediment.calculate_sorting(self.diameters, percentage2cal)
         self.d50 = self.diameters[:, :, :, 3]
+
+    def compute_sediment_parameters_processing(self):
+        """
+        Compute sediment parameters. Add the following attributes ModelResult:
+
+        Simplidied for the processing step, which only requires D50 as end result.
+
+        diameters           :       np.ndarray: D50 array (time, x, y)
+
+        Returns
+        -------
+        None (but the above attributes are added to the instance)
+        """
+        percentage2cal = [50]
+        self.dmsedcum_final = self.dataset["DMSEDCUM"].values
+        # FUTURE DASK SOLUTION HERE
+        # self.dmsedcum_final.map_blocks(
+        #     sediment.calculate_fraction,
+        # )
+        # Only the incoming sediment flux determines the composition of potential
+        # deposits, so remove fluxes of sediment classes that are negative.
+        self.dmsedcum_final[self.dmsedcum_final < 0] = 0
+        self.vfraction = sediment.calculate_fraction(self.rho_db, self.dmsedcum_final)
+
+        self.zcor = -self.dataset["DPS"].values
+        self.preserved_thickness, self.deposition_age = layering.preservation(
+            self.zcor, self.dataset["SDU"].values, self.deposit_height
+        )
+
+        print(utils.log_memory_usage())
+        self.diameters, _, _ = sediment.calculate_diameter(
+            np.asarray(self.d50_input, dtype=np.float32),
+            np.asarray(percentage2cal, dtype=np.float32),
+            self.vfraction,
+        )
+        self.d50 = self.diameters[:, :, :, 0]
 
     def statistics_summary(self):
         """
@@ -361,7 +409,7 @@ class ModelResult:
 
         - Compute sediment parameters
         """
-        self.compute_sediment_parameters()
+        self.compute_sediment_parameters_processing()
 
     def postprocess(self):
         """
@@ -371,7 +419,7 @@ class ModelResult:
         - Detect subenvironments
         - Detect architectural elements
         """
-        self.compute_sediment_parameters()
+        self.compute_sediment_parameters_postprocessing()
         self.detect_subenvironments()
         self.detect_channel_network()
         self.detect_architectural_elements()

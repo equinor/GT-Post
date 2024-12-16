@@ -42,6 +42,7 @@ dependencies = [
     "shapely",
     "h5netcdf",
     "mako",
+    "psutil",
 ]
 
 

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from gtpost.model import ModelResult
-from gtpost.utils import get_current_time, get_template_name
+from gtpost.utils import get_current_time, get_template_name, log_memory_usage
 from gtpost.visualize import plot
 
 logger = logging.getLogger(__name__)
@@ -36,6 +36,7 @@ def main(
     """
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
+    logger.info(log_memory_usage())
 
     template_name = get_template_name(fpath_input)
     settings_file = (
@@ -64,6 +65,8 @@ def main(
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
+    # xsect_start = (160, 160)
+    # xsect_end = (280, 160)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")

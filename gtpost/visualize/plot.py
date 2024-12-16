@@ -139,7 +139,7 @@ class PlotBase:
         caxis = self.cax[axis_idx]
 
         for i, x in enumerate(self.anchor_x):
-            subsidence = self.dsub[i]
+            subsidence = self.dsub[timestep, i]
             absolute_bed_chg = self.dh[timestep, i]
             current_surface = self.anchor_y[timestep, i]
 
@@ -355,7 +355,9 @@ class PlotBase:
             for i, f in enumerate(self.figures):
                 f.savefig(Path(path) / f"{name}_{i:04}.png")
         else:
-            self.figures[0].savefig(Path(path) / f"{name}_{self.model.timestep:04}.png")
+            self.figures[0].savefig(
+                Path(path) / f"{name}_{self.model.timestep-1:04}.png"
+            )
 
 
 class CrossSectionPlot(PlotBase):
@@ -370,7 +372,7 @@ class CrossSectionPlot(PlotBase):
             -self.model.dataset["DPS"][:, self.xc, self.yc].values, axis1=1, axis2=2
         )
         self.dh = self.model.deposit_height[:, self.xc, self.yc]
-        self.dsub = self.model.subsidence_per_t[self.xc, self.yc]
+        self.dsub = self.model.subsidence_per_t[:, self.xc, self.yc]
         self.preserved = self.model.preserved_thickness[:, self.xc, self.yc]
         self.width = 1
         self.xlim = [self.anchor_x[0], self.anchor_x[-1]]

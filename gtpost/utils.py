@@ -4,11 +4,18 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
+import psutil
 from rasterio.features import rasterize
 from shapely import buffer
 from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import nearest_points
 from skimage import measure
+
+
+def log_memory_usage():
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    return f"Memory usage: {mem_info.rss / (1024 ** 2):.2f} MB"
 
 
 def get_current_time():
