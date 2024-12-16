@@ -93,6 +93,8 @@ def main(
         modelresult.mouth_position[1] + 120,
         modelresult.mouth_position[0],
     )
+    xsect_start = (90, 130)
+    xsect_end = (160, 130)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
@@ -105,15 +107,15 @@ def main(
     )
     xsect_plotter.save_figures(fpath_output, "xsect_archels")
 
-    # logger.info(f"{get_current_time()}: Plotting deposition age x-sections")
-    # xsect_plotter.twopanel_xsection(
-    #     "bottom_depth", "deposition_age", only_last_timestep=True
-    # )
-    # xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
+    logger.info(f"{get_current_time()}: Plotting deposition age x-sections")
+    xsect_plotter.twopanel_xsection(
+        "bottom_depth", "deposition_age", only_last_timestep=True
+    )
+    xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
 
 
 if __name__ == "__main__":
     main(
-        r"p:\11209074-002-geotool-new-deltas\01_modelling\Roda_058_Reference",
-        r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Roda_058_Reference_integtest",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf",
     )
