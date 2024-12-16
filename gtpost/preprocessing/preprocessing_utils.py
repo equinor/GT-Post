@@ -127,7 +127,7 @@ def write_ini(root: str | Path = "/data/input"):
     folders = ["simulation", "preprocess", "process", "postprocess", "export"]
 
     # Create ini file for containers
-    config = SafeConfigParser()
+    config = SafeConfigParser(interpolation=None)
     for section in parameters:
         if not config.has_section(section):
             config.add_section(section)

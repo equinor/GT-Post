@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from gtpost.model import ModelResult
-from gtpost.utils import get_current_time, get_template_name
+from gtpost.utils import get_current_time, get_template_name, log_memory_usage
 from gtpost.visualize import plot
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ def main(
     ----------
     fpath_input : str | Path, optional
         Path with input, including at least the .sed file, config ini file, and most
-        importantly the trim.nc file with model results up to the last exported timstep.
+        importantly the trim.nc file with model results up to the last exported timestep.
         by default the relative path is "/data/input" within the container folder
         structure.
     fpath_output : str | Path, optional
@@ -36,6 +36,7 @@ def main(
     """
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
+    logger.info(log_memory_usage())
 
     template_name = get_template_name(fpath_input)
     settings_file = (
@@ -64,11 +65,14 @@ def main(
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
+    # xsect_start = (160, 160)
+    # xsect_end = (280, 160)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
     xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
     xsect_plotter.save_figures(fpath_output, "xsect_diameter")
+    (fpath_input / "temp.nc").unlink(missing_ok=True)
 
 
 if __name__ == "__main__":

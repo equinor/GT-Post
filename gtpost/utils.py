@@ -4,11 +4,18 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
+import psutil
 from rasterio.features import rasterize
 from shapely import buffer
 from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import nearest_points
 from skimage import measure
+
+
+def log_memory_usage():
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    return f"Memory usage: {mem_info.rss / (1024 ** 2):.2f} MB"
 
 
 def get_current_time():
@@ -34,7 +41,7 @@ def get_template_name(input_path: str | Path) -> str:
     str
         Name of the D3D-GT template.
     """
-    input_ini = ConfigParser()
+    input_ini = ConfigParser(interpolation=None)
     input_ini.read(Path(input_path).joinpath("input.ini"))
     template_name = (
         input_ini["template"]["value"].lower().replace(" ", "_").replace("/", "_")

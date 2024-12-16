@@ -7,10 +7,7 @@ channels = ["conda-forge"]
 platforms = ["win-64"]
 
 [tasks]
-install = "python -m pip install --no-deps --editable ."
-test = { depends_on = [
-    "install",
-], cmd = "python -m pytest --verbose --cov=gtpost --cov-config=.coveragerc" }
+test = "python -m pytest --verbose --cov=gtpost --cov-config=.coveragerc"
 docs = "sphinx-build -b html docs ./docs/build"
 format = "black ."
 lint = "ruff check --fix ./gtpost"
@@ -44,12 +41,13 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 pip = "*"
 cuda-toolkit = "*"
+psutil = "*"
 
 [pypi-dependencies]
 labelme2yolo = "*"
 torch = "*"
 torchvision = "*"
-ultralytics = ">=8.3.13, <9"
+ultralytics = "*"
 gtpost = { path = ".", editable = true }
 
 [pypi-options]
