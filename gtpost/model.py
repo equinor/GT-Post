@@ -101,7 +101,6 @@ class ModelResult:
 
         shutil.copyfile(trimfile, folder / "temp.nc")
         dataset = xr.open_dataset(folder / "temp.nc")
-        dataset = xr.open_dataset(trimfile)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
