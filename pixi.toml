@@ -15,7 +15,7 @@ lint = "ruff check --fix ./gtpost"
 [dependencies]
 python = "3.12.*"
 numpy = "*"
-numba = "<0.60.0"
+numba = "*"
 pandas = "*"
 pillow = "*"
 tqdm = "*"
@@ -54,5 +54,5 @@ gtpost = { path = ".", editable = true }
 extra-index-urls = ["https://download.pytorch.org/whl/cu121"]
 
 [system-requirements]
-# cuda = "12.1"
+cuda = "12.1"
 
