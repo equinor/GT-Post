@@ -41,17 +41,18 @@ def calculate_fraction(rho_db, dmsedcum_final):
     old_err_state = np.seterr(divide="ignore", invalid="ignore")
 
     # derive the volumetric sed flux by dividing by dry bed density
-    dvsedcum = np.zeros_like(dmsedcum_final)
-    for stype in range(np.shape(dvsedcum)[1]):
-        dvsedcum[:, stype, :, :] = dmsedcum_final[:, stype, :, :] / rho_db[stype]
+    dvsedcum = dmsedcum_final / rho_db[:, np.newaxis, np.newaxis]
 
     dvsedcum[dmsedcum_final <= 0] = 0
     sumsedvcum = np.sum(dvsedcum, axis=1)
 
-    for stype in range(np.shape(dvsedcum)[1]):
-        vfraction[:, stype, :, :] = np.divide(dvsedcum[:, stype, :, :], sumsedvcum)
+    vfraction = np.divide(
+        dvsedcum,
+        sumsedvcum[:, np.newaxis, :, :],
+        where=sumsedvcum[:, np.newaxis, :, :] != 0,
+    )
     vfraction[np.isnan(vfraction) == 1] = 0
-    #        # go back to original error state
+    # go back to original error state
     np.seterr(**old_err_state)
     return vfraction
 

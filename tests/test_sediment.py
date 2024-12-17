@@ -13,7 +13,7 @@ class TestSediment:
 
     @pytest.fixture
     def rho_p(self):
-        return [2650.0, 2650.0, 2650.0, 2650.0, 2650.0, 2650.0]
+        return np.array([2650.0, 2650.0, 2650.0, 2650.0, 2650.0, 2650.0])
 
     @pytest.fixture
     def sedfile_line(self):
@@ -30,11 +30,11 @@ class TestSediment:
 
     @pytest.fixture
     def rho_db(self):
-        return [1600.0, 1600.0, 1600.0, 1600.0, 1600.0, 1600.0]
+        return np.array([1600.0, 1600.0, 1600.0, 1600.0, 1600.0, 1600.0])
 
     @pytest.fixture
     def d50input(self):
-        return [0.00141, 0.000707, 0.000354, 0.0002, 0.0001, 0.000043988]
+        return np.array([0.00141, 0.000707, 0.000354, 0.0002, 0.0001, 0.000043988])
 
     @pytest.fixture
     def vfraction(self):
