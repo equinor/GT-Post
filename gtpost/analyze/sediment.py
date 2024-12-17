@@ -159,7 +159,7 @@ def calculate_distribution(fraction_data, d50input):
     return (ynew, xnew, poros, perm)
 
 
-@numba.njit
+@numba.njit(parallel=True)
 def calculate_diameter(d50input, percentage2cal, vfraction):
     if len(vfraction.shape) == 4:
         nt, nlyr, nx, ny = vfraction.shape
@@ -170,9 +170,9 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
     diameters[0] = np.nan
     porosity[0] = np.nan
     permeability[0] = np.nan
-    for it in range(nt):
-        for ix in range(nx):
-            for iy in range(ny):
+    for it in numba.prange(nt):
+        for ix in numba.prange(nx):
+            for iy in numba.prange(ny):
                 fraction_data = vfraction[it, :, ix, iy]
                 # return the phi value needs to be changed back to meters
                 (

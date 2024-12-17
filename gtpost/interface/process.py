@@ -65,12 +65,12 @@ def main(
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
-    # xsect_start = (160, 160)
-    # xsect_end = (280, 160)
+    xsect_start = (15, 140)
+    xsect_end = (60, 140)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
-    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
+    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=False)
     xsect_plotter.save_figures(fpath_output, "xsect_diameter")
     (fpath_input / "temp.nc").unlink(missing_ok=True)
 
