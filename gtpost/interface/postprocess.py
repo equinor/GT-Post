@@ -42,6 +42,7 @@ def main(
     """
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
+    input_ini_file = fpath_input.joinpath("input.ini")
 
     template_name = get_template_name(fpath_input)
     settings_file = (
@@ -57,6 +58,15 @@ def main(
     logger.info(f"{get_current_time()}: Starting postprocessing")
     modelresult.postprocess()
     logger.info(f"{get_current_time()}: Postprocessing completed, exporting data...")
+
+    # Data export
+    modelresult.append_input_ini_file(
+        input_ini_file,
+        fpath_output.joinpath(modelresult.modelname + "_input_postprocessed.ini"),
+    )
+    logger.info(
+        f"{get_current_time()}: Created {modelresult.modelname + '_input_postprocessed.ini'}"
+    )
     modelresult.export_sediment_and_object_data(
         fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
     )

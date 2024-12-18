@@ -61,10 +61,10 @@ def create_sed_and_obj_dataset(p):
             ),
         ),
         subsidence=(
-            ("dimen_x", "dimen_y"),
-            p.subsidence_per_t,
+            ("dimen_t", "dimen_x", "dimen_y"),
+            p.subsidence,
             dict(
-                long_name="Subsidence in meter per timestep",
+                long_name="Subsidence in meter per timestep and location",
                 variable_type="D3D output",
                 units="meter",
             ),
@@ -170,13 +170,9 @@ def create_sed_and_obj_dataset(p):
         ),
     )
     ds = xr.Dataset(data_vars)
-    ds["subenv"].attrs["encoding"] = [
-        i.value for i in classifications.SubEnv.__iter__()
-    ]
-    ds["subenv"].attrs["names"] = [i.name for i in classifications.SubEnv.__iter__()]
-    ds["archel"].attrs["encoding"] = [
-        i.value for i in classifications.ArchEl.__iter__()
-    ]
-    ds["archel"].attrs["names"] = [i.name for i in classifications.ArchEl.__iter__()]
+    ds["subenv"].attrs["encoding"] = classifications.subenvironment_codes
+    ds["subenv"].attrs["names"] = classifications.subenvironment_names
+    ds["archel"].attrs["encoding"] = classifications.archel_codes
+    ds["archel"].attrs["names"] = classifications.archel_names
 
     return ds

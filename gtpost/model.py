@@ -7,8 +7,7 @@ import numpy as np
 import xarray as xr
 
 import gtpost.utils as utils
-from gtpost.analyze import layering, sediment, statistics, surface
-from gtpost.analyze.classifications import sorting_classifier
+from gtpost.analyze import classifications, layering, sediment, statistics, surface
 from gtpost.io import export, read_d3d_input
 
 default_settings_file = (
@@ -44,7 +43,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset  # .isel(time=slice(0, 20))  # time slice for testing
+        self.dataset = dataset.isel(time=slice(0, 120))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -99,9 +98,9 @@ class ModelResult:
         trimfile = [f for f in folder.glob("*.nc") if "trim" in f.name][0]
         modelname = delft3d_folder.stem + f" - {sedfile.stem}"
 
-        shutil.copyfile(trimfile, folder / "temp.nc")
-        dataset = xr.open_dataset(folder / "temp.nc")
-        # dataset = xr.open_dataset(trimfile)
+        # shutil.copyfile(trimfile, folder / "temp.nc")
+        # dataset = xr.open_dataset(folder / "temp.nc")
+        dataset = xr.open_dataset(trimfile)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
@@ -135,14 +134,14 @@ class ModelResult:
             self.dataset["SDU"].values[-1, :, :][np.newaxis, ...],
             axis=0,
         )
-        self.subsidence_per_t = np.diff(subsidence, axis=0)
+        self.subsidence = np.diff(subsidence, axis=0)
         self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
         self.deposit_height[1:, :, :] = -(
             (
                 self.dataset["DPS"].values[1:, :, :]
                 - self.dataset["DPS"].values[:-1, :, :]
             )
-            + self.subsidence_per_t[1:, :, :]
+            + self.subsidence[1:, :, :]
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
         print(utils.log_memory_usage())
@@ -178,14 +177,14 @@ class ModelResult:
             self.dataset["SDU"].values[-1, :, :][np.newaxis, ...],
             axis=0,
         )
-        self.subsidence_per_t = np.diff(subsidence, axis=0)
+        self.subsidence = np.diff(subsidence, axis=0)
         self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
         self.deposit_height[1:, :, :] = -(
             (
                 self.dataset["DPS"].values[1:, :, :]
                 - self.dataset["DPS"].values[:-1, :, :]
             )
-            + self.subsidence_per_t[1:, :, :]
+            + self.subsidence[1:, :, :]
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
         self.dataset["MEAN_H1"] = self.dataset.MEAN_H1.where(self.dataset.MEAN_H1 > -50)
@@ -380,27 +379,39 @@ class ModelResult:
             "delta_top_aerial_volume": self.archel_volumes[0],
             "delta_top_aerial_d50": archel_d50s[0],
             "delta_top_aerial_sandfraction": archel_fractions[0],
-            "delta_top_aerial_sorting": sorting_classifier(archel_sorting[0])[0],
+            "delta_top_aerial_sorting": classifications.sorting_classifier(
+                archel_sorting[0]
+            )[0],
             "delta_top_sub_volume": self.archel_volumes[1],
             "delta_top_sub_d50": archel_d50s[1],
             "delta_top_sub_sandfraction": archel_fractions[1],
-            "delta_top_sub_sorting": sorting_classifier(archel_sorting[1])[0],
+            "delta_top_sub_sorting": classifications.sorting_classifier(
+                archel_sorting[1]
+            )[0],
             "active_channel_volume": self.archel_volumes[2],
             "active_channel_d50": archel_d50s[2],
             "active_channel_sandfraction": archel_fractions[2],
-            "active_channel_sorting": sorting_classifier(archel_sorting[2])[0],
+            "active_channel_sorting": classifications.sorting_classifier(
+                archel_sorting[2]
+            )[0],
             "mouthbar_volume": self.archel_volumes[3],
             "mouthbar_d50": archel_d50s[3],
             "mouthbar_sandfraction": archel_fractions[3],
-            "mouthbar_sorting": sorting_classifier(archel_sorting[3])[0],
+            "mouthbar_sorting": classifications.sorting_classifier(archel_sorting[3])[
+                0
+            ],
             "delta_front_volume": self.archel_volumes[4],
             "delta_front_d50": archel_d50s[4],
             "delta_front_sandfraction": archel_fractions[4],
-            "delta_front_sorting": sorting_classifier(archel_sorting[4])[0],
+            "delta_front_sorting": classifications.sorting_classifier(
+                archel_sorting[4]
+            )[0],
             "prodelta_volume": self.archel_volumes[5],
             "prodelta_d50": archel_d50s[5],
             "prodelta_sandfraction": archel_fractions[5],
-            "prodelta_sorting": sorting_classifier(archel_sorting[5])[0],
+            "prodelta_sorting": classifications.sorting_classifier(archel_sorting[5])[
+                0
+            ],
         }
 
     def process(self):
@@ -426,5 +437,61 @@ class ModelResult:
         self.statistics_summary()
 
     def export_sediment_and_object_data(self, out_file: str | Path):
+        """
+        Export sediment and object data to a NetCDF file.
+
+        This method creates a dataset containing sediment and object data
+        and exports it to a specified NetCDF file.
+
+        Parameters
+        ----------
+        out_file : str or Path
+            The path to the output NetCDF file.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        The dataset is created using the `export.create_sed_and_obj_dataset` method
+        and saved to a NetCDF file using the `h5netcdf` engine with specified encodings.
+        """
         ds = export.create_sed_and_obj_dataset(self)
         ds.to_netcdf(out_file, engine="h5netcdf", encoding=export.ENCODINGS)
+
+    def append_input_ini_file(self, input_ini_file: str | Path, out_file: str | Path):
+        """
+        Appends sections and settings for postprocessing settings, subenviroment
+        definitions and architectural element definitions to the input.ini configuration
+        file and writes the updated configuration to an output file.
+
+        Parameters
+        ----------
+        input_ini_file : str or Path
+            The path to the input INI file to be read and modified.
+        out_file : str or Path
+            The path to the output file where the modified configuration will be written.
+        """
+        shutil.copyfile(input_ini_file, out_file)
+        config = ConfigParser()
+        config.read(out_file)
+
+        # Define new sections
+        config.add_section("postprocessing_parameters")
+        config.add_section("subenvironments")
+        config.add_section("architectural_elements")
+
+        # Fill new sections
+        for key, value in self.config.items("classification"):
+            config.set("postprocessing_parameters", key, value)
+        for code, name in zip(
+            classifications.subenvironment_codes, classifications.subenvironment_names
+        ):
+            config.set("subenvironments", str(code), name)
+        for code, name in zip(
+            classifications.archel_codes, classifications.archel_names
+        ):
+            config.set("architectural_elements", str(code), name)
+        with open(out_file, "w") as configfile:
+            config.write(configfile)

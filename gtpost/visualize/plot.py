@@ -372,7 +372,7 @@ class CrossSectionPlot(PlotBase):
             -self.model.dataset["DPS"][:, self.xc, self.yc].values, axis1=1, axis2=2
         )
         self.dh = self.model.deposit_height[:, self.xc, self.yc]
-        self.dsub = self.model.subsidence_per_t[:, self.xc, self.yc]
+        self.dsub = self.model.subsidence[:, self.xc, self.yc]
         self.preserved = self.model.preserved_thickness[:, self.xc, self.yc]
         self.width = 1
         self.xlim = [self.anchor_x[0], self.anchor_x[-1]]
