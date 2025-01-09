@@ -2,7 +2,7 @@ d50_per_sedclass|D50 values defining each sediment class|f|meter|\-
 xcor|x\-coordinates of cells|x, y|meter|\-
 ycor|y\-coordinates of cells|x, y|meter|\-
 zcor|z\-coordinates of cells|t, x, y|meter|Bed level
-subsidence|Subsidence in meter per timestep|x, y|meter|Assumes constant subsidence over timestep
+subsidence|Subsidence in meter per timestep and per location|t, x, y|meter|Assumes constant subsidence over timestep
 preserved_thickness|Final preserved thickness of deposits|t, x, y|meter|See :ref:`Ch. 2.2 <preservation_and_deposition_age>`
 deposition_age|Timestep at which deposition took place|t, x, y|\-|See :ref:`Ch. 2.2 <preservation_and_deposition_age>`
 diameter|D50 value for cell, based on combination of classes|t, x, y|meter|See :ref:`Ch. 2.1.2 <d-values_from_a_cdf>`

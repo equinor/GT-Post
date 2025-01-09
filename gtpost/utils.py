@@ -13,6 +13,14 @@ from skimage import measure
 
 
 def log_memory_usage():
+    """
+    Logs the memory usage of the current process.
+
+    Returns
+    -------
+    str
+        A string representing the memory usage in megabytes (MB).
+    """
     process = psutil.Process()
     mem_info = process.memory_info()
     return f"Memory usage: {mem_info.rss / (1024 ** 2):.2f} MB"

@@ -65,15 +65,18 @@ def main(
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
-    # xsect_start = (160, 160)
-    # xsect_end = (280, 160)
+    xsect_start = (15, 140)
+    xsect_end = (60, 140)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
-    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
+    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=False)
     xsect_plotter.save_figures(fpath_output, "xsect_diameter")
     (fpath_input / "temp.nc").unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
-    main()
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf",
+    )

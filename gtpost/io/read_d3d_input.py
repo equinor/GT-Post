@@ -1,3 +1,5 @@
+import numpy as np
+
 from gtpost.analyze.sediment import get_d50input
 
 
@@ -23,4 +25,4 @@ def read_sedfile(sedfile):
                 rho_db.append(temp)
 
     d50_input = get_d50input(sedfile, sedtype, rho_p, sedfile_line)
-    return sedtype, rho_p, rho_db, d50_input
+    return sedtype, np.array(rho_p), np.array(rho_db), np.array(d50_input)

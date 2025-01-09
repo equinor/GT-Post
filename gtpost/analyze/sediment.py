@@ -36,37 +36,91 @@ def get_d50input(sedfile, sedtype, rho_p, sedfile_line):
     return d50input
 
 
-def calculate_fraction(rho_db, dmsedcum_final):
+def calculate_fraction(rho_db: np.array, dmsedcum_final: np.array) -> np.array:
+    """
+    Calculate the volumetric fraction of sediment.
+    This function computes the volumetric fraction of sediment by dividing the cumulative
+    sediment mass by the dry bed density and normalizing the result.
+
+    Parameters
+    ----------
+    rho_db : np.array
+        Array of dry bed densities.
+    dmsedcum_final : np.array
+        Array of cumulative sediment mass.
+
+    Returns
+    -------
+    np.array
+        Array of volumetric fractions of sediment.
+    """
     vfraction = np.zeros_like(dmsedcum_final)
     old_err_state = np.seterr(divide="ignore", invalid="ignore")
 
     # derive the volumetric sed flux by dividing by dry bed density
-    dvsedcum = np.zeros_like(dmsedcum_final)
-    for stype in range(np.shape(dvsedcum)[1]):
-        dvsedcum[:, stype, :, :] = dmsedcum_final[:, stype, :, :] / rho_db[stype]
+    dvsedcum = dmsedcum_final / rho_db[:, np.newaxis, np.newaxis]
 
     dvsedcum[dmsedcum_final <= 0] = 0
     sumsedvcum = np.sum(dvsedcum, axis=1)
 
-    for stype in range(np.shape(dvsedcum)[1]):
-        vfraction[:, stype, :, :] = np.divide(dvsedcum[:, stype, :, :], sumsedvcum)
+    vfraction = np.divide(
+        dvsedcum,
+        sumsedvcum[:, np.newaxis, :, :],
+        where=sumsedvcum[:, np.newaxis, :, :] != 0,
+    )
     vfraction[np.isnan(vfraction) == 1] = 0
-    #        # go back to original error state
+    # go back to original error state
     np.seterr(**old_err_state)
     return vfraction
 
 
-def calculate_sand_fraction(sedtype, vfraction):
+def calculate_sand_fraction(sedtype: list, vfraction: np.array) -> np.array:
+    """
+    Calculate the sand fraction from the given sediment types and volume fractions.
+
+    Parameters
+    ----------
+    sedtype : list
+        A list of sediment types.
+    vfraction : np.array
+        A numpy array representing the volume fractions of different sediment types.
+    Returns
+    -------
+    np.array
+        A numpy array containing the summed volume fractions of sand, with mud fractions set to zero.
+    """
     vfrac = vfraction.copy()
-    for stype in range(np.shape(vfrac)[1]):
+    num_stypes = np.shape(vfrac)[1]
+    for stype in range(num_stypes):
         if sedtype[stype] == "mud":
             vfrac[:, stype, :, :] = 0
-        else:
-            pass
     return np.sum(vfrac, axis=1).astype(np.float32)
 
 
-def calculate_sorting(diameters: np.ndarray, percentage2cal: list):
+def calculate_sorting(diameters: np.ndarray, percentage2cal: list) -> np.ndarray:
+    """
+    Calculate the sorting parameter of sediment grain size distribution using Folks
+    (1968) method.
+
+    Parameters
+    ----------
+    diameters : np.ndarray
+        A multi-dimensional array of sediment grain diameters.
+    percentage2cal : list
+        A list of percentage values used to calculate the sorting parameter.
+        It should contain the values 10, 16, 84, and 90.
+
+    Returns
+    -------
+    np.ndarray
+        The calculated sorting parameter for the given sediment grain size distribution.
+
+    Notes
+    -----
+    The sorting parameter is calculated using the formula:
+    sorting = (phi_84 - phi_16) / 4 + (phi_90 - phi_10) / 6.6
+    where phi_x is the grain size at the xth percentile in grain size phi.
+    """
     index10 = percentage2cal.index(10)
     index16 = percentage2cal.index(16)
     index84 = percentage2cal.index(84)
@@ -159,7 +213,7 @@ def calculate_distribution(fraction_data, d50input):
     return (ynew, xnew, poros, perm)
 
 
-@numba.njit
+@numba.njit(parallel=True)
 def calculate_diameter(d50input, percentage2cal, vfraction):
     if len(vfraction.shape) == 4:
         nt, nlyr, nx, ny = vfraction.shape
@@ -170,9 +224,9 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
     diameters[0] = np.nan
     porosity[0] = np.nan
     permeability[0] = np.nan
-    for it in range(nt):
-        for ix in range(nx):
-            for iy in range(ny):
+    for it in numba.prange(nt):
+        for ix in numba.prange(nx):
+            for iy in numba.prange(ny):
                 fraction_data = vfraction[it, :, ix, iy]
                 # return the phi value needs to be changed back to meters
                 (

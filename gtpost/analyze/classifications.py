@@ -20,6 +20,12 @@ class ArchEl(Enum):
     prodelta = 6
 
 
+subenvironment_codes = [i.value for i in SubEnv.__iter__()]
+subenvironment_names = [i.name for i in SubEnv.__iter__()]
+archel_codes = [i.value for i in ArchEl.__iter__()]
+archel_names = [i.name for i in ArchEl.__iter__()]
+
+
 class Classifier:
     def __init__(self, bounds: list | np.ndarray, labels: list | np.ndarray):
         """
