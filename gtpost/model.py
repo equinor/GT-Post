@@ -43,7 +43,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset.isel(time=slice(0, 120))  # time slice for testing
+        self.dataset = dataset  # .isel(time=slice(0, 120))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -98,9 +98,9 @@ class ModelResult:
         trimfile = [f for f in folder.glob("*.nc") if "trim" in f.name][0]
         modelname = delft3d_folder.stem + f" - {sedfile.stem}"
 
-        # shutil.copyfile(trimfile, folder / "temp.nc")
-        # dataset = xr.open_dataset(folder / "temp.nc")
-        dataset = xr.open_dataset(trimfile)
+        shutil.copyfile(trimfile, folder / "temp.nc")
+        dataset = xr.open_dataset(folder / "temp.nc")
+        # dataset = xr.open_dataset(trimfile)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
