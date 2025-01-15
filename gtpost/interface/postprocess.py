@@ -67,12 +67,12 @@ def main(
     logger.info(
         f"{get_current_time()}: Created {modelresult.modelname + '_input_postprocessed.ini'}"
     )
-    modelresult.export_sediment_and_object_data(
-        fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
-    )
-    logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname + '_sed_and_obj_data.nc'}"
-    )
+    # modelresult.export_sediment_and_object_data(
+    #     fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
+    # )
+    # logger.info(
+    #     f"{get_current_time()}: Created {modelresult.modelname + '_sed_and_obj_data.nc'}"
+    # )
 
     # with open(
     #     fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"

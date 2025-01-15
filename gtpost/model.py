@@ -8,6 +8,7 @@ import xarray as xr
 
 import gtpost.utils as utils
 from gtpost.analyze import classifications, layering, sediment, statistics, surface
+from gtpost.analyze.sediment import calculate_diameter
 from gtpost.experimental import detect_archels
 from gtpost.io import export, read_d3d_input
 
@@ -44,7 +45,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset.isel(time=slice(0, 120))  # time slice for testing
+        self.dataset = dataset  # .isel(time=slice(0, 120))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -176,6 +177,7 @@ class ModelResult:
         self.model_boundary = utils.get_model_bound(
             self.dataset["MEAN_H1"][1, :, :].values
         )
+        self.model_mask = self.dataset["KCS"] >= 1
         subsidence = np.append(
             self.dataset["SDU"].values,
             self.dataset["SDU"].values[-1, :, :][np.newaxis, ...],
@@ -307,7 +309,7 @@ class ModelResult:
         self.sandfraction = sediment.calculate_sand_fraction(
             self.sed_type, self.vfraction
         )
-        self.diameters, self.porosity, self.permeability = sediment.calculate_diameter(
+        self.diameters, self.porosity, self.permeability = calculate_diameter(
             np.asarray(self.d50_input, dtype=np.float32),
             np.asarray(percentage2cal, dtype=np.float32),
             self.vfraction,
@@ -319,7 +321,7 @@ class ModelResult:
         """
         Compute sediment parameters. Add the following attributes ModelResult:
 
-        Simplidied for the processing step, which only requires D50 as end result.
+        Simplified for the processing step, which only requires D50 as end result.
 
         diameters           :       np.ndarray: D50 array (time, x, y)
 
@@ -344,7 +346,7 @@ class ModelResult:
         )
 
         print(utils.log_memory_usage())
-        self.diameters, _, _ = sediment.calculate_diameter(
+        self.diameters, *_ = calculate_diameter(
             np.asarray(self.d50_input, dtype=np.float32),
             np.asarray(percentage2cal, dtype=np.float32),
             self.vfraction,

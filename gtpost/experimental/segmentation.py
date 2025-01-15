@@ -51,6 +51,49 @@ prediction_parameters_delta_top = [
     ),
 ]
 
+prediction_parameters_delta = [
+    PredictionParams(
+        unit_name="deltatop",
+        string_code="dt",
+        encoding=1,
+        trained_model=YOLO(
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+        ),
+        max_instances=1,
+        min_confidence=0.1,
+    ),
+    PredictionParams(
+        unit_name="deltafront",
+        string_code="df",
+        encoding=5,
+        trained_model=YOLO(
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+        ),
+        max_instances=2,
+        min_confidence=0.1,
+    ),
+    PredictionParams(
+        unit_name="channel",
+        string_code="ch",
+        encoding=3,
+        trained_model=YOLO(
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+        ),
+        max_instances=99,
+        min_confidence=0.1,
+    ),
+    PredictionParams(
+        unit_name="mouthbar",
+        string_code="mb",
+        encoding=4,
+        trained_model=YOLO(
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+        ),
+        max_instances=99,
+        min_confidence=0.05,
+    ),
+]
+
 prediction_parameters_delta_front = [
     PredictionParams(
         unit_name="Delta front",
@@ -220,21 +263,21 @@ if __name__ == "__main__":
     # # )
 
     # results = train(
-    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_training_channels_mouthbars\YOLODataset\dataset.yaml",
-    #     288,
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\images_for_masking\YOLODataset\dataset.yaml",
+    #     282,
     # )
 
-    image_folder = r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo\prediction_images"
+    image_folder = r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\prediction_images"
     # result = None
-    result_dt = predict(image_folder, prediction_parameters_delta_top, 282)
-    result_df = predict(image_folder, prediction_parameters_delta_front, 282)
-    result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
+    result_dt = predict(image_folder, prediction_parameters_delta, 282)
+    # result_df = predict(image_folder, prediction_parameters_delta_front, 282)
+    # result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
 
-    result = merge_arrays_in_order([result_dt, result_df, result_ch_mb])
+    # result = merge_arrays_in_order([result_dt, result_df, result_ch_mb])
 
     prediction_bathymetry_figure(
-        result,
-        r"p:\11209074-002-geotool-new-deltas\01_modelling\Roda_058_Reference",
-        r"p:\11209074-002-geotool-new-deltas\02_postprocessing\Roda_058_Reference_yolo\segmentation_result",
+        result_dt,
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\segmentation_result",
     )
     print(1)

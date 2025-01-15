@@ -45,10 +45,13 @@ def predict_units(
             images,
             save=False,
             imgsz=imgsz,
+            iou=1.0,
             conf=pp.min_confidence,
             max_det=pp.max_instances,
             show_boxes=False,
             retina_masks=True,
+            augment=True,
+            agnostic_nms=True,
             classes=unit_index,
             device="cpu",
         )

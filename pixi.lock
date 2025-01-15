@@ -276,7 +276,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruff-0.8.6-py311hef9733d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scikit-image-0.25.0-py311hcf9f919_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scikit-learn-1.6.0-py311hdcb8d17_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py311h6274721_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py311h6274721_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scooby-0.10.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-75.6.0-pyhff2d567_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/shapely-2.0.6-py311hd54bd37_2.conda
@@ -629,7 +629,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruff-0.8.6-py311hef9733d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scikit-image-0.25.0-py311hcf9f919_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scikit-learn-1.6.0-py311hdcb8d17_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py311h6274721_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py311h6274721_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scooby-0.10.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-75.6.0-pyhff2d567_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/shapely-2.0.6-py311hd54bd37_2.conda
@@ -982,7 +982,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruff-0.8.6-py312h4e4d446_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scikit-image-0.25.0-py312h72972c8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scikit-learn-1.6.0-py312h816cc57_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py312h928f2a1_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py312h928f2a1_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/scooby-0.10.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-75.6.0-pyhff2d567_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/shapely-2.0.6-py312h0c580ee_2.conda
@@ -6654,6 +6654,7 @@ packages:
   depends:
   - python >=3.9
   license: BSD-2-Clause
+  license_family: BSD
   purls:
   - pkg:pypi/pygments?source=hash-mapping
   size: 888600
@@ -7429,6 +7430,7 @@ packages:
   - pywavelets >=1.6
   - cloudpickle >=3.0
   license: BSD-3-Clause
+  license_family: BSD
   purls:
   - pkg:pypi/scikit-image?source=hash-mapping
   size: 10484692
@@ -7470,6 +7472,7 @@ packages:
   - matplotlib-base >=3.7
   - toolz >=0.10.0
   license: BSD-3-Clause
+  license_family: BSD
   purls:
   - pkg:pypi/scikit-image?source=hash-mapping
   size: 10399254
@@ -7525,16 +7528,17 @@ packages:
 - kind: conda
   name: scipy
   version: 1.15.0
-  build: py311h6274721_0
+  build: py311h6274721_1
+  build_number: 1
   subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py311h6274721_0.conda
-  sha256: 206f5df707814b3d12c9b6edc40486d05d428b5c25cf75762a85d7f47427e75a
-  md5: 8d4e1d83a9d66117918498ae4baa44ab
+  url: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py311h6274721_1.conda
+  sha256: 08a1235e8bbb657ac2b5182c1085acea24aedd9b1966325252feb8b2ffd61164
+  md5: a13115597886e6e2763fd569d121b88b
   depends:
   - libblas >=3.9.0,<4.0a0
   - libcblas >=3.9.0,<4.0a0
   - liblapack >=3.9.0,<4.0a0
-  - numpy <2.3
+  - numpy <2.5
   - numpy >=1.19,<3
   - numpy >=1.23.5
   - python >=3.11,<3.12.0a0
@@ -7546,21 +7550,22 @@ packages:
   license_family: BSD
   purls:
   - pkg:pypi/scipy?source=hash-mapping
-  size: 18138328
-  timestamp: 1736010966277
+  size: 18152460
+  timestamp: 1736354609757
 - kind: conda
   name: scipy
   version: 1.15.0
-  build: py312h928f2a1_0
+  build: py312h928f2a1_1
+  build_number: 1
   subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py312h928f2a1_0.conda
-  sha256: 2ecd2c24c3799f391ca90f4f884ff776f21d7a99da8a3a03be314b8cdb223f86
-  md5: e4b16b6652162ed4d58f912bcb371403
+  url: https://conda.anaconda.org/conda-forge/win-64/scipy-1.15.0-py312h928f2a1_1.conda
+  sha256: 4091f3911e98a01d694d99732cd935cbf3bd274d6534e25b520f16ec61b01a97
+  md5: efb96d1294adae201658a053c3ddfd51
   depends:
   - libblas >=3.9.0,<4.0a0
   - libcblas >=3.9.0,<4.0a0
   - liblapack >=3.9.0,<4.0a0
-  - numpy <2.3
+  - numpy <2.5
   - numpy >=1.19,<3
   - numpy >=1.23.5
   - python >=3.12,<3.13.0a0
@@ -7572,8 +7577,8 @@ packages:
   license_family: BSD
   purls:
   - pkg:pypi/scipy?source=hash-mapping
-  size: 17942085
-  timestamp: 1736011094191
+  size: 17916279
+  timestamp: 1736354284892
 - kind: conda
   name: scooby
   version: 0.10.0
@@ -8634,6 +8639,7 @@ packages:
   depends:
   - vtk-base 9.3.1 qt_py311h86964fa_214
   license: BSD-3-Clause
+  license_family: BSD
   purls: []
   size: 23433
   timestamp: 1736232573067
@@ -8649,6 +8655,7 @@ packages:
   depends:
   - vtk-base 9.3.1 qt_py312h9d90919_214
   license: BSD-3-Clause
+  license_family: BSD
   purls: []
   size: 23518
   timestamp: 1736232807045
@@ -8699,6 +8706,7 @@ packages:
   - libboost_headers
   - paraview ==9999999999
   license: BSD-3-Clause
+  license_family: BSD
   purls: []
   size: 34743891
   timestamp: 1736232459227
@@ -8749,6 +8757,7 @@ packages:
   - libboost_headers
   - paraview ==9999999999
   license: BSD-3-Clause
+  license_family: BSD
   purls: []
   size: 34692663
   timestamp: 1736232686615
@@ -8819,6 +8828,7 @@ packages:
   - msgpack-python >=1,<2
   - python >=3.9
   license: BSD-3-Clause
+  license_family: BSD
   purls:
   - pkg:pypi/wslink?source=hash-mapping
   size: 34565

@@ -396,3 +396,34 @@ def quadratic_curve_fit(x_data, y_data):
     coeffs = np.dot(a_ta_inv, a_t_y)
 
     return coeffs[0], coeffs[1], coeffs[2]
+
+
+def describe_data_vars(dataset, output_file="data_vars_description.txt"):
+    """
+    Print a description of the data variables in a D3D-GT ModelResult dataset.
+
+    Parameters
+    ----------
+    dataset : xr.Dataset
+        Dataset object with D3D-GT data variables.
+
+    Returns
+    -------
+    None
+    """
+    with open("data_vars_description.txt", "w") as file:
+        for var in dataset.data_vars:
+            file.write(f"Variable: {var}\n")
+            file.write(f"Description: {dataset[var].attrs}\n")
+            file.write(f"Data type: {dataset[var].dtype}\n")
+            try:
+                shape = dataset[var].shape
+                file.write(f"Shape: {shape}\n")
+                if len(shape) < 4:
+                    file.write(f"Min: {dataset[var].min().values}\n")
+                    file.write(f"Max: {dataset[var].max().values}\n")
+                    file.write(f"Mean: {dataset[var].mean().values}\n")
+                    file.write(f"Std: {dataset[var].std().values}\n")
+            except TypeError:
+                pass
+            file.write("\n")

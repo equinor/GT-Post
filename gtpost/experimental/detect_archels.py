@@ -26,6 +26,7 @@ prediction_parameters_delta_top = [
         trained_model=YOLO(
             Path(__file__).parent.joinpath("trained_yolo_models/best_deltatop.pt")
         ),
+        min_confidence=0.01,
         max_instances=1,
     ),
 ]
@@ -117,6 +118,8 @@ def constrain_ch_mb(modelresult: ModelResult, prediction_result: np.ndarray):
 def postprocess_result(
     modelresult: ModelResult, prediction_result: np.ndarray, delta_top_division=1
 ):
+    # Apply model mask to the prediction result
+    prediction_result *= modelresult.model_mask.values
     # split delta top into a subaerial and subaqeous part
     prediction_result[
         (prediction_result == 1) & (modelresult.bottom_depth > delta_top_division)
