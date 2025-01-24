@@ -102,8 +102,6 @@ class ModelResult:
 
         # shutil.copyfile(trimfile, folder / "temp.nc")
         # dataset = xr.open_dataset(folder / "temp.nc")
-        # shutil.copyfile(trimfile, folder / "temp.nc")
-        # dataset = xr.open_dataset(folder / "temp.nc")
         dataset = xr.open_dataset(trimfile)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
@@ -149,7 +147,6 @@ class ModelResult:
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
         self.slope = surface.slope(self.dataset["MEAN_H1"].values)
-        print(utils.log_memory_usage())
 
     def complete_init_for_postprocess(self):
         """
@@ -345,7 +342,6 @@ class ModelResult:
             self.zcor, self.dataset["SDU"].values, self.deposit_height
         )
 
-        print(utils.log_memory_usage())
         self.diameters, *_ = calculate_diameter(
             np.asarray(self.d50_input, dtype=np.float32),
             np.asarray(percentage2cal, dtype=np.float32),

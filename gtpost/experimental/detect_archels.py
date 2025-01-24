@@ -12,7 +12,7 @@ from gtpost.experimental.segmentation_utils import (
     PredictionParams,
 )
 
-type ModelResult = None
+ModelResult = None
 
 prediction_images_temp_folder = Path(__file__).parent.joinpath(
     "training_dataset/prediction_images_temp"

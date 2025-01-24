@@ -5,3 +5,5 @@ sphinx-apidoc -o docs/api ./pysst "**/bro*" "**/analysis*" "**/export*" "**/vali
 To build docs use:
 
 sphinx-build -b html docs ./docs/build
+
+labelme2yolo --json_dir "p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\images_for_masking" --output_format polygon

@@ -57,17 +57,17 @@ prediction_parameters_delta = [
         string_code="dt",
         encoding=1,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
         ),
         max_instances=1,
         min_confidence=0.1,
     ),
     PredictionParams(
-        unit_name="deltafront",
-        string_code="df",
+        unit_name="shoreface_offshore",
+        string_code="so",
         encoding=5,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
         ),
         max_instances=2,
         min_confidence=0.1,
@@ -77,7 +77,7 @@ prediction_parameters_delta = [
         string_code="ch",
         encoding=3,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
         ),
         max_instances=99,
         min_confidence=0.1,
@@ -87,7 +87,7 @@ prediction_parameters_delta = [
         string_code="mb",
         encoding=4,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train4\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
         ),
         max_instances=99,
         min_confidence=0.05,
