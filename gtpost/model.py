@@ -144,7 +144,6 @@ class ModelResult:
             + self.subsidence[1:, :, :]
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
-        print(utils.log_memory_usage())
 
     def complete_init_for_postprocess(self):
         """
@@ -314,7 +313,7 @@ class ModelResult:
         """
         Compute sediment parameters. Add the following attributes ModelResult:
 
-        Simplidied for the processing step, which only requires D50 as end result.
+        Simplified for the processing step, which only requires D50 as end result.
 
         diameters           :       np.ndarray: D50 array (time, x, y)
 
@@ -338,7 +337,6 @@ class ModelResult:
             self.zcor, self.dataset["SDU"].values, self.deposit_height
         )
 
-        print(utils.log_memory_usage())
         self.diameters, _, _ = sediment.calculate_diameter(
             np.asarray(self.d50_input, dtype=np.float32),
             np.asarray(percentage2cal, dtype=np.float32),
