@@ -88,7 +88,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf",
-    )
+    main()
