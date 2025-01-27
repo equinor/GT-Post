@@ -74,7 +74,7 @@ def main(
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections")
-    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=False)
+    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
     logger.info(
         f"{get_current_time()}: >>> D50 x-sections plotting complete, "
         + log_memory_usage()
