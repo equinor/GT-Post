@@ -53,16 +53,16 @@ class ArchelColormap(NamedTuple):
 
 class GrainsizeColormap(NamedTuple):
     c0 = (0.0, "#006400")  # dark green
-    c1 = (0.044, "#6B8E23")  # olivedrab
-    c2 = (0.088, "#FFFF00")  # yellow
-    c3 = (0.177, "#FFD700")  # gold
-    c4 = (0.354, "#FF8C00")  # dark orange
-    c5 = (0.707, "#8B0000")  # dark red
+    c1 = (0.0625, "#6B8E23")  # olivedrab
+    c2 = (0.1, "#FFFF00")  # yellow
+    c3 = (0.2, "#FFD700")  # gold
+    c4 = (0.4, "#FF8C00")  # dark orange
+    c5 = (0.8, "#8B0000")  # dark red
     c6 = (1.0, "#BA55D3")  # mediumorchid
     name = "Grain size (D50)"
     type = "mappable"
     vmin = 0
-    vmax = 1.6
+    vmax = 1.0
     cmap, mappable, norm = continuous_cmap(
         [c0, c1, c2, c3, c4, c5, c6], name, vmin, vmax
     )

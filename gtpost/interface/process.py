@@ -62,24 +62,30 @@ def main(
     # Map plots
     logger.info(f"{get_current_time()}: Plotting maps")
     map_plotter = plot.MapPlot(modelresult)
-    map_plotter.twopanel_map("bottom_depth", "deposit_height", only_last_timestep=True)
+    map_plotter.twopanel_map(
+        "bottom_depth",
+        "deposit_height",
+        fpath_output,
+        "map_bottomdepth_deposition",
+        only_last_timestep=True,
+    )
     logger.info(
         f"{get_current_time()}: >>> Plotting maps complete, " + log_memory_usage()
     )
-    map_plotter.save_figures(fpath_output, "map_bottomdepth_deposition")
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
-    logger.info(f"{get_current_time()}: Plotting D50 x-sections")
-    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
+    logger.info(f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage())
+    xsect_plotter.twopanel_xsection(
+        "bottom_depth", "d50", fpath_output, "xsect_diameter", only_last_timestep=True
+    )
     logger.info(
         f"{get_current_time()}: >>> D50 x-sections plotting complete, "
         + log_memory_usage()
     )
-    xsect_plotter.save_figures(fpath_output, "xsect_diameter")
 
     (fpath_input / "temp.nc").unlink(missing_ok=True)
     logger.info(

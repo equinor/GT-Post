@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 from gtpost.model import ModelResult
-from gtpost.utils import get_current_time, get_template_name
+from gtpost.utils import get_current_time, get_template_name, log_memory_usage
 from gtpost.visualize import plot
 
 logger = logging.getLogger(__name__)
@@ -50,14 +50,17 @@ def main(
     )
 
     modelresult = ModelResult.from_folder(
-        fpath_input, post=True, settings_file=settings_file
+        fpath_input, post=True, settings_file=settings_file, use_copied_trim_file=True
     )
     logger.info(
         f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
     )
-    logger.info(f"{get_current_time()}: Starting postprocessing")
+    logger.info(f"{get_current_time()}: Starting postprocessing, " + log_memory_usage())
     modelresult.postprocess()
-    logger.info(f"{get_current_time()}: Postprocessing completed, exporting data...")
+    logger.info(
+        f"{get_current_time()}: Postprocessing completed, exporting data. "
+        + log_memory_usage()
+    )
 
     # Data export
     modelresult.append_input_ini_file(
@@ -65,13 +68,15 @@ def main(
         fpath_output.joinpath(modelresult.modelname + "_input_postprocessed.ini"),
     )
     logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname + '_input_postprocessed.ini'}"
+        f"{get_current_time()}: Created {modelresult.modelname}_input_postprocessed.ini, "
+        + log_memory_usage()
     )
     modelresult.export_sediment_and_object_data(
         fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
     )
     logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname + '_sed_and_obj_data.nc'}"
+        f"{get_current_time()}: Created {modelresult.modelname}_sed_and_obj_data.nc"
+        + log_memory_usage()
     )
 
     with open(
@@ -82,43 +87,58 @@ def main(
             f,
         )
     logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname + '_statistics_summary.json'}"
+        f"{get_current_time()}: Created {modelresult.modelname}_statistics_summary.json"
+        + log_memory_usage()
     )
 
     # Summary plot
-    logger.info(f"{get_current_time()}: Plotting stats")
+    logger.info(f"{get_current_time()}: Plotting stats, " + log_memory_usage())
     stat_plotter = plot.StatPlot(modelresult)
-    stat_plotter.plot_histograms()
-    stat_plotter.save_figures(fpath_output, "archel_summary")
+    stat_plotter.plot_histograms(fpath_output, "archel_summary")
 
     # Map plots
-    logger.info(f"{get_current_time()}: Plotting archel maps")
+    logger.info(f"{get_current_time()}: Plotting archel maps, " + log_memory_usage())
     map_plotter = plot.MapPlot(modelresult)
-    map_plotter.twopanel_map("bottom_depth", "architectural_elements")
-    map_plotter.save_figures(fpath_output, "map_bottomdepth_archels")
+    map_plotter.twopanel_map(
+        "bottom_depth",
+        "architectural_elements",
+        fpath_output,
+        "map_bottomdepth_archels",
+        only_last_timestep=False,
+    )
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
-    # xsect_start = (80, 160)
-    # xsect_end = (120, 160)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
-    logger.info(f"{get_current_time()}: Plotting D50 x-sections")
-    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
-    xsect_plotter.save_figures(fpath_output, "xsect_diameter")
-
-    logger.info(f"{get_current_time()}: Plotting archel x-sections")
+    logger.info(f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage())
     xsect_plotter.twopanel_xsection(
-        "bottom_depth", "architectural_elements", only_last_timestep=True
+        "bottom_depth", "d50", fpath_output, "xsect_diameter", only_last_timestep=True
     )
-    xsect_plotter.save_figures(fpath_output, "xsect_archels")
 
-    logger.info(f"{get_current_time()}: Plotting deposition age x-sections")
-    xsect_plotter.twopanel_xsection(
-        "bottom_depth", "deposition_age", only_last_timestep=True
+    logger.info(
+        f"{get_current_time()}: Plotting archel x-sections, " + log_memory_usage()
     )
-    xsect_plotter.save_figures(fpath_output, "xsect_depositionage")
+    xsect_plotter.twopanel_xsection(
+        "bottom_depth",
+        "architectural_elements",
+        fpath_output,
+        "xsect_archels",
+        only_last_timestep=True,
+    )
+
+    logger.info(
+        f"{get_current_time()}: Plotting deposition age x-sections, "
+        + log_memory_usage()
+    )
+    xsect_plotter.twopanel_xsection(
+        "bottom_depth",
+        "deposition_age",
+        fpath_output,
+        "xsect_depositionage",
+        only_last_timestep=True,
+    )
 
 
 if __name__ == "__main__":
