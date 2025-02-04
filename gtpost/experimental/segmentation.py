@@ -16,7 +16,7 @@ from gtpost.model import ModelResult
 from gtpost.visualize import colormaps
 
 default_yolo_model = Path(__file__).parent.joinpath(
-    "pretrained_yolo_models/yolo11m-seg.pt"
+    "pretrained_yolo_models/yolo11l-seg.pt"
 )
 
 matplotlib.use("TkAgg")
@@ -39,25 +39,13 @@ matplotlib.use("TkAgg")
 #     ),
 # ]
 
-prediction_parameters_delta_top = [
-    PredictionParams(
-        unit_name="Delta area",
-        string_code="dt",
-        encoding=1,
-        trained_model=YOLO(
-            Path(__file__).parent.joinpath("trained_yolo_models/best_deltatop.pt")
-        ),
-        max_instances=1,
-    ),
-]
-
 prediction_parameters_delta = [
     PredictionParams(
         unit_name="deltatop",
         string_code="dt",
         encoding=1,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
         ),
         max_instances=1,
         min_confidence=0.1,
@@ -67,7 +55,7 @@ prediction_parameters_delta = [
         string_code="so",
         encoding=5,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
         ),
         max_instances=2,
         min_confidence=0.1,
@@ -77,7 +65,7 @@ prediction_parameters_delta = [
         string_code="ch",
         encoding=3,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
         ),
         max_instances=99,
         min_confidence=0.1,
@@ -87,47 +75,26 @@ prediction_parameters_delta = [
         string_code="mb",
         encoding=4,
         trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train6\weights\best.pt"
+            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
         ),
         max_instances=99,
         min_confidence=0.05,
     ),
 ]
 
-prediction_parameters_delta_front = [
+prediction_parameters_ch = [
     PredictionParams(
-        unit_name="Delta front",
-        string_code="df",
-        encoding=5,
-        trained_model=YOLO(
-            Path(__file__).parent.joinpath("trained_yolo_models/best_deltafront.pt")
-        ),
-        max_instances=4,
-        min_confidence=0.25,
-    ),
-]
-
-prediction_parameters_ch_mb = [
-    PredictionParams(
-        unit_name="Channel",
+        unit_name="channel",
         string_code="ch",
         encoding=3,
         trained_model=YOLO(
-            Path(__file__).parent.joinpath("trained_yolo_models/best_ch_mb.pt")
+            Path(__file__).parent.joinpath(
+                r"c:\Users\onselen\Development\GT-Post\runs\segment\train10\weights\best.pt"
+            )
         ),
         max_instances=99,
         min_confidence=0.25,
-    ),
-    PredictionParams(
-        unit_name="Mouth bar",
-        string_code="mb",
-        encoding=4,
-        trained_model=YOLO(
-            Path(__file__).parent.joinpath("trained_yolo_models/best_ch_mb.pt")
-        ),
-        max_instances=99,
-        min_confidence=0.25,
-    ),
+    )
 ]
 
 
@@ -203,7 +170,9 @@ def predict(
 
 
 def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
-    modelresult = ModelResult.from_folder(Path(d3d_folder), post=False)
+    modelresult = ModelResult.from_folder(
+        Path(d3d_folder), post=False, use_copied_trim_file=False
+    )
     depth = modelresult.bottom_depth
 
     for i in range(0, prediction_result.shape[0], 1):
@@ -263,13 +232,14 @@ if __name__ == "__main__":
     # # )
 
     # results = train(
-    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\images_for_masking\YOLODataset\dataset.yaml",
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\images_for_masking\YOLODataset_deltatop\dataset.yaml",
     #     282,
     # )
 
     image_folder = r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\prediction_images"
+    image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images_temp"
     # result = None
-    result_dt = predict(image_folder, prediction_parameters_delta, 282)
+    result_dt = predict(image_folder, prediction_parameters_ch, 282)
     # result_df = predict(image_folder, prediction_parameters_delta_front, 282)
     # result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
 

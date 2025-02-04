@@ -29,6 +29,7 @@ class PredictionParams:
     trained_model: YOLO
     min_confidence: float = 0.01
     max_instances: int = 99
+    constrain_func: callable = None
 
 
 def predict_units(
@@ -38,9 +39,6 @@ def predict_units(
 ):
     mask_arrays = []
     for pp in tqdm(prediction_parameters):
-        unit_index = [
-            n[0] for n in pp.trained_model.names.items() if n[1] == pp.unit_name
-        ]
         results = pp.trained_model.predict(
             images,
             save=False,
@@ -49,13 +47,13 @@ def predict_units(
             conf=pp.min_confidence,
             max_det=pp.max_instances,
             show_boxes=False,
+            #visualize=True,
             retina_masks=True,
-            augment=True,
+            augment=False,
             agnostic_nms=True,
-            classes=unit_index,
             device="cpu",
         )
-        mask_array = np.zeros([len(results)] + list(results[-1].masks.data.shape[1:]))
+        mask_array = np.zeros([len(results)] + list(results[0].orig_shape))
         for i, result in enumerate(results):
             if result.masks is not None:
                 array = result.masks.data.max(axis=0).values
