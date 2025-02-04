@@ -8,6 +8,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy import spatial
+import xarray as xr
 
 from gtpost.visualize import colormaps
 
@@ -135,57 +136,116 @@ class PlotBase:
             self.fig.set_size_inches(650.0 / float(dpi), 1000.0 / float(dpi))
 
     def draw_xsection(self, axis_idx, timestep, data, colormap):
+        """
+
+
+        Parameters
+        ----------
+        axis_idx : _type_
+            _description_
+        timestep : _type_
+            _description_
+        data : _type_
+            _description_
+        colormap : _type_
+            _description_
+        """
         axis = self.ax[axis_idx]
         caxis = self.cax[axis_idx]
 
-        for i, x in enumerate(self.anchor_x):
-            subsidence = self.dsub[timestep, i]
-            absolute_bed_chg = self.dh[timestep, i]
-            current_surface = self.anchor_y[timestep, i]
+        for i, x in enumerate(self.anchor_x[1:-1]):
+            i += 1
+            x_left = x - self.width / 2
+            x_right = x + self.width / 2
+            subsidence_left = (self.dsub[timestep, i - 1] + self.dsub[timestep, i]) / 2
+            subsidence_middle = self.dsub[timestep, i]
+            subsidence_right = (self.dsub[timestep, i] + self.dsub[timestep, i + 1]) / 2
+            bed_chg_left = max((self.dh[timestep, i - 1] + self.dh[timestep, i]) / 2, 0)
+            bed_chg_middle = max(self.dh[timestep, i], 0)
+            bed_chg_right = max(
+                (self.dh[timestep, i] + self.dh[timestep, i + 1]) / 2, 0
+            )
+            surface_left = (
+                self.anchor_y[timestep, i - 1] + self.anchor_y[timestep, i]
+            ) / 2
+            surface_middle = self.anchor_y[timestep, i]
+            surface_right = (
+                self.anchor_y[timestep, i] + self.anchor_y[timestep, i + 1]
+            ) / 2
 
-            # First update existing patches with the subsidence that took place since
-            # the last timestep
-            [p.set_y(p.get_y() + subsidence) for p in self.patches_per_position[i]]
-
-            if absolute_bed_chg != 0:
-                if absolute_bed_chg > 0.0:
-                    if colormap.type == "mappable":
-                        color = colormap.mappable.to_rgba(data[timestep, i])
-                    elif colormap.type == "categorical":
-                        color = colormap.colors[data[timestep, i]]
-
-                    self.patches_per_position[i].append(
-                        patches.Rectangle(
-                            xy=(x, current_surface),
-                            width=self.width,
-                            height=-absolute_bed_chg,
-                            color=color,
-                            linewidth=0,
-                        )
-                    )
-
-                # Remove previous white patch
-                self.patches_per_position[i] = [
-                    p for p in self.patches_per_position[i] if p.get_height() < 0
+            # First update existing polygons with the subsidence that took place since
+            # the last timestep:
+            xy_update = np.array(
+                [
+                    subsidence_left,
+                    subsidence_left,
+                    subsidence_middle,
+                    subsidence_right,
+                    subsidence_right,
+                    subsidence_middle,
+                    subsidence_left,
                 ]
-                # Get patch bottoms to compare to current surface level. i.e. if bottom is
-                # above current surface level, remove patch altogether because it was eroded
-                patches_bottoms = [
-                    p.get_y() + p.get_height() for p in self.patches_per_position[i]
-                ]
-                self.patches_per_position[i] = [
-                    p
-                    for p, b in zip(self.patches_per_position[i], patches_bottoms)
-                    if b < current_surface
-                ]
-                # White patch to fill area above surface level up to top of figure
+            )
+            [
+                p.set_xy(np.array([p.get_xy()[:, 0], p.get_xy()[:, 1] + xy_update]).T)
+                for p in self.patches_per_position[i]
+            ]
+            # Remove polygons that were fully eroded. i.e. if their bottom is above the
+            # current surface level:
+            self.patches_per_position[i] = [
+                p
+                for p in self.patches_per_position[i]
+                if not (
+                    (p.get_xy()[0, 1] >= surface_left)
+                    & (p.get_xy()[4, 1] >= surface_middle)
+                    & (p.get_xy()[5, 1] >= surface_right)
+                )
+            ]
+
+            # Update the top of the polygons that extend above the current surface:
+            for p in self.patches_per_position[i]:
+                xy = p.get_xy()
+                xy[:2, 1] = xy[:2, 1].clip(max=surface_left)
+                xy[2, 1] = xy[2, 1].clip(max=surface_middle)
+                xy[5, 1] = xy[5, 1].clip(max=surface_middle)
+                xy[3:5, 1] = xy[3:5, 1].clip(max=surface_right)
+                xy[-1, 1] = xy[0, 1]
+                p.set_xy(xy)
+
+            # Make sure that the top polygon (self.patches_per_position[i][-1]) still
+            # reaches the current surface:
+            if len(self.patches_per_position[i]) > 0:
+                xy_last = self.patches_per_position[i][-1].xy
+                if bed_chg_left == 0.0:
+                    xy_last[1, 1] = surface_left
+                if bed_chg_middle == 0.0:
+                    xy_last[2, 1] = surface_middle
+                if bed_chg_right == 0.0:
+                    xy_last[3, 1] = surface_right
+                self.patches_per_position[i][-1].set_xy(xy_last)
+
+            # Draw a new polygon if any deposition took place at the left, middle and
+            # and right x-positions of the potential polygon and append it to the list of
+            # polygons for this position:
+            if colormap.type == "mappable":
+                color = colormap.mappable.to_rgba(data[timestep, i])
+            elif colormap.type == "categorical":
+                color = colormap.colors[data[timestep, i]]
+
+            if bed_chg_left > 0.0 or bed_chg_middle > 0.0 or bed_chg_right > 0.0:
                 self.patches_per_position[i].append(
-                    patches.Rectangle(
-                        xy=(x, self.anchor_y[timestep, i]),
-                        width=self.width,
-                        height=(self.ylim[1] - current_surface),
-                        color=(1.0, 1.0, 1.0, 1.0),
+                    patches.Polygon(
+                        xy=(
+                            (x_left, surface_left - bed_chg_left),
+                            (x_left, surface_left),
+                            (x, surface_middle),
+                            (x_right, surface_right),
+                            (x_right, surface_right - bed_chg_right),
+                            (x, surface_middle - bed_chg_middle),
+                        ),
+                        color=color,
                         linewidth=0,
+                        closed=True,
                     )
                 )
 
@@ -199,6 +259,14 @@ class PlotBase:
         axis.add_collection(p)
         axis.plot(self.anchor_y[timestep, :])
 
+        # # Additional timelines to plot:
+        # for timeline_to_draw in np.arange(5, timestep, 10):
+        #     timeline_to_draw_y = np.minimum(
+        #         self.anchor_y[timeline_to_draw, :], self.anchor_y[timestep, :]
+        #     )
+        #     axis.plot(timeline_to_draw_y, linestyle="--", linewidth=0.6, color="black")
+
+        # Finally update the axis limits, labels, titles etc.
         axis.set_xlim(self.xlim)
         axis.set_ylim(self.ylim)
         axis.set_xticks(axis.get_xticks())
@@ -311,7 +379,9 @@ class PlotBase:
         axis.set_xlabel("Alongshore direction (km)", fontsize=self.axlabelsize)
         axis.set_ylabel("Cross-shore direction (km)", fontsize=self.axlabelsize)
         axis.set_title(
-            colormap.name + f" (t = {timestep})", fontsize=self.titlesize, loc="left"
+            colormap.name + f" (t = {timestep})",
+            fontsize=self.titlesize,
+            loc="left",
         )
 
         colorbar = self.fig.colorbar(
@@ -350,14 +420,8 @@ class PlotBase:
     def draw_colorbar(self, axis):
         pass
 
-    def save_figures(self, path, name):
-        if len(self.figures) > 1:
-            for i, f in enumerate(self.figures):
-                f.savefig(Path(path) / f"{name}_{i:04}.png")
-        else:
-            self.figures[0].savefig(
-                Path(path) / f"{name}_{self.model.timestep-1:04}.png"
-            )
+    def save_figure(self, path, name, t):
+        self.fig.savefig(Path(path) / f"{name}_{t:04}.png")
 
 
 class CrossSectionPlot(PlotBase):
@@ -378,19 +442,25 @@ class CrossSectionPlot(PlotBase):
         self.xlim = [self.anchor_x[0], self.anchor_x[-1]]
         self.ylim = [
             np.round(self.anchor_y.min() - 1),
-            2,
-            # np.round(self.anchor_y.max() + 1),
+            np.round(self.anchor_y.max() + 1),
         ]
 
     def twopanel_xsection(
-        self, variable_basemap, variable_xsect, only_last_timestep=False
+        self,
+        variable_basemap,
+        variable_xsect,
+        path,
+        name,
+        add_timelines=False,
+        timeline_interval=10,
+        timeline_start=5,
+        only_last_timestep=False,
     ):
         data_xsect = self.model.__dict__[variable_xsect][:, self.xc, self.yc]
         data_base = self.model.__dict__[variable_basemap]
         colormap_xsect = self.colormaps[variable_xsect]
         colormap_base = self.colormaps[variable_basemap]
 
-        self.figures = []
         self.patchlist = []
         self.colorlist = []
 
@@ -401,22 +471,35 @@ class CrossSectionPlot(PlotBase):
             )
         )
 
+        # if add_timelines:
+        #     anchor_y_subsidence_corrected = self.anchor_y - np.cumsum(self.dsub, axis=0)
+        #     anchor_y_subsidence = [
+        #         np.min(anchor_y_subsidence_corrected[i:, :], axis=0)
+        #         <= anchor_y_subsidence_corrected[i, :]
+        #         for i in range(anchor_y_subsidence_corrected.shape[0])
+        #     ]
+        #     anchor_y_subsidence = np.array(anchor_y_subsidence)
+
+        #     anchor_y = self.anchor_y[
+        #         np.arange(timeline_start, data_xsect.shape[0], timeline_interval)
+        #     ]
+        #     self.anchor_y
+
+        self.create_figure("x-2panels")
         if only_last_timestep:
             t = data_base.shape[0] - 1
-            self.create_figure("x-2panels")
             self.draw_map(0, t, data_base, colormap_base)
             self.draw_profile_line(0, self.start, self.finish)
             self.draw_last_xsection(1, t, data_xsect, colormap_xsect)
-            self.figures.append(self.fig)
-            plt.close()
+            self.save_figure(path, name, t)
+            [ax.clear() for ax in self.ax]
         else:
             for t in range(data_xsect.shape[0]):
-                self.create_figure("x-2panels")
                 self.draw_map(0, t, data_base, colormap_base)
                 self.draw_profile_line(0, self.start, self.finish)
                 self.draw_xsection(1, t, data_xsect, colormap_xsect)
-                self.figures.append(self.fig)
-                plt.close()
+                self.save_figure(path, name, t)
+                [ax.clear() for ax in self.ax]
 
     @staticmethod
     def profile_line_coordinates(start, finish):
@@ -437,35 +520,34 @@ class MapPlot(PlotBase):
     def __init__(self, modelresult):
         super().__init__(modelresult)
 
-    def twopanel_map(self, variable_1, variable_2, only_last_timestep=False):
+    def twopanel_map(
+        self, variable_1, variable_2, path, name, only_last_timestep=False
+    ):
         data_1 = self.model.__dict__[variable_1]
         data_2 = self.model.__dict__[variable_2]
         colormap_1 = self.colormaps[variable_1]
         colormap_2 = self.colormaps[variable_2]
 
-        self.figures = []
+        self.create_figure("double")
         if only_last_timestep:
-            self.create_figure("double")
             t = data_1.shape[0] - 1
             self.draw_map(0, t, data_1, colormap_1)
             self.draw_map(1, t, data_2, colormap_2)
-            self.figures.append(self.fig)
-            plt.close()
+            self.save_figure(path, name, t)
+            [ax.clear() for ax in self.ax]
         else:
             for t in range(data_1.shape[0]):
-                self.create_figure("double")
                 self.draw_map(0, t, data_1, colormap_1)
                 self.draw_map(1, t, data_2, colormap_2)
-                self.figures.append(self.fig)
-                plt.close()
+                self.save_figure(path, name, t)
+                [ax.clear() for ax in self.ax]
 
 
 class StatPlot(PlotBase):
     def __init__(self, modelresult):
         super().__init__(modelresult)
 
-    def plot_histograms(self):
-        self.figures = []
+    def plot_histograms(self, path, name):
         self.create_figure("histograms")
 
         # Volume distribution in first plot
@@ -504,5 +586,5 @@ class StatPlot(PlotBase):
                 "D50 distribution per preserved architectural element", fontsize=16
             )
 
-        self.figures.append(self.fig)
+        self.save_figure(path, name, "")
         plt.close()

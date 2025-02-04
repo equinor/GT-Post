@@ -52,36 +52,46 @@ def main(
     logger.info(
         f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
     )
-    logger.info(">>> ModelResult initialized, " + log_memory_usage())
+    logger.info(
+        f"{get_current_time()}: >>> ModelResult initialized, " + log_memory_usage()
+    )
     logger.info(f"{get_current_time()}: Starting processing")
     modelresult.process()
-    logger.info(">>> Processing complete, " + log_memory_usage())
+    logger.info(f"{get_current_time()}: >>> Processing complete, " + log_memory_usage())
 
     # Map plots
     logger.info(f"{get_current_time()}: Plotting maps")
     map_plotter = plot.MapPlot(modelresult)
-    map_plotter.twopanel_map("bottom_depth", "deposit_height", only_last_timestep=True)
-    logger.info(">>> Plotting maps complete, " + log_memory_usage())
-    map_plotter.save_figures(fpath_output, "map_bottomdepth_deposition")
+    map_plotter.twopanel_map(
+        "bottom_depth",
+        "deposit_height",
+        fpath_output,
+        "map_bottomdepth_deposition",
+        only_last_timestep=True,
+    )
+    logger.info(
+        f"{get_current_time()}: >>> Plotting maps complete, " + log_memory_usage()
+    )
 
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
-    xsect_start = (15, 140)
-    xsect_end = (60, 140)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
-    logger.info(f"{get_current_time()}: Plotting D50 x-sections")
-    xsect_plotter.twopanel_xsection("bottom_depth", "d50", only_last_timestep=True)
-    logger.info(">>> D50 x-sections plotting complete, " + log_memory_usage())
-    xsect_plotter.save_figures(fpath_output, "xsect_diameter")
+    logger.info(f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage())
+    xsect_plotter.twopanel_xsection(
+        "bottom_depth", "d50", fpath_output, "xsect_diameter", only_last_timestep=True
+    )
+    logger.info(
+        f"{get_current_time()}: >>> D50 x-sections plotting complete, "
+        + log_memory_usage()
+    )
 
     (fpath_input / "temp.nc").unlink(missing_ok=True)
-    logger.info(">>> Processing steps complete, " + log_memory_usage())
+    logger.info(
+        f"{get_current_time()}: >>> Processing steps complete, " + log_memory_usage()
+    )
 
 
 if __name__ == "__main__":
-    main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf",
-    )
+    main()
