@@ -2,9 +2,9 @@ import json
 import logging
 from pathlib import Path
 
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
 from gtpost.analyze import surface
 from gtpost.experimental import segmentation_utils
@@ -74,15 +74,20 @@ def main(
         )
         rgb_image = ax.imshow(
             modelresult.bottom_depth[i, :, :],
-            cmap=colormaps.BottomDepthColormap.cmap,
-            vmin=colormaps.BottomDepthColormap.vmin,
-            vmax=colormaps.BottomDepthColormap.vmax,
+            cmap=colormaps.BottomDepthHighContrastColormap.cmap,
+            vmin=colormaps.BottomDepthHighContrastColormap.vmin,
+            vmax=colormaps.BottomDepthHighContrastColormap.vmax,
         ).make_image("png", unsampled=True)[0]
         for path in contour.get_paths():
             vertices = path.vertices
             for vertex in vertices:
                 x, y = vertex
-                rgb_image[int(y), int(x), :] = [255, 255, 255, 255]  # Set contour color to white
+                rgb_image[int(y), int(x), :] = [
+                    250,
+                    250,
+                    250,
+                    255,
+                ]  # Set contour color to white
         plt.imsave(
             fpath_prediction_images.joinpath(f"seg_image_{i}.png"),
             rgb_image,
@@ -99,6 +104,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_074",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_074",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_097",
+        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset",
     )

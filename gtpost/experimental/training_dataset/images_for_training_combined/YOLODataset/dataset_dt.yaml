@@ -1,7 +1,0 @@
-path: \\?\UNC\storage007.directory.intra\11209074-002-geotool-new-deltas\02_postprocessing\Sobrarbe_048_Reference\images_for_training\YOLODataset
-train: images/train
-val: images/val
-test:
-
-names:
-    3: Delta top

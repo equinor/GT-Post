@@ -10,14 +10,32 @@ class SubEnv(Enum):
     prodelta = 3
 
 
+# class ArchEl(Enum):
+#     undefined = 0
+#     dtair = 1
+#     dtaqua = 2
+#     channel = 3
+#     mouthbar = 4
+#     deltafront = 5
+#     prodelta = 6
+
+
 class ArchEl(Enum):
     undefined = 0
-    dtair = 1
-    dtaqua = 2
-    channel = 3
+    dtundif = 1
+    dtbayfill = 2
+    dchannel = 3
+    tchannel = 4
     mouthbar = 4
-    # deltafront = 5
-    prodelta = 5
+    deltafront = 5
+    prodelta = 6
+    ushoreface = 7
+    lshoreface = 8
+    offshore = 9
+    beachridge = 10
+    tinlet = 11
+    tidalflat = 12
+    backbarrier = 13
 
 
 subenvironment_codes = [i.value for i in SubEnv.__iter__()]

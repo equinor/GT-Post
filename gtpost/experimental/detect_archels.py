@@ -66,9 +66,9 @@ def postprocess_result(
 
 
 prediction_parameters_deltatop = PredictionParams(
-    unit_name="deltatop",
-    string_code="dt",
-    encoding=classifications.ArchEl.dtair.value,
+    unit_name="deltatop undifferentiated",
+    string_code="dtundif",
+    encoding=classifications.ArchEl.dtundif.value,
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_deltatop_yolo11l.pt")
     ),
@@ -78,9 +78,9 @@ prediction_parameters_deltatop = PredictionParams(
 )
 
 prediction_parameters_ch = PredictionParams(
-    unit_name="channel",
-    string_code="ch",
-    encoding=classifications.ArchEl.channel.value,
+    unit_name="distributary channel",
+    string_code="dchannel",
+    encoding=classifications.ArchEl.dchannel.value,
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_channel_yolo11l.pt")
     ),
@@ -91,7 +91,7 @@ prediction_parameters_ch = PredictionParams(
 
 prediction_parameters_mb = PredictionParams(
     unit_name="mouthbar",
-    string_code="mb",
+    string_code="mouthbar",
     encoding=classifications.ArchEl.mouthbar.value,
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_mouthbar_yolo11l.pt")
@@ -102,8 +102,8 @@ prediction_parameters_mb = PredictionParams(
 )
 
 ae_to_prediction_params = {
-    "deltatop": prediction_parameters_deltatop,
-    "channel": prediction_parameters_ch,
+    "dtundef": prediction_parameters_deltatop,
+    "dchannel": prediction_parameters_ch,
     "mouthbar": prediction_parameters_mb,
 }
 

@@ -1,8 +1,0 @@
-path: \\?\C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_training_channels_mouthbars\YOLODataset
-train: images/train
-val: images/val
-test:
-
-names:
-    0: Mouth bar
-    1: Channel
