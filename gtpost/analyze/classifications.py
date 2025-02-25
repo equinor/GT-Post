@@ -16,8 +16,8 @@ class ArchEl(Enum):
     dtaqua = 2
     channel = 3
     mouthbar = 4
-    deltafront = 5
-    prodelta = 6
+    # deltafront = 5
+    prodelta = 5
 
 
 subenvironment_codes = [i.value for i in SubEnv.__iter__()]

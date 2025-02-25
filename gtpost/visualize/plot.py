@@ -17,7 +17,8 @@ from gtpost.visualize import colormaps
 class PlotBase:
     colormaps = {
         "d50": colormaps.GrainsizeColormap(),
-        "architectural_elements": colormaps.ArchelColormap(),
+        "architectural_elements": colormaps.WaveArchelColormap(),
+        # "architectural_elements": colormaps.ArchelColormap(),
         "deposit_height": colormaps.BedlevelchangeColormap(),
         "porosity": colormaps.PorosityColormap(),
         "bottom_depth": colormaps.BottomDepthColormap(),

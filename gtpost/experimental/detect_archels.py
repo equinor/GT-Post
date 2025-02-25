@@ -21,10 +21,10 @@ prediction_images_temp_folder = Path(__file__).parent.joinpath(
 
 
 def constrain_channel(modelresult: ModelResult, prediction_result: np.ndarray):
-    # Water depth must be > 0.5 m to justify a channel prediction
+    # Water depth must be > 0 m to justify a channel prediction
     prediction_result[
         (prediction_result == classifications.ArchEl.channel.value)
-        & (modelresult.bottom_depth < 0.5)
+        & (modelresult.bottom_depth < 0)
     ] = 0
     return prediction_result
 
@@ -33,16 +33,23 @@ def constrain_mouthbar(modelresult: ModelResult, prediction_result: np.ndarray):
     # Limit the depth at which mouth bars are expected, based on the delta front depth
     prediction_result[
         (prediction_result == classifications.ArchEl.mouthbar.value)
-        & (modelresult.bottom_depth > 5)
+        & (modelresult.bottom_depth > 4)
+        & (modelresult.deposit_height < 0.05)
     ] = 0
     return prediction_result
 
 
 def constrain_deltatop(modelresult: ModelResult, prediction_result: np.ndarray):
     # split delta top into a subaerial and subaqeous part
-    prediction_result[(prediction_result == 1) & (modelresult.bottom_depth > 1)] = (
+    prediction_result[(prediction_result == 1) & (modelresult.d50 < 0.07)] = (
         classifications.ArchEl.dtaqua.value
     )
+    return prediction_result
+
+
+def constrain_spit(modelresult: ModelResult, prediction_result: np.ndarray):
+    # A spit prediction must lie above the water level for it to be valid
+    pass
     return prediction_result
 
 
@@ -52,13 +59,16 @@ def postprocess_result(
 ):
     # Apply model mask to the prediction result
     prediction_result *= modelresult.model_mask.values
+    prediction_result[(prediction_result == 0) & (modelresult.bottom_depth > 2)] = (
+        classifications.ArchEl.prodelta.value
+    )
     return prediction_result
 
 
 prediction_parameters_deltatop = PredictionParams(
     unit_name="deltatop",
     string_code="dt",
-    encoding=1,
+    encoding=classifications.ArchEl.dtair.value,
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_deltatop_yolo11l.pt")
     ),
@@ -70,21 +80,19 @@ prediction_parameters_deltatop = PredictionParams(
 prediction_parameters_ch = PredictionParams(
     unit_name="channel",
     string_code="ch",
-    encoding=3,
+    encoding=classifications.ArchEl.channel.value,
     trained_model=YOLO(
-        Path(__file__).parent.joinpath(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train10\weights\best.pt"
-        )
+        Path(__file__).parent.joinpath("trained_yolo_models/best_channel_yolo11l.pt")
     ),
     max_instances=99,
-    min_confidence=0.25,
+    min_confidence=0.2,
     constrain_func=constrain_channel,
 )
 
 prediction_parameters_mb = PredictionParams(
     unit_name="mouthbar",
     string_code="mb",
-    encoding=4,
+    encoding=classifications.ArchEl.mouthbar.value,
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_mouthbar_yolo11l.pt")
     ),
@@ -147,10 +155,11 @@ def detect(
 
     # Stack results and apply final postprocessing
     final_prediction = segmentation_utils.merge_arrays_in_order(results)
+    del results
     final_prediction = postprocess_result(modelresult, final_prediction)
 
     # Remove temporary folder with prediction images
     # if prediction_images_temp_folder.is_dir():
     #     prediction_images_temp_folder.rmdir()
 
-    return final_prediction.astype(np.int64)
+    return final_prediction.astype(np.uint8)

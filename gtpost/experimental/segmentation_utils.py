@@ -47,17 +47,19 @@ def predict_units(
             conf=pp.min_confidence,
             max_det=pp.max_instances,
             show_boxes=False,
-            #visualize=True,
+            # visualize=True,
             retina_masks=True,
             augment=False,
             agnostic_nms=True,
             device="cpu",
         )
-        mask_array = np.zeros([len(results)] + list(results[0].orig_shape))
+        mask_array = np.zeros(
+            [len(results)] + list(results[0].orig_shape), dtype=np.uint8
+        )
         for i, result in enumerate(results):
             if result.masks is not None:
                 array = result.masks.data.max(axis=0).values
-                mask_array[i, :, :][array == 1.0] = pp.encoding
+                mask_array[i, :, :][array == 1] = pp.encoding
         mask_arrays.append(mask_array)
     stacked_arrays = np.stack(mask_arrays)
     result = np.flip(stacked_arrays, axis=0)

@@ -45,7 +45,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset.isel(time=slice(0, 120))  # time slice for testing
+        self.dataset = dataset  # .isel(time=slice(0, 120))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -202,32 +202,6 @@ class ModelResult:
             self.config["classification"]["deltafront_expected_width"]
         )
 
-    def detect_subenvironments(self):
-        """
-        Detect depositional environments and channel parameters.
-
-        Adds the attribute subenvironment which is an np.ndarray with time, x and y
-        dimensions. It detects the following environments:
-
-        1 - Delta top
-        2 - Delta edge area (Delta front)
-        3 - Deep marine area (Prodelta)
-
-        Returns
-        -------
-        None (attribute subenvironment is created)
-        """
-        (
-            self.subenvironment,
-            self.delta_fringe,
-        ) = surface.detect_depositional_environments(
-            self.bottom_depth,
-            self.mouth_position,
-            self.mouth_river_width,
-            self.model_boundary,
-            self.foreset_depth,
-            self.df_average_width,
-        )
 
     def detect_channel_network(self):
         """
@@ -268,16 +242,6 @@ class ModelResult:
         None (attribute architectural_elements is created)
         """
         self.architectural_elements = detect_archels.detect(self)
-        # self.architectural_elements = surface.detect_elements(
-        #     self.subenvironment,
-        #     self.channels,
-        #     self.channel_skeleton,
-        #     self.bottom_depth,
-        #     self.deposit_height,
-        #     self.sandfraction,
-        #     self.foreset_depth,
-        #     self.config,
-        # )
 
     def compute_sediment_parameters_postprocessing(self):
         """

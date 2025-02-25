@@ -110,8 +110,10 @@ def main(
     # Cross-section plots
     xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
-    xsect_start = (20, 140)
-    xsect_end = (60, 140)
+    xsect_start = (20, 145)
+    xsect_end = (90, 145)
+    xsect_start = (50, 80)
+    xsect_end = (50, 260)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage())
@@ -126,7 +128,7 @@ def main(
         "bottom_depth",
         "architectural_elements",
         fpath_output,
-        "xsect_archels",
+        "lsect_archels",
         only_last_timestep=False,
     )
 
@@ -145,6 +147,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_097",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_097",
     )

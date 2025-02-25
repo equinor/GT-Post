@@ -2,6 +2,7 @@ import json
 import logging
 from pathlib import Path
 
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -43,7 +44,7 @@ def main(
 
     Path.mkdir(fpath_output, exist_ok=True)
     Path.mkdir(fpath_masking_images, exist_ok=True)
-    Path.mkdir(fpath_training_images, exist_ok=True)
+    # Path.mkdir(fpath_training_images, exist_ok=True)
     Path.mkdir(fpath_prediction_images, exist_ok=True)
 
     template_name = get_template_name(fpath_input)
@@ -52,7 +53,7 @@ def main(
     )
 
     modelresult = ModelResult.from_folder(
-        fpath_input, post=False, settings_file=settings_file
+        fpath_input, post=False, settings_file=settings_file, use_copied_trim_file=False
     )
     # describe_data_vars(modelresult.dataset, fpath_output / "data_vars.txt")
     logger.info(
@@ -64,106 +65,40 @@ def main(
         f"{get_current_time()}: Processing completed, creating training images..."
     )
 
-    for i in range(0, modelresult.timestep, every_nth_image):
+    for i in range(0, modelresult.timestep, 1):
         # masking_img is an image of the bathymetry that will be used to draw the training
         # image segmentation masks.
-        masking_image = plt.imshow(
-            modelresult.bottom_depth[i, :, :],
-            cmap=colormaps.BottomDepthColormap.cmap,
-            vmin=colormaps.BottomDepthColormap.vmin,
-            vmax=colormaps.BottomDepthColormap.vmax,
-        ).make_image("png", unsampled=True)[0]
-
-        # training_image is an image where the RGB channels are chosen to represent three
-        # different D3D output parameters. These channels will be used for training the
-        # YOLO instance segmentation model.
-        # training_image = segmentation_utils.arrays_to_8bit_rgb(
-        #     [
-        #         modelresult.dataset["KS"].values[i, :, :],
-        #         modelresult.bottom_depth[i, :, :],
-        #         modelresult.dataset["DM"].values[i, :, :],
-        #     ],
-        #     [0, 0, 0],
-        #     [0.05, 12, 0.0005],
-        # )
-        # training_image = segmentation_utils.arrays_to_8bit_rgb(
-        #     [
-        #         modelresult.bottom_depth[i, :, :],
-        #         modelresult.dataset["DM"].values[i, :, :],
-        #         modelresult.dataset["MAX_UV"].values[i, :, :],
-        #     ],
-        #     [0, 0, 0],
-        #     [12, 0.0005, 1],
-        # )
-        plt.imsave(
-            fpath_masking_images.joinpath(f"seg_image_{i}.png"),
-            masking_image,
-            format="png",
+        fig, ax = plt.subplots()
+        contour = ax.contour(
+            modelresult.bottom_depth[i, :, :], levels=[0], colors="white"
         )
-        # plt.imsave(
-        #     fpath_training_images.joinpath(f"seg_image_{i}.png"),
-        #     training_image,
-        #     format="png",
-        # )
-
-    for i in range(0, modelresult.timestep, 1):
-        # seg_img is an image of the bathymetry that will be used to draw the training
-        # image segmentation masks.
-        # pred_image = segmentation_utils.arrays_to_8bit_rgb(
-        #     [
-        #         modelresult.bottom_depth[i, :, :],
-        #         modelresult.dataset["DM"].values[i, :, :],
-        #         modelresult.dataset["MAX_UV"].values[i, :, :],
-        #     ],
-        #     [0, 0, 0],
-        #     [12, 0.0005, 1],
-        # )
-        pred_image = plt.imshow(
+        rgb_image = ax.imshow(
             modelresult.bottom_depth[i, :, :],
             cmap=colormaps.BottomDepthColormap.cmap,
             vmin=colormaps.BottomDepthColormap.vmin,
             vmax=colormaps.BottomDepthColormap.vmax,
         ).make_image("png", unsampled=True)[0]
+        for path in contour.get_paths():
+            vertices = path.vertices
+            for vertex in vertices:
+                x, y = vertex
+                rgb_image[int(y), int(x), :] = [255, 255, 255, 255]  # Set contour color to white
         plt.imsave(
             fpath_prediction_images.joinpath(f"seg_image_{i}.png"),
-            pred_image,
+            rgb_image,
             format="png",
         )
+        if i % every_nth_image == 0:
+            plt.imsave(
+                fpath_masking_images.joinpath(f"seg_image_{i}.png"),
+                rgb_image,
+                format="png",
+            )
+        plt.close(fig)
 
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_074",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_074",
     )
-
-    # i =
-
-    # param = modelresult.dataset["DPS"][
-    #     i, :, :
-    # ]  # - modelresult.dataset["MIN_H1"][i,:,:]
-    # param.plot.imshow(vmin=-2, vmax=2)
-    # plt.savefig("test.png")
-    # plt.close()
-
-    # param = model_mean_dm - modelresult.dataset["DM"][i, :, :]
-    # param.plot.imshow(vmin=0, vmax=model_mean_dm / 4)
-    # plt.savefig("test.png")
-    # plt.close()
-
-    # param = modelresult.slope[i, :, :]
-    # plt.imshow(param, vmin=0, vmax=0.1)
-    # plt.savefig("test.png")
-    # plt.close()
-
-    # img = segmentation_utils.arrays_to_8bit_rgb(
-    #     [
-    #         modelresult.deposit_height[i, :, :],
-    #         modelresult.bottom_depth[i, :, :],
-    #         modelresult.dataset["MAX_UV"].values[i, :, :],
-    #     ],
-    #     [0, 0, 0],
-    #     [0.2, 5, 1],
-    # )
-    # plt.imsave("test.png", img, format="png")
-    # plt.close()
