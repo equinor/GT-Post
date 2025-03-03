@@ -9,6 +9,8 @@ from matplotlib.colors import (
     Normalize,
 )
 
+from gtpost.analyze.classifications import ArchEl
+
 
 def categorical_cmap(alphas, colors, name):
     cmap = ListedColormap(
@@ -31,6 +33,23 @@ def continuous_cmap(colorlist, name, vmin, vmax):
     cmap = LinearSegmentedColormap.from_list(name, colorlist)
     mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
     return cmap, mappable, norm
+
+
+class GenericCategoricalColormap:
+    def __init__(self, classifications_enum_class, labels, name):
+        self.labels = labels
+        self.alphas = [1] * len(labels)
+        self.colors = [
+            classifications_enum_class[label.name].color
+            for label in classifications_enum_class
+            if label.name in labels
+        ]
+        self.ticks = np.arange(0, len(labels))
+        self.name = name
+        self.type = "categorical"
+        self.cmap, self.mappable, self.bounds, self.values, self.norm = (
+            categorical_cmap(self.alphas, self.colors, self.name)
+        )
 
 
 class ArchelColormap(NamedTuple):
@@ -150,6 +169,12 @@ class BottomDepthColormap(NamedTuple):
 
 
 class BottomDepthHighContrastColormap(NamedTuple):
+    """
+    The high contrast version is used in computer vision applications. It features
+    larger color gradients at critical depths to improve the performance of the
+    object detection algorithms.
+    """
+
     c0 = (0, "#000000")
     c1 = (0.01, "#182514")
     c2 = (0.05, "#0C672C")

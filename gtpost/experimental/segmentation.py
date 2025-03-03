@@ -12,8 +12,10 @@ from gtpost.experimental.segmentation_utils import (
     merge_arrays_in_order,
     predict_units,
 )
+
 from gtpost.model import ModelResult
 from gtpost.visualize import colormaps
+from gtpost.analyze import classifications
 
 default_yolo_model = Path(__file__).parent.joinpath(
     "pretrained_yolo_models/yolo11l-seg.pt"
@@ -39,63 +41,53 @@ matplotlib.use("TkAgg")
 #     ),
 # ]
 
-prediction_parameters_delta = [
-    PredictionParams(
-        unit_name="deltatop",
-        string_code="dt",
-        encoding=1,
-        trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
-        ),
-        max_instances=1,
-        min_confidence=0.1,
+prediction_parameters_dchannel = PredictionParams(
+    unit_name="distributary channel",
+    string_code="dchannel",
+    encoding=classifications.ArchEl.dchannel.value,
+    trained_model=YOLO(
+        Path(__file__).parent.joinpath("trained_yolo_models/best_dchannel_yolo11l.pt")
     ),
-    PredictionParams(
-        unit_name="shoreface_offshore",
-        string_code="so",
-        encoding=5,
-        trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
-        ),
-        max_instances=2,
-        min_confidence=0.1,
-    ),
-    PredictionParams(
-        unit_name="channel",
-        string_code="ch",
-        encoding=3,
-        trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
-        ),
-        max_instances=99,
-        min_confidence=0.1,
-    ),
-    PredictionParams(
-        unit_name="mouthbar",
-        string_code="mb",
-        encoding=4,
-        trained_model=YOLO(
-            r"c:\Users\onselen\Development\GT-Post\runs\segment\train8\weights\best.pt"
-        ),
-        max_instances=99,
-        min_confidence=0.05,
-    ),
-]
+    max_instances=99,
+    min_confidence=0.15,
+    # constrain_func=constrain_dchannel,
+)
 
-prediction_parameters_ch = [
-    PredictionParams(
-        unit_name="channel",
-        string_code="ch",
-        encoding=3,
-        trained_model=YOLO(
-            Path(__file__).parent.joinpath(
-                r"c:\Users\onselen\Development\GT-Post\runs\segment\train10\weights\best.pt"
-            )
-        ),
-        max_instances=99,
-        min_confidence=0.25,
-    )
-]
+prediction_parameters_beachridge = PredictionParams(
+    unit_name="Beach ridge",
+    string_code="beachridge",
+    encoding=classifications.ArchEl.beachridge.value,
+    trained_model=YOLO(
+        Path(__file__).parent.joinpath("trained_yolo_models/best_beachridge_yolo11l.pt")
+    ),
+    max_instances=99,
+    min_confidence=0.1,
+    # constrain_func=constrain_beachridge,
+)
+
+prediction_parameters_dtundef = PredictionParams(
+    unit_name="deltatop",
+    string_code="dtundef",
+    encoding=classifications.ArchEl.dtundef.value,
+    trained_model=YOLO(
+        Path(__file__).parent.joinpath("trained_yolo_models/best_dtundef_yolo11l.pt")
+    ),
+    min_confidence=0.5,
+    max_instances=1,
+    # constrain_func=constrain_deltatop,
+)
+
+prediction_parameters_tchannel = PredictionParams(
+    unit_name="tidal channel",
+    string_code="tchannel",
+    encoding=classifications.ArchEl.tchannel.value,
+    trained_model=YOLO(
+        Path(__file__).parent.joinpath("trained_yolo_models/best_tchannel_yolo11l.pt")
+    ),
+    max_instances=20,
+    min_confidence=0.1,
+    # constrain_func=constrain_tchannel,
+)
 
 
 def tune():
@@ -232,14 +224,25 @@ if __name__ == "__main__":
     # # )
 
     # results = train(
-    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\images_for_masking\YOLODataset_deltatop\dataset.yaml",
-    #     282,
+    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel\dataset.yaml",
+    #     322,
+    # )
+    # results = train(
+    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge\dataset.yaml",
+    #     322,
+    # )
+    # results = train(
+    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef\dataset.yaml",
+    #     322,
+    # )
+    # results = train(
+    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel\dataset.yaml",
+    #     322,
     # )
 
-    image_folder = r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\prediction_images"
-    image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images_temp"
+    image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images"
     # result = None
-    result_dt = predict(image_folder, prediction_parameters_ch, 282)
+    result_dt = predict(image_folder, prediction_parameters_tchannel, 322)
     # result_df = predict(image_folder, prediction_parameters_delta_front, 282)
     # result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
 

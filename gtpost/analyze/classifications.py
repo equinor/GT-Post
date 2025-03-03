@@ -22,20 +22,40 @@ class SubEnv(Enum):
 
 class ArchEl(Enum):
     undefined = 0
-    dtundif = 1
+    dtundef = 1
     dtbayfill = 2
     dchannel = 3
     tchannel = 4
-    mouthbar = 4
-    deltafront = 5
-    prodelta = 6
-    ushoreface = 7
-    lshoreface = 8
-    offshore = 9
-    beachridge = 10
-    tinlet = 11
-    tidalflat = 12
-    backbarrier = 13
+    mouthbar = 5
+    deltafront = 6
+    prodelta = 7
+    ushoreface = 8
+    lshoreface = 9
+    offshore = 10
+    beachridge = 11
+    tinlet = 12
+    tidalflat = 13
+    backbarrier = 14
+
+    @property
+    def color(self):
+        return {
+            ArchEl.undefined: "white",
+            ArchEl.dtundef: "yellowgreen",
+            ArchEl.dtbayfill: "mediumseagreen",
+            ArchEl.dchannel: "deepskyblue",
+            ArchEl.tchannel: "cadetblue",
+            ArchEl.mouthbar: "orange",
+            ArchEl.deltafront: "paleturquoise",
+            ArchEl.prodelta: "mediumblue",
+            ArchEl.ushoreface: "khaki",
+            ArchEl.lshoreface: "darkkhaki",
+            ArchEl.offshore: "mediumblue",
+            ArchEl.beachridge: "gold",
+            ArchEl.tinlet: "plum",
+            ArchEl.tidalflat: "thistle",
+            ArchEl.backbarrier: "slategray",
+        }[self]
 
 
 subenvironment_codes = [i.value for i in SubEnv.__iter__()]

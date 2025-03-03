@@ -2,6 +2,9 @@ import json
 import logging
 from pathlib import Path
 
+import numpy as np
+
+from gtpost.analyze import classifications
 from gtpost.model import ModelResult
 from gtpost.utils import get_current_time, get_template_name, log_memory_usage
 from gtpost.visualize import plot
@@ -91,10 +94,31 @@ def main(
         + log_memory_usage()
     )
 
-    # Summary plot
-    logger.info(f"{get_current_time()}: Plotting stats, " + log_memory_usage())
-    stat_plotter = plot.StatPlot(modelresult)
-    stat_plotter.plot_histograms(fpath_output, "archel_summary")
+    # import matplotlib.pyplot as plt
+
+    # # Plot architectural elements
+    # arch_elements = modelresult.architectural_elements[100, :, :]
+    # unique_elements = np.unique(arch_elements)
+
+    # plt.figure(figsize=(10, 8))
+    # plt.imshow(arch_elements, cmap='tab20', interpolation='none')
+    # cbar = plt.colorbar(ticks=unique_elements)
+    # cbar.ax.set_yticklabels([classifications.ArchEl(el).name for el in unique_elements])
+    # plt.title('Architectural Elements')
+    # plt.xlabel('X')
+    # plt.ylabel('Y')
+    # plt.savefig(fpath_output.joinpath(modelresult.modelname + "_architectural_elements.png"))
+    # plt.close()
+
+    logger.info(
+        f"{get_current_time()}: Created {modelresult.modelname}_architectural_elements.png"
+        + log_memory_usage()
+    )
+
+    # # Summary plot
+    # logger.info(f"{get_current_time()}: Plotting stats, " + log_memory_usage())
+    # stat_plotter = plot.StatPlot(modelresult)
+    # stat_plotter.plot_histograms(fpath_output, "archel_summary")
 
     # Map plots
     logger.info(f"{get_current_time()}: Plotting archel maps, " + log_memory_usage())
@@ -112,8 +136,8 @@ def main(
     xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
     xsect_start = (20, 145)
     xsect_end = (90, 145)
-    xsect_start = (50, 80)
-    xsect_end = (50, 260)
+    xsect_start = (40, 120)
+    xsect_end = (40, 260)
     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
     logger.info(f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage())

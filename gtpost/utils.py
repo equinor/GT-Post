@@ -224,6 +224,10 @@ def numpy_mode(array: np.ndarray):
     index = np.argmax(counts)
     return vals[index]
 
+def normalize_numpy_array(array: np.ndarray):
+    unique_values = np.unique(array)
+    value_to_int = {val: idx for idx, val in enumerate(unique_values)}
+    return np.vectorize(value_to_int.get)(array)
 
 def join_linestrings_to_polygon(linestring_a, linestring_b, reverse=False):
     if reverse:

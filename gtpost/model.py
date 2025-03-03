@@ -45,7 +45,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset  # .isel(time=slice(0, 120))  # time slice for testing
+        self.dataset = dataset.isel(time=slice(0, 120))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -201,7 +201,6 @@ class ModelResult:
         self.df_average_width = int(
             self.config["classification"]["deltafront_expected_width"]
         )
-
 
     def detect_channel_network(self):
         """

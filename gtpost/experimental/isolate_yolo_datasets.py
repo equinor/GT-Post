@@ -76,11 +76,11 @@ def update_label_text_file(label_file, key_to_update, new_key, new_label):
 if __name__ == "__main__":
     yolo_class_names = get_yolo_class_names(
         Path(
-            r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\images_for_masking\YOLODataset\dataset.yaml"
+            r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset\dataset.yaml"
         )
     )
     new_dataset_folders = make_new_yolo_folders(
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\images_for_masking\YOLODataset",
+        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset",
         yolo_class_names,
     )
     update_datasets(new_dataset_folders)

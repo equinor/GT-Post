@@ -1,0 +1,10 @@
+path: \\?\C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset
+train: images/train
+val: images/val
+test:
+
+names:
+    0: dchannel
+    1: dtundef
+    2: beachridge
+    3: tchannel

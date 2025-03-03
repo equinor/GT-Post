@@ -4,12 +4,13 @@ from pathlib import Path
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 from matplotlib.collections import PatchCollection
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy import spatial
-import xarray as xr
 
+from gtpost.analyze.classifications import ArchEl
 from gtpost.visualize import colormaps
 
 
@@ -17,7 +18,21 @@ from gtpost.visualize import colormaps
 class PlotBase:
     colormaps = {
         "d50": colormaps.GrainsizeColormap(),
-        "architectural_elements": colormaps.WaveArchelColormap(),
+        "architectural_elements": colormaps.GenericCategoricalColormap(
+            ArchEl,
+            [
+                "undefined",
+                "dtundef",
+                "dtbayfill",
+                "dchannel",
+                "tchannel",
+                "ushoreface",
+                "lshoreface",
+                "offshore",
+                "beachridge",
+            ],
+            "Architectural elements",
+        ),
         # "architectural_elements": colormaps.ArchelColormap(),
         "deposit_height": colormaps.BedlevelchangeColormap(),
         "porosity": colormaps.PorosityColormap(),
@@ -366,6 +381,7 @@ class PlotBase:
             axis.imshow(
                 data[timestep, :, :],
                 cmap=colormap.cmap,
+                norm=colormap.norm,
                 interpolation="antialiased",
                 interpolation_stage="rgba",
             )
