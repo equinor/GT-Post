@@ -1,0 +1,260 @@
+import logging
+from pathlib import Path
+
+from gtpost.model import ModelResult
+from gtpost.utils import get_current_time, get_template_name, log_memory_usage
+from gtpost.visualize import plot
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+POSITION_TAGS_PRO = [
+    "xshore_5000",
+    "xshore_6000",
+    "xshore_7000",
+    "xshore_8000",
+    "xshore_9000",
+    "xshore_10000",
+    "xshore_11000",
+    "xshore_12000",
+    "xshore_13000",
+    "xshore_14000",
+    "xshore_15000",
+    "lshore_1500",
+    "lshore_2000",
+    "lshore_2500",
+    "lshore_3000",
+    "lshore_3500",
+    "lshore_4000",
+]
+
+XSECT_STARTS_PRO = [
+    (18, 100),
+    (18, 120),
+    (18, 140),
+    (18, 160),
+    (18, 180),
+    (18, 200),
+    (18, 220),
+    (18, 240),
+    (18, 260),
+    (18, 280),
+    (18, 300),
+    (30, 100),
+    (40, 100),
+    (50, 100),
+    (60, 100),
+    (70, 100),
+    (80, 100),
+]
+
+XSECT_ENDS_PRO = [
+    (100, 100),
+    (100, 120),
+    (100, 140),
+    (100, 160),
+    (100, 180),
+    (100, 200),
+    (100, 220),
+    (100, 240),
+    (100, 260),
+    (100, 280),
+    (100, 300),
+    (30, 300),
+    (40, 300),
+    (50, 300),
+    (60, 300),
+    (70, 300),
+    (80, 300),
+]
+
+POSITION_TAGS_RET = [
+    "xshore_4200",
+    "xshore_5000",
+    "xshore_6000",
+    "xshore_7000",
+    "xshore_8000",
+    "xshore_9000",
+    "xshore_10000",
+    "xshore_11000",
+    "xshore_12000",
+    "xshore_13000",
+    "xshore_14000",
+    "xshore_15000",
+    "lshore_5000",
+    "lshore_5500",
+    "lshore_6000",
+    "lshore_6500",
+    "lshore_7000",
+    "lshore_7500",
+]
+
+XSECT_STARTS_RET = [
+    (18, 84),
+    (80, 100),
+    (80, 120),
+    (80, 140),
+    (80, 160),
+    (80, 180),
+    (80, 200),
+    (80, 220),
+    (80, 240),
+    (80, 260),
+    (80, 280),
+    (80, 300),
+    (100, 100),
+    (110, 100),
+    (120, 100),
+    (130, 100),
+    (140, 100),
+    (150, 100),
+]
+
+XSECT_ENDS_RET = [
+    (160, 84),
+    (160, 100),
+    (160, 120),
+    (160, 140),
+    (160, 160),
+    (160, 180),
+    (160, 200),
+    (160, 220),
+    (160, 240),
+    (160, 260),
+    (160, 280),
+    (160, 300),
+    (100, 300),
+    (110, 300),
+    (120, 300),
+    (130, 300),
+    (140, 300),
+    (150, 300),
+]
+
+
+def main(
+    position_tags,
+    xsect_starts,
+    xsect_ends,
+    fpath_input: str | Path = "/data/input",
+    fpath_output: str | Path = "/data/output",
+) -> None:
+    """
+    main function that interfaces with the Delft3D Geotool backend for processing during
+    a model run.
+
+    Parameters
+    ----------
+    fpath_input : str | Path, optional
+        Path with input, including at least the .sed file, config ini file, and most
+        importantly the trim.nc file with model results up to the last exported timestep.
+        by default the relative path is "/data/input" within the container folder
+        structure.
+    fpath_output : str | Path, optional
+        Relative path within the container folder structure to write results to,
+        by default "/data/output"
+
+
+    Output for D3D-GT and to be displayed in the processing GUI elements:
+
+    - Figures showing bathymetry and sedimentation/erosion rate (top down)
+    - Figures showing median sediment diameter D50 (along a cross-shore profile)
+    """
+    fpath_input = Path(fpath_input)
+    fpath_output = Path(fpath_output)
+
+    template_name = get_template_name(fpath_input)
+    settings_file = (
+        Path(__file__).parents[2].joinpath(f"config/settings_{template_name}.ini")
+    )
+
+    try:
+        modelresult = ModelResult.from_folder(
+            fpath_input,
+            post=False,
+            settings_file=settings_file,
+            use_copied_trim_file=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to initialize model results: {e}")
+        return
+    logger.info(
+        f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"
+    )
+    logger.info(
+        f"{get_current_time()}: >>> ModelResult initialized, " + log_memory_usage()
+    )
+    logger.info(f"{get_current_time()}: Starting processing")
+    modelresult.process()
+    logger.info(f"{get_current_time()}: >>> Processing complete, " + log_memory_usage())
+
+    # Map plots
+    logger.info(f"{get_current_time()}: Plotting maps")
+    map_plotter = plot.MapPlot(modelresult)
+    map_plotter.twopanel_map(
+        "bottom_depth",
+        "deposit_height",
+        fpath_output,
+        "map_bottomdepth_deposition",
+        only_last_timestep=True,
+    )
+    logger.info(
+        f"{get_current_time()}: >>> Plotting maps complete, " + log_memory_usage()
+    )
+
+    # Cross-section plots
+    for position_tag, xsect_start, xsect_end in zip(
+        position_tags, xsect_starts, xsect_ends
+    ):
+        xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
+
+        logger.info(
+            f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage()
+        )
+        xsect_plotter.twopanel_xsection(
+            "bottom_depth",
+            "d50",
+            fpath_output,
+            f"xsect_diameter_{position_tag}",
+            only_last_timestep=False,
+        )
+        logger.info(
+            f"{get_current_time()}: >>> D50 x-sections plotting complete, "
+            + log_memory_usage()
+        )
+
+    (fpath_input / "temp.nc").unlink(missing_ok=True)
+    logger.info(
+        f"{get_current_time()}: >>> Processing steps complete, " + log_memory_usage()
+    )
+
+
+if __name__ == "__main__":
+    # main(
+    #     POSITION_TAGS_PRO,
+    #     XSECT_STARTS_PRO,
+    #     XSECT_ENDS_PRO,
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_104",
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_104",
+    # )
+    # main(
+    #     POSITION_TAGS_RET,
+    #     XSECT_STARTS_RET,
+    #     XSECT_ENDS_RET,
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_072",
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_072",
+    # )
+    # main(
+    #     POSITION_TAGS_PRO,
+    #     XSECT_STARTS_PRO,
+    #     XSECT_ENDS_PRO,
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_105",
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_105",
+    # )
+    main(
+        POSITION_TAGS_RET,
+        XSECT_STARTS_RET,
+        XSECT_ENDS_RET,
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_074",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_074",
+    )

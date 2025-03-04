@@ -78,7 +78,8 @@ ruff = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 pip = ">=24.0,<25"
-psutil = ">=6.1.0,<7"
+psutil = ">=6.1.1,<7"
+affine = ">=2.4.0,<3"
 
 [tool.pixi.pypi-dependencies]
 gtpost = { path = ".", editable = true }

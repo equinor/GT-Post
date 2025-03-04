@@ -5,6 +5,7 @@ from typing import List
 
 import numpy as np
 import psutil
+
 from rasterio.features import rasterize
 from shapely import buffer
 from shapely.geometry import LineString, Point, Polygon

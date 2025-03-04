@@ -136,26 +136,54 @@ class PlotBase:
             self.fig.set_size_inches(650.0 / float(dpi), 1000.0 / float(dpi))
 
     def draw_xsection(self, axis_idx, timestep, data, colormap):
+        """
+
+
+        Parameters
+        ----------
+        axis_idx : _type_
+            _description_
+        timestep : _type_
+            _description_
+        data : _type_
+            _description_
+        colormap : _type_
+            _description_
+        """
         axis = self.ax[axis_idx]
         caxis = self.cax[axis_idx]
 
-        for i, x in enumerate(self.anchor_x[:-1]):
-            subsidence = self.dsub[timestep, i]
-            adjacent_subsidence = self.dsub[timestep, i + 1]
-            absolute_bed_chg = self.dh[timestep, i]
-            adjacent_bed_chg = self.dh[timestep, i + 1]
-            current_surface = self.anchor_y[timestep, i]
-            adjacent_surface = self.anchor_y[timestep, i + 1]
+        for i, x in enumerate(self.anchor_x[1:-1]):
+            i += 1
+            x_left = x - self.width / 2
+            x_right = x + self.width / 2
+            subsidence_left = (self.dsub[timestep, i - 1] + self.dsub[timestep, i]) / 2
+            subsidence_middle = self.dsub[timestep, i]
+            subsidence_right = (self.dsub[timestep, i] + self.dsub[timestep, i + 1]) / 2
+            bed_chg_left = max((self.dh[timestep, i - 1] + self.dh[timestep, i]) / 2, 0)
+            bed_chg_middle = max(self.dh[timestep, i], 0)
+            bed_chg_right = max(
+                (self.dh[timestep, i] + self.dh[timestep, i + 1]) / 2, 0
+            )
+            surface_left = (
+                self.anchor_y[timestep, i - 1] + self.anchor_y[timestep, i]
+            ) / 2
+            surface_middle = self.anchor_y[timestep, i]
+            surface_right = (
+                self.anchor_y[timestep, i] + self.anchor_y[timestep, i + 1]
+            ) / 2
 
             # First update existing polygons with the subsidence that took place since
             # the last timestep:
             xy_update = np.array(
                 [
-                    subsidence,
-                    subsidence,
-                    adjacent_subsidence,
-                    adjacent_subsidence,
-                    subsidence,
+                    subsidence_left,
+                    subsidence_left,
+                    subsidence_middle,
+                    subsidence_right,
+                    subsidence_right,
+                    subsidence_middle,
+                    subsidence_left,
                 ]
             )
             [
@@ -168,45 +196,52 @@ class PlotBase:
                 p
                 for p in self.patches_per_position[i]
                 if not (
-                    (p.get_xy()[0, 1] >= current_surface)
-                    & (p.get_xy()[3, 1] >= adjacent_surface)
+                    (p.get_xy()[0, 1] >= surface_left)
+                    & (p.get_xy()[4, 1] >= surface_middle)
+                    & (p.get_xy()[5, 1] >= surface_right)
                 )
             ]
+
             # Update the top of the polygons that extend above the current surface:
             for p in self.patches_per_position[i]:
                 xy = p.get_xy()
-                xy[:2, 1] = xy[:2, 1].clip(max=current_surface)
-                xy[2:4, 1] = xy[2:4, 1].clip(max=adjacent_surface)
+                xy[:2, 1] = xy[:2, 1].clip(max=surface_left)
+                xy[2, 1] = xy[2, 1].clip(max=surface_middle)
+                xy[5, 1] = xy[5, 1].clip(max=surface_middle)
+                xy[3:5, 1] = xy[3:5, 1].clip(max=surface_right)
                 xy[-1, 1] = xy[0, 1]
                 p.set_xy(xy)
 
-            # Draw a new polygon if deposition took place and append it to the list of
+            # Make sure that the top polygon (self.patches_per_position[i][-1]) still
+            # reaches the current surface:
+            if len(self.patches_per_position[i]) > 0:
+                xy_last = self.patches_per_position[i][-1].xy
+                if bed_chg_left == 0.0:
+                    xy_last[1, 1] = surface_left
+                if bed_chg_middle == 0.0:
+                    xy_last[2, 1] = surface_middle
+                if bed_chg_right == 0.0:
+                    xy_last[3, 1] = surface_right
+                self.patches_per_position[i][-1].set_xy(xy_last)
+
+            # Draw a new polygon if any deposition took place at the left, middle and
+            # and right x-positions of the potential polygon and append it to the list of
             # polygons for this position:
             if colormap.type == "mappable":
-                color = colormap.mappable.to_rgba(
-                    (data[timestep, i] + data[timestep, i + 1]) / 2
-                )
+                color = colormap.mappable.to_rgba(data[timestep, i])
             elif colormap.type == "categorical":
                 color = colormap.colors[data[timestep, i]]
 
-            if absolute_bed_chg > 0.0 or adjacent_bed_chg > 0.0:
-                if absolute_bed_chg > 0.0 and adjacent_bed_chg > 0.0:
-                    adj_bed_chg_to_use = adjacent_bed_chg
-                    abs_bed_chg_to_use = absolute_bed_chg
-                elif absolute_bed_chg <= 0.0 and adjacent_bed_chg > 0.0:
-                    adj_bed_chg_to_use = adjacent_bed_chg
-                    abs_bed_chg_to_use = 0.0
-                elif absolute_bed_chg > 0.0 and adjacent_bed_chg <= 0.0:
-                    adj_bed_chg_to_use = 0.0
-                    abs_bed_chg_to_use = absolute_bed_chg
-
+            if bed_chg_left > 0.0 or bed_chg_middle > 0.0 or bed_chg_right > 0.0:
                 self.patches_per_position[i].append(
                     patches.Polygon(
                         xy=(
-                            (x, current_surface - abs_bed_chg_to_use),
-                            (x, current_surface),
-                            (x + self.width, adjacent_surface),
-                            (x + self.width, adjacent_surface - adj_bed_chg_to_use),
+                            (x_left, surface_left - bed_chg_left),
+                            (x_left, surface_left),
+                            (x, surface_middle),
+                            (x_right, surface_right),
+                            (x_right, surface_right - bed_chg_right),
+                            (x, surface_middle - bed_chg_middle),
                         ),
                         color=color,
                         linewidth=0,
@@ -224,6 +259,14 @@ class PlotBase:
         axis.add_collection(p)
         axis.plot(self.anchor_y[timestep, :])
 
+        # # Additional timelines to plot:
+        # for timeline_to_draw in np.arange(5, timestep, 10):
+        #     timeline_to_draw_y = np.minimum(
+        #         self.anchor_y[timeline_to_draw, :], self.anchor_y[timestep, :]
+        #     )
+        #     axis.plot(timeline_to_draw_y, linestyle="--", linewidth=0.6, color="black")
+
+        # Finally update the axis limits, labels, titles etc.
         axis.set_xlim(self.xlim)
         axis.set_ylim(self.ylim)
         axis.set_xticks(axis.get_xticks())
@@ -408,6 +451,9 @@ class CrossSectionPlot(PlotBase):
         variable_xsect,
         path,
         name,
+        add_timelines=False,
+        timeline_interval=10,
+        timeline_start=5,
         only_last_timestep=False,
     ):
         data_xsect = self.model.__dict__[variable_xsect][:, self.xc, self.yc]
@@ -424,6 +470,20 @@ class CrossSectionPlot(PlotBase):
                 [[] for i in range(len(self.anchor_x))],
             )
         )
+
+        # if add_timelines:
+        #     anchor_y_subsidence_corrected = self.anchor_y - np.cumsum(self.dsub, axis=0)
+        #     anchor_y_subsidence = [
+        #         np.min(anchor_y_subsidence_corrected[i:, :], axis=0)
+        #         <= anchor_y_subsidence_corrected[i, :]
+        #         for i in range(anchor_y_subsidence_corrected.shape[0])
+        #     ]
+        #     anchor_y_subsidence = np.array(anchor_y_subsidence)
+
+        #     anchor_y = self.anchor_y[
+        #         np.arange(timeline_start, data_xsect.shape[0], timeline_interval)
+        #     ]
+        #     self.anchor_y
 
         self.create_figure("x-2panels")
         if only_last_timestep:
