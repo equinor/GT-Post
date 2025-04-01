@@ -1,4 +1,5 @@
 import shutil
+import subprocess
 from pathlib import Path
 
 import yaml
@@ -74,6 +75,19 @@ def update_label_text_file(label_file, key_to_update, new_key, new_label):
 
 
 if __name__ == "__main__":
+    # Run labelme2yolo in the command line to create the YOLO dataset
+    subprocess.run(
+        [
+            "labelme2yolo",
+            "--json_dir",
+            r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking",
+            "--output_format",
+            "polygon",
+        ],
+        check=True,
+    )
+
+    # Split up the YOLO dataset into individual datasets for each Architectural Element
     yolo_class_names = get_yolo_class_names(
         Path(
             r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset\dataset.yaml"
