@@ -10,16 +10,6 @@ class SubEnv(Enum):
     prodelta = 3
 
 
-# class ArchEl(Enum):
-#     undefined = 0
-#     dtair = 1
-#     dtaqua = 2
-#     channel = 3
-#     mouthbar = 4
-#     deltafront = 5
-#     prodelta = 6
-
-
 class ArchEl(Enum):
     undefined = 0
     dtundef = 1
@@ -40,21 +30,21 @@ class ArchEl(Enum):
     @property
     def color(self):
         return {
-            ArchEl.undefined: "white",
-            ArchEl.dtundef: "yellowgreen",
-            ArchEl.dtbayfill: "mediumseagreen",
-            ArchEl.dchannel: "deepskyblue",
-            ArchEl.tchannel: "cadetblue",
-            ArchEl.mouthbar: "orange",
-            ArchEl.deltafront: "paleturquoise",
-            ArchEl.prodelta: "mediumblue",
-            ArchEl.ushoreface: "khaki",
-            ArchEl.lshoreface: "darkkhaki",
-            ArchEl.offshore: "mediumblue",
-            ArchEl.beachridge: "gold",
-            ArchEl.tinlet: "plum",
-            ArchEl.tidalflat: "thistle",
-            ArchEl.backbarrier: "slategray",
+            self.undefined: "white",
+            self.dtundef: "yellowgreen",
+            self.dtbayfill: "mediumseagreen",
+            self.dchannel: "deepskyblue",
+            self.tchannel: "cadetblue",
+            self.mouthbar: "orange",
+            self.deltafront: "paleturquoise",
+            self.prodelta: "mediumblue",
+            self.ushoreface: "khaki",
+            self.lshoreface: "darkkhaki",
+            self.offshore: "mediumblue",
+            self.beachridge: "gold",
+            self.tinlet: "plum",
+            self.tidalflat: "thistle",
+            self.backbarrier: "slategray",
         }[self]
 
 

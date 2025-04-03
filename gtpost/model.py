@@ -126,13 +126,12 @@ class ModelResult:
         """
         Derive additional attributes from the trimfile (self.dataset) for postprocessing
         the final model results. These are:
+
+        bottom_depth       :       np.ndarray: array (x, y) with bottom depth
+        subsidence         :       np.ndarray: array (time, x, y) with subsidence
+        deposit_height     :       np.ndarray: array (time, x, y) height of deposits
         """
         self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
-        self.mouth_position = utils.get_mouth_midpoint(
-            self.dataset["MEAN_H1"][1, :, :].values,
-            self.dataset.N.values,
-            self.dataset.M.values,
-        )
         self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
         subsidence = np.append(
             self.dataset["SDU"].values,
@@ -165,17 +164,6 @@ class ModelResult:
                                     of the foreset.
         """
         self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
-        self.mouth_position = utils.get_mouth_midpoint(
-            self.dataset["MEAN_H1"][1, :, :].values,
-            self.dataset.N.values,
-            self.dataset.M.values,
-        )
-        self.mouth_river_width = utils.get_river_width_at_mouth(
-            self.dataset["MEAN_H1"][1, :, :].values, self.mouth_position
-        )
-        self.model_boundary = utils.get_model_bound(
-            self.dataset["MEAN_H1"][1, :, :].values
-        )
         self.model_mask = self.dataset["KCS"] >= 1
         subsidence = np.append(
             self.dataset["SDU"].values,
@@ -194,13 +182,6 @@ class ModelResult:
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
         self.dataset["MEAN_H1"] = self.dataset.MEAN_H1.where(self.dataset.MEAN_H1 > -50)
         self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
-        self.slope = surface.slope(self.dataset["MEAN_H1"].values)
-        self.foreset_depth = utils.get_deltafront_contour_depth(
-            self.bottom_depth, self.slope, self.model_boundary
-        )
-        self.df_average_width = int(
-            self.config["classification"]["deltafront_expected_width"]
-        )
 
     def detect_channel_network(self):
         """
@@ -293,10 +274,6 @@ class ModelResult:
         """
         percentage2cal = [50]
         self.dmsedcum_final = self.dataset["DMSEDCUM"].values
-        # FUTURE DASK SOLUTION HERE
-        # self.dmsedcum_final.map_blocks(
-        #     sediment.calculate_fraction,
-        # )
         # Only the incoming sediment flux determines the composition of potential
         # deposits, so remove fluxes of sediment classes that are negative.
         self.dmsedcum_final[self.dmsedcum_final < 0] = 0
@@ -402,7 +379,7 @@ class ModelResult:
         # self.detect_subenvironments()
         # self.detect_channel_network()
         self.detect_architectural_elements()
-        self.statistics_summary()
+        # self.statistics_summary()
 
     def export_sediment_and_object_data(self, out_file: str | Path):
         """

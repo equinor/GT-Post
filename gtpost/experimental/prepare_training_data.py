@@ -6,8 +6,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from gtpost.analyze import surface
-from gtpost.experimental import segmentation_utils
 from gtpost.model import ModelResult
 from gtpost.utils import describe_data_vars, get_current_time, get_template_name
 from gtpost.visualize import colormaps
@@ -39,12 +37,10 @@ def main(
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
     fpath_masking_images = fpath_output / "images_for_masking"
-    fpath_training_images = fpath_output / "images_for_training"
     fpath_prediction_images = fpath_output / "prediction_images"
 
     Path.mkdir(fpath_output, exist_ok=True)
     Path.mkdir(fpath_masking_images, exist_ok=True)
-    # Path.mkdir(fpath_training_images, exist_ok=True)
     Path.mkdir(fpath_prediction_images, exist_ok=True)
 
     template_name = get_template_name(fpath_input)
@@ -78,6 +74,9 @@ def main(
             vmin=colormaps.BottomDepthHighContrastColormap.vmin,
             vmax=colormaps.BottomDepthHighContrastColormap.vmax,
         ).make_image("png", unsampled=True)[0]
+
+        # Also add a contour of the 0 m water depth to the training image. This helps
+        # in visual interpretation of the masking images.
         for path in contour.get_paths():
             vertices = path.vertices
             for vertex in vertices:

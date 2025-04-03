@@ -7,15 +7,14 @@ from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ultralytics import YOLO
 
+from gtpost.analyze import classifications
 from gtpost.experimental.segmentation_utils import (
     PredictionParams,
     merge_arrays_in_order,
     predict_units,
 )
-
 from gtpost.model import ModelResult
 from gtpost.visualize import colormaps
-from gtpost.analyze import classifications
 
 default_yolo_model = Path(__file__).parent.joinpath(
     "pretrained_yolo_models/yolo11l-seg.pt"

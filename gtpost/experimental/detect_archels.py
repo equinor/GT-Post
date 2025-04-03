@@ -1,6 +1,5 @@
 from pathlib import Path, WindowsPath
 
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from ultralytics import YOLO
@@ -8,10 +7,7 @@ from ultralytics import YOLO
 from gtpost import utils
 from gtpost.analyze import classifications
 from gtpost.experimental import segmentation_utils
-from gtpost.experimental.segmentation_utils import (
-    PredictionImageParams,
-    PredictionParams,
-)
+from gtpost.experimental.segmentation_utils import PredictionParams
 from gtpost.visualize import colormaps
 
 ModelResult = None
@@ -25,7 +21,7 @@ def constrain_dchannel(modelresult: ModelResult, prediction_result: np.ndarray):
     # Water depth must be > 0 m to justify a channel prediction
     prediction_result[
         (prediction_result == classifications.ArchEl.dchannel.value)
-        & (modelresult.bottom_depth < 0)
+        & (modelresult.bottom_depth < -2)
     ] = classifications.ArchEl.undefined.value
     return prediction_result
 
@@ -98,7 +94,7 @@ prediction_parameters_dchannel = PredictionParams(
         Path(__file__).parent.joinpath("trained_yolo_models/best_dchannel_yolo11l.pt")
     ),
     max_instances=99,
-    min_confidence=0.1,
+    min_confidence=0.08,
     constrain_func=constrain_dchannel,
 )
 
@@ -121,7 +117,7 @@ prediction_parameters_dtundef = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_dtundef_yolo11l.pt")
     ),
-    min_confidence=0.5,
+    min_confidence=0.2,
     max_instances=1,
     constrain_func=constrain_dtundef,
 )
@@ -150,9 +146,9 @@ def generate_prediction_images(modelresult: ModelResult, folder: Path | str):
     for i in range(0, modelresult.timestep, 1):
         pred_image = plt.imshow(
             modelresult.bottom_depth[i, :, :],
-            cmap=colormaps.BottomDepthColormap.cmap,
-            vmin=colormaps.BottomDepthColormap.vmin,
-            vmax=colormaps.BottomDepthColormap.vmax,
+            cmap=colormaps.BottomDepthHighContrastColormap.cmap,
+            vmin=colormaps.BottomDepthHighContrastColormap.vmin,
+            vmax=colormaps.BottomDepthHighContrastColormap.vmax,
         ).make_image("png", unsampled=True)[0]
         plt.imsave(
             folder.joinpath(f"{i:04d}_pred_image.png"),
