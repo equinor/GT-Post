@@ -25,7 +25,7 @@ def constrain_dchannel(modelresult: ModelResult, prediction_result: np.ndarray):
     # Water depth must be > 0 m to justify a channel prediction
     prediction_result[
         (prediction_result == classifications.ArchEl.dchannel.value)
-        & (modelresult.bottom_depth < 0)
+        & (modelresult.bottom_depth < -2)
     ] = classifications.ArchEl.undefined.value
     return prediction_result
 
@@ -121,7 +121,7 @@ prediction_parameters_dtundef = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_dtundef_yolo11l.pt")
     ),
-    min_confidence=0.5,
+    min_confidence=0.2,
     max_instances=1,
     constrain_func=constrain_dtundef,
 )
@@ -150,9 +150,9 @@ def generate_prediction_images(modelresult: ModelResult, folder: Path | str):
     for i in range(0, modelresult.timestep, 1):
         pred_image = plt.imshow(
             modelresult.bottom_depth[i, :, :],
-            cmap=colormaps.BottomDepthColormap.cmap,
-            vmin=colormaps.BottomDepthColormap.vmin,
-            vmax=colormaps.BottomDepthColormap.vmax,
+            cmap=colormaps.BottomDepthHighContrastColormap.cmap,
+            vmin=colormaps.BottomDepthHighContrastColormap.vmin,
+            vmax=colormaps.BottomDepthHighContrastColormap.vmax,
         ).make_image("png", unsampled=True)[0]
         plt.imsave(
             folder.joinpath(f"{i:04d}_pred_image.png"),
@@ -177,7 +177,13 @@ def predict(
 
 def detect(
     modelresult: ModelResult,
-    archels_to_detect: list = ["dtundef", "dchannel", "tchannel", "beachridge"],
+    archels_to_detect: list = [
+        "dtundef",
+        "beach",
+        "dchannel",
+        "tchannel",
+        "beachridge",
+    ],
 ):
     if not prediction_images_temp_folder.is_dir():
         Path.mkdir(prediction_images_temp_folder, exist_ok=True)

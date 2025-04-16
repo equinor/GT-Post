@@ -41,7 +41,7 @@ def predict_units(
     for pp in tqdm(prediction_parameters):
         results = pp.trained_model.predict(
             images,
-            save=False,
+            save=True,
             imgsz=imgsz,
             iou=1.0,
             conf=pp.min_confidence,

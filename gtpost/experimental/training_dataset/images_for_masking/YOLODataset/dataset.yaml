@@ -4,7 +4,8 @@ val: images/val
 test:
 
 names:
-    0: dchannel
-    1: dtundef
-    2: beachridge
-    3: tchannel
+    0: dtundef
+    1: dchannel
+    2: tchannel
+    3: beachridge
+    4: beach

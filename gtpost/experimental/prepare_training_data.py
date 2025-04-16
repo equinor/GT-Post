@@ -65,7 +65,7 @@ def main(
         f"{get_current_time()}: Processing completed, creating training images..."
     )
 
-    for i in range(0, modelresult.timestep, 1):
+    for i in range(0, 101, 1):
         # masking_img is an image of the bathymetry that will be used to draw the training
         # image segmentation masks.
         fig, ax = plt.subplots()
@@ -104,6 +104,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_097",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_110",
         r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset",
     )

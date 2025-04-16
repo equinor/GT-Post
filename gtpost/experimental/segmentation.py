@@ -7,15 +7,14 @@ from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ultralytics import YOLO
 
+from gtpost.analyze import classifications
 from gtpost.experimental.segmentation_utils import (
     PredictionParams,
     merge_arrays_in_order,
     predict_units,
 )
-
 from gtpost.model import ModelResult
 from gtpost.visualize import colormaps
-from gtpost.analyze import classifications
 
 default_yolo_model = Path(__file__).parent.joinpath(
     "pretrained_yolo_models/yolo11l-seg.pt"
@@ -83,6 +82,18 @@ prediction_parameters_tchannel = PredictionParams(
     encoding=classifications.ArchEl.tchannel.value,
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_tchannel_yolo11l.pt")
+    ),
+    max_instances=20,
+    min_confidence=0.1,
+    # constrain_func=constrain_tchannel,
+)
+
+prediction_parameters_beach = PredictionParams(
+    unit_name="Beach",
+    string_code="beach",
+    encoding=classifications.ArchEl.beach.value,
+    trained_model=YOLO(
+        Path(__file__).parent.joinpath("trained_yolo_models/best_beach_yolo11l.pt")
     ),
     max_instances=20,
     min_confidence=0.1,
@@ -223,25 +234,30 @@ if __name__ == "__main__":
     # #     val=False,
     # # )
 
-    # results = train(
-    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel\dataset.yaml",
-    #     322,
-    # )
-    # results = train(
-    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge\dataset.yaml",
-    #     322,
-    # )
-    # results = train(
-    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef\dataset.yaml",
-    #     322,
-    # )
-    # results = train(
-    #     r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel\dataset.yaml",
-    #     322,
-    # )
+    results = train(
+        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel\dataset.yaml",
+        282,
+    )
+    results = train(
+        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge\dataset.yaml",
+        282,
+    )
+    results = train(
+        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef\dataset.yaml",
+        282,
+    )
+    results = train(
+        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beach\dataset.yaml",
+        282,
+    )
+    results = train(
+        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel\dataset.yaml",
+        282,
+    )
 
     image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images"
     # result = None
+    result_beach = predict(image_folder, prediction_parameters_beach, 322)
     result_dt = predict(image_folder, prediction_parameters_tchannel, 322)
     # result_df = predict(image_folder, prediction_parameters_delta_front, 282)
     # result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)

@@ -94,22 +94,6 @@ def main(
         + log_memory_usage()
     )
 
-    # import matplotlib.pyplot as plt
-
-    # # Plot architectural elements
-    # arch_elements = modelresult.architectural_elements[100, :, :]
-    # unique_elements = np.unique(arch_elements)
-
-    # plt.figure(figsize=(10, 8))
-    # plt.imshow(arch_elements, cmap='tab20', interpolation='none')
-    # cbar = plt.colorbar(ticks=unique_elements)
-    # cbar.ax.set_yticklabels([classifications.ArchEl(el).name for el in unique_elements])
-    # plt.title('Architectural Elements')
-    # plt.xlabel('X')
-    # plt.ylabel('Y')
-    # plt.savefig(fpath_output.joinpath(modelresult.modelname + "_architectural_elements.png"))
-    # plt.close()
-
     logger.info(
         f"{get_current_time()}: Created {modelresult.modelname}_architectural_elements.png"
         + log_memory_usage()
@@ -132,45 +116,56 @@ def main(
     )
 
     # Cross-section plots
-    xsect_start = (modelresult.mouth_position[1], modelresult.mouth_position[0])
-    xsect_end = (modelresult.mouth_position[1] + 120, modelresult.mouth_position[0])
-    xsect_start = (20, 145)
-    xsect_end = (90, 145)
-    xsect_start = (40, 120)
-    xsect_end = (40, 260)
-    xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
+    position_tags = ["xshore_7000", "xshore_5000", "xshore_8000", "lshore_4000"]
+    xsect_starts = [(30, 140), (30, 100), (30, 160), (80, 20)]
+    xsect_ends = [(140, 140), (140, 100), (140, 160), (80, 260)]
 
-    logger.info(f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage())
-    xsect_plotter.twopanel_xsection(
-        "bottom_depth", "d50", fpath_output, "xsect_diameter", only_last_timestep=False
-    )
+    position_tags = ["xshore_7000"]
+    xsect_starts = [(30, 140)]
+    xsect_ends = [(140, 140)]
 
-    logger.info(
-        f"{get_current_time()}: Plotting archel x-sections, " + log_memory_usage()
-    )
-    xsect_plotter.twopanel_xsection(
-        "bottom_depth",
-        "architectural_elements",
-        fpath_output,
-        "lsect_archels",
-        only_last_timestep=False,
-    )
+    for position_tag, xsect_start, xsect_end in zip(
+        position_tags, xsect_starts, xsect_ends
+    ):
+        xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
-    logger.info(
-        f"{get_current_time()}: Plotting deposition age x-sections, "
-        + log_memory_usage()
-    )
-    xsect_plotter.twopanel_xsection(
-        "bottom_depth",
-        "deposition_age",
-        fpath_output,
-        "xsect_depositionage",
-        only_last_timestep=False,
-    )
+        logger.info(
+            f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage()
+        )
+        xsect_plotter.twopanel_xsection(
+            "bottom_depth",
+            "d50",
+            fpath_output,
+            f"xsect_diameter_{position_tag}",
+            only_last_timestep=False,
+        )
+
+        logger.info(
+            f"{get_current_time()}: Plotting archel x-sections, " + log_memory_usage()
+        )
+        xsect_plotter.twopanel_xsection(
+            "bottom_depth",
+            "architectural_elements",
+            fpath_output,
+            f"xsect_archels_{position_tag}",
+            only_last_timestep=False,
+        )
+
+        # logger.info(
+        #     f"{get_current_time()}: Plotting deposition age x-sections, "
+        #     + log_memory_usage()
+        # )
+        # xsect_plotter.twopanel_xsection(
+        #     "bottom_depth",
+        #     "deposition_age",
+        #     fpath_output,
+        #     f"xsect_depositionage_{position_tag}",
+        #     only_last_timestep=False,
+        # )
 
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_097",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_097",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_110",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_110_high_contrast_training_images",
     )

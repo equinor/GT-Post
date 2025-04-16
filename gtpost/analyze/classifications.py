@@ -33,7 +33,7 @@ class ArchEl(Enum):
     lshoreface = 9
     offshore = 10
     beachridge = 11
-    tinlet = 12
+    beach = 12
     tidalflat = 13
     backbarrier = 14
 
@@ -52,7 +52,7 @@ class ArchEl(Enum):
             ArchEl.lshoreface: "darkkhaki",
             ArchEl.offshore: "mediumblue",
             ArchEl.beachridge: "gold",
-            ArchEl.tinlet: "plum",
+            ArchEl.beachridge: "yellow",
             ArchEl.tidalflat: "thistle",
             ArchEl.backbarrier: "slategray",
         }[self]
