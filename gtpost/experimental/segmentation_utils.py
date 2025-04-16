@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple
+from typing import List, NamedTuple
 
 import numpy as np
 from tqdm import tqdm
@@ -8,21 +8,11 @@ from ultralytics import YOLO
 
 
 @dataclass
-class PredictionImageParams:
-    is_postprocessing_result: bool
-    param_red: str
-    param_green: str
-    param_blue: str
-    param_red_min: float
-    param_green_min: float
-    param_blue_min: float
-    param_red_max: float
-    param_green_max: float
-    param_blue_max: float
-
-
-@dataclass
 class PredictionParams:
+    """
+    A class to hold parameters for the prediction of segmentation masks using a trained
+    YOLO model (.pt file).
+    """
     unit_name: str
     string_code: str
     encoding: int
@@ -37,6 +27,36 @@ def predict_units(
     prediction_parameters: list[PredictionParams],
     imgsz: int,
 ):
+    """
+    Generates a final segmentation mask by predicting and combining masks
+    from multiple instance segmentation models and parameters.
+
+    Parameters
+    ----------
+    images : list[str]
+        A list of file paths to the input images to be processed.
+    prediction_parameters : list[PredictionParams]
+        A list of PredictionParams objects, each containing a trained model
+        and associated parameters for prediction.
+    imgsz : int
+        The size to which the input images should be resized for prediction.
+
+    Returns
+    -------
+    numpy.ndarray
+        A 3D array representing the final combined segmentation mask. The
+        array dimensions correspond to the number of images and their
+        corrected spatial dimensions.
+
+    Notes
+    -----
+    - The function uses the ultralytics YOLO `predict` method of the trained models to
+      generate masks for each image.
+    - Masks are combined by stacking and flipping them, followed by taking
+      the maximum value along the stacking axis.
+    - Corrections are applied to align the final masks such that they correctly fit the
+      Delft3D model grid.
+    """
     mask_arrays = []
     for pp in tqdm(prediction_parameters):
         results = pp.trained_model.predict(
@@ -74,7 +94,36 @@ def predict_units(
     ]
 
 
-def arrays_to_8bit_rgb(variables, min_values, max_values):
+def arrays_to_8bit_rgb(
+    variables: List[np.ndarray],
+    min_values: List[float],
+    max_values: List[float]
+) -> np.ndarray:
+    """
+    Convert a list of arrays into an 8-bit RGB image by normalizing each array
+    to the range [0, 255] based on provided minimum and maximum values.
+
+    Parameters
+    ----------
+    variables : List[np.ndarray]
+        A list of 2D arrays representing the input variables to be normalized.
+    min_values : List[float]
+        A list of minimum values for normalization, one for each variable.
+    max_values : List[float]
+        A list of maximum values for normalization, one for each variable.
+
+    Returns
+    -------
+    np.ndarray
+        A 3D array representing the RGB image, where each channel corresponds
+        to a normalized input variable.
+
+    Notes
+    -----
+    - The input variables must be 2D arrays of the same shape.
+    - The number of variables, min_values, and max_values must match.
+    - Values outside the specified range are clipped to the range [min_value, max_value].
+    """
     normalized_variables = []
     for variable, min_value, max_value in zip(variables, min_values, max_values):
         variable = variable.copy()
@@ -88,7 +137,35 @@ def arrays_to_8bit_rgb(variables, min_values, max_values):
     return rgb_image
 
 
-def merge_arrays_in_order(list_of_arrays):
+def merge_arrays_in_order(list_of_arrays: list[np.ndarray]) -> np.ndarray:
+    """
+    Merge a list of arrays in order, prioritizing non-zero values from later arrays.
+    This is used to combine segmentation masks in order. (e.g. a channel detection
+    overwrites a deltya top detection etc.)
+
+    Parameters
+    ----------
+    list_of_arrays : list of numpy.ndarray
+        A list of 2D or 3D arrays of the same shape. Each array is merged in order,
+        with non-zero values from later arrays overwriting values in earlier arrays.
+
+    Returns
+    -------
+    numpy.ndarray
+        A single array of the same shape as the input arrays, where non-zero values
+        from later arrays in the list overwrite values in earlier arrays.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> arr1 = np.array([[1, 0], [0, 2]])
+    >>> arr2 = np.array([[0, 3], [4, 0]])
+    >>> arr3 = np.array([[0, 0], [5, 0]])
+    >>> merge_arrays_in_order([arr1, arr2, arr3])
+    array([[1, 3],
+           [5, 2]])
+    """
+
     result = list_of_arrays[0].copy()
     for next_layer in list_of_arrays[1:]:
         result[next_layer != 0] = next_layer[next_layer != 0]

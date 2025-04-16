@@ -1,6 +1,5 @@
 from pathlib import Path, WindowsPath
 
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from ultralytics import YOLO
@@ -8,10 +7,7 @@ from ultralytics import YOLO
 from gtpost import utils
 from gtpost.analyze import classifications
 from gtpost.experimental import segmentation_utils
-from gtpost.experimental.segmentation_utils import (
-    PredictionImageParams,
-    PredictionParams,
-)
+from gtpost.experimental.segmentation_utils import PredictionParams
 from gtpost.visualize import colormaps
 
 ModelResult = None
@@ -98,7 +94,7 @@ prediction_parameters_dchannel = PredictionParams(
         Path(__file__).parent.joinpath("trained_yolo_models/best_dchannel_yolo11l.pt")
     ),
     max_instances=99,
-    min_confidence=0.1,
+    min_confidence=0.08,
     constrain_func=constrain_dchannel,
 )
 

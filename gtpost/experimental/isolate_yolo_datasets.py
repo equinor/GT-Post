@@ -80,7 +80,7 @@ if __name__ == "__main__":
         [
             "labelme2yolo",
             "--json_dir",
-            r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking",
+            str(Path(__file__).parent.joinpath("training_dataset/images_for_masking")),
             "--output_format",
             "polygon",
         ],
@@ -89,12 +89,14 @@ if __name__ == "__main__":
 
     # Split up the YOLO dataset into individual datasets for each Architectural Element
     yolo_class_names = get_yolo_class_names(
-        Path(
-            r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset\dataset.yaml"
+        Path(__file__).parent.joinpath(
+            "training_dataset/images_for_masking/YOLODataset/dataset.yaml"
         )
     )
     new_dataset_folders = make_new_yolo_folders(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset",
+        Path(__file__).parent.joinpath(
+            "training_dataset/images_for_masking/YOLODataset"
+        ),
         yolo_class_names,
     )
     update_datasets(new_dataset_folders)
