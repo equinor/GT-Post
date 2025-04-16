@@ -1,6 +1,6 @@
 names:
   0: dchannel
-path: c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel
+path: C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel
 test: null
 train: images/train
 val: images/val

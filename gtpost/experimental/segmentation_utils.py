@@ -13,6 +13,7 @@ class PredictionParams:
     A class to hold parameters for the prediction of segmentation masks using a trained
     YOLO model (.pt file).
     """
+
     unit_name: str
     string_code: str
     encoding: int
@@ -95,9 +96,7 @@ def predict_units(
 
 
 def arrays_to_8bit_rgb(
-    variables: List[np.ndarray],
-    min_values: List[float],
-    max_values: List[float]
+    variables: List[np.ndarray], min_values: List[float], max_values: List[float]
 ) -> np.ndarray:
     """
     Convert a list of arrays into an 8-bit RGB image by normalizing each array

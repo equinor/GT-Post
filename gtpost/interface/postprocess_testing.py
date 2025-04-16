@@ -82,22 +82,22 @@ def main(
     #     + log_memory_usage()
     # )
 
-    with open(
-        fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"
-    ) as f:
-        json.dump(
-            modelresult.delta_stats,
-            f,
-        )
-    logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname}_statistics_summary.json"
-        + log_memory_usage()
-    )
+    # with open(
+    #     fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"
+    # ) as f:
+    #     json.dump(
+    #         modelresult.delta_stats,
+    #         f,
+    #     )
+    # logger.info(
+    #     f"{get_current_time()}: Created {modelresult.modelname}_statistics_summary.json"
+    #     + log_memory_usage()
+    # )
 
-    logger.info(
-        f"{get_current_time()}: Created {modelresult.modelname}_architectural_elements.png"
-        + log_memory_usage()
-    )
+    # logger.info(
+    #     f"{get_current_time()}: Created {modelresult.modelname}_architectural_elements.png"
+    #     + log_memory_usage()
+    # )
 
     # # Summary plot
     # logger.info(f"{get_current_time()}: Plotting stats, " + log_memory_usage())

@@ -63,6 +63,15 @@ def constrain_beachridge(modelresult: ModelResult, prediction_result: np.ndarray
     return prediction_result
 
 
+def constrain_beach(modelresult: ModelResult, prediction_result: np.ndarray):
+    # A beach ridge must lie above the water level for it to be valid
+    # prediction_result[
+    #     (prediction_result == classifications.ArchEl.beach.value)
+    #     & (modelresult.bottom_depth > 0)
+    # ] = classifications.ArchEl.undefined.value
+    return prediction_result
+
+
 def postprocess_result(
     modelresult: ModelResult,
     prediction_result: np.ndarray,
@@ -81,7 +90,7 @@ def postprocess_result(
     prediction_result[
         (prediction_result == classifications.ArchEl.undefined.value)
         & (modelresult.bottom_depth <= 4)
-        & (modelresult.bottom_depth > -2)
+        & (modelresult.bottom_depth > 0)
     ] = classifications.ArchEl.ushoreface.value
     return prediction_result
 
@@ -93,8 +102,8 @@ prediction_parameters_dchannel = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_dchannel_yolo11l.pt")
     ),
-    max_instances=99,
-    min_confidence=0.08,
+    max_instances=30,
+    min_confidence=0.16,
     constrain_func=constrain_dchannel,
 )
 
@@ -108,6 +117,18 @@ prediction_parameters_beachridge = PredictionParams(
     max_instances=99,
     min_confidence=0.1,
     constrain_func=constrain_beachridge,
+)
+
+prediction_parameters_beach = PredictionParams(
+    unit_name="Beach",
+    string_code="beach",
+    encoding=classifications.ArchEl.beach.value,
+    trained_model=YOLO(
+        Path(__file__).parent.joinpath("trained_yolo_models/best_beach_yolo11l.pt")
+    ),
+    max_instances=30,
+    min_confidence=0.16,
+    constrain_func=constrain_beach,
 )
 
 prediction_parameters_dtundef = PredictionParams(
@@ -139,17 +160,35 @@ ae_to_prediction_params = {
     "dchannel": prediction_parameters_dchannel,
     "tchannel": prediction_parameters_tchannel,
     "beachridge": prediction_parameters_beachridge,
+    "beach": prediction_parameters_beach,
 }
 
 
 def generate_prediction_images(modelresult: ModelResult, folder: Path | str):
     for i in range(0, modelresult.timestep, 1):
-        pred_image = plt.imshow(
+        fig, ax = plt.subplots()
+        contour = ax.contour(
+            modelresult.bottom_depth[i, :, :], levels=[0], colors="white"
+        )
+        pred_image = ax.imshow(
             modelresult.bottom_depth[i, :, :],
             cmap=colormaps.BottomDepthHighContrastColormap.cmap,
             vmin=colormaps.BottomDepthHighContrastColormap.vmin,
             vmax=colormaps.BottomDepthHighContrastColormap.vmax,
         ).make_image("png", unsampled=True)[0]
+
+        # Also add a contour of the 0 m water depth to the training image. This helps
+        # in visual interpretation of the masking images.
+        for path in contour.get_paths():
+            vertices = path.vertices
+            for vertex in vertices:
+                x, y = vertex
+                pred_image[int(y), int(x), :] = [
+                    250,
+                    250,
+                    250,
+                    255,
+                ]  # Set contour color to white
         plt.imsave(
             folder.joinpath(f"{i:04d}_pred_image.png"),
             pred_image,

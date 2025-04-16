@@ -255,18 +255,18 @@ if __name__ == "__main__":
         282,
     )
 
-    image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images"
-    # result = None
-    result_beach = predict(image_folder, prediction_parameters_beach, 322)
-    result_dt = predict(image_folder, prediction_parameters_tchannel, 322)
-    # result_df = predict(image_folder, prediction_parameters_delta_front, 282)
-    # result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
+    # image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images"
+    # # result = None
+    # result_beach = predict(image_folder, prediction_parameters_beach, 322)
+    # result_dt = predict(image_folder, prediction_parameters_tchannel, 322)
+    # # result_df = predict(image_folder, prediction_parameters_delta_front, 282)
+    # # result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
 
-    # result = merge_arrays_in_order([result_dt, result_df, result_ch_mb])
+    # # result = merge_arrays_in_order([result_dt, result_df, result_ch_mb])
 
-    prediction_bathymetry_figure(
-        result_dt,
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\segmentation_result",
-    )
-    print(1)
+    # prediction_bathymetry_figure(
+    #     result_dt,
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\segmentation_result",
+    # )
+

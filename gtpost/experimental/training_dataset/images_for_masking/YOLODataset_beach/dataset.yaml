@@ -1,6 +1,6 @@
 names:
   0: beach
-path: c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beach
+path: C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beach
 test: null
 train: images/train
 val: images/val

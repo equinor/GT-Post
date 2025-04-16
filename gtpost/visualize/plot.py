@@ -30,6 +30,7 @@ class PlotBase:
                 "lshoreface",
                 "offshore",
                 "beachridge",
+                "beach",
             ],
             "Architectural elements",
         ),
