@@ -255,6 +255,6 @@ if __name__ == "__main__":
         POSITION_TAGS_RET,
         XSECT_STARTS_RET,
         XSECT_ENDS_RET,
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_074",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_074",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_067",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_067",
     )

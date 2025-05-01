@@ -36,7 +36,7 @@ def get_d50input(sedfile, sedtype, rho_p, sedfile_line):
     return d50input
 
 
-def calculate_fraction(rho_db: np.array, dmsedcum_final: np.array) -> np.array:
+def calculate_fraction(dmsedcum_final: np.array, rho_db: np.array) -> np.array:
     """
     Calculate the volumetric fraction of sediment.
     This function computes the volumetric fraction of sediment by dividing the cumulative
@@ -44,10 +44,10 @@ def calculate_fraction(rho_db: np.array, dmsedcum_final: np.array) -> np.array:
 
     Parameters
     ----------
-    rho_db : np.array
-        Array of dry bed densities.
     dmsedcum_final : np.array
         Array of cumulative sediment mass.
+    rho_db : np.array
+        Array of dry bed densities.
 
     Returns
     -------
@@ -55,10 +55,9 @@ def calculate_fraction(rho_db: np.array, dmsedcum_final: np.array) -> np.array:
         Array of volumetric fractions of sediment.
     """
     vfraction = np.zeros_like(dmsedcum_final)
-    old_err_state = np.seterr(divide="ignore", invalid="ignore")
 
     # derive the volumetric sed flux by dividing by dry bed density
-    dvsedcum = dmsedcum_final / rho_db[:, np.newaxis, np.newaxis]
+    dvsedcum = dmsedcum_final / rho_db[:]  # , np.newaxis, np.newaxis]
 
     dvsedcum[dmsedcum_final <= 0] = 0
     sumsedvcum = np.sum(dvsedcum, axis=1)
@@ -69,8 +68,6 @@ def calculate_fraction(rho_db: np.array, dmsedcum_final: np.array) -> np.array:
         where=sumsedvcum[:, np.newaxis, :, :] != 0,
     )
     vfraction[np.isnan(vfraction) == 1] = 0
-    # go back to original error state
-    np.seterr(**old_err_state)
     return vfraction
 
 
@@ -214,9 +211,11 @@ def calculate_distribution(fraction_data, d50input):
 
 
 @numba.njit(parallel=True)
-def calculate_diameter(d50input, percentage2cal, vfraction):
+def calculate_diameter(d50input, vfraction):
     if len(vfraction.shape) == 4:
         nt, nlyr, nx, ny = vfraction.shape
+
+    percentage2cal = [5, 10, 16, 50, 84, 90]
 
     diameters = np.zeros((nt, nx, ny, len(percentage2cal)))
     porosity = np.zeros((nt, nx, ny))
@@ -227,7 +226,7 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
     for it in numba.prange(nt):
         for ix in numba.prange(nx):
             for iy in numba.prange(ny):
-                fraction_data = vfraction[it, :, ix, iy]
+                fraction_data = vfraction[it, ix, iy, :]
                 # return the phi value needs to be changed back to meters
                 (
                     cdf,

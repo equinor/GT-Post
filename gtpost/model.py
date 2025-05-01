@@ -3,6 +3,7 @@ from configparser import ConfigParser
 from pathlib import Path
 from typing import Self
 
+import dask.array as da
 import numpy as np
 import xarray as xr
 
@@ -13,6 +14,19 @@ from gtpost.io import export, read_d3d_input
 default_settings_file = (
     Path(__file__).parents[1].joinpath("config/default_settings.ini")
 )
+
+CHUNK_SETTINGS_3D = {
+    "time": 400,
+    "M": 200,
+    "N": 200,
+}
+
+CHUNK_SETTINGS_4D = {
+    "time": 400,
+    "M": 200,
+    "N": 200,
+    "LSEDTOT": 6,
+}
 
 
 class ModelResult:
@@ -43,7 +57,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset  # .isel(time=slice(0, 120))  # time slice for testing
+        self.dataset = dataset.isel(time=slice(0, 60))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -64,6 +78,59 @@ class ModelResult:
             + f"Processing state      : {self.processing_state}\n"
             + f"Completed timesteps   : {self.timestep}"
         )
+
+    @property
+    def array_template_3d(self):
+        template = xr.DataArray(
+            data=da.empty(
+                [
+                    len(self.dataset["time"]),
+                    len(self.dataset["M"]),
+                    len(self.dataset["N"]),
+                ],
+                chunks=(
+                    CHUNK_SETTINGS_3D["time"],
+                    CHUNK_SETTINGS_3D["M"],
+                    CHUNK_SETTINGS_3D["N"],
+                ),
+                dtype=np.float32,
+            ),
+            dims=["time", "M", "N"],
+            coords={
+                "time": self.dataset["time"],
+                "M": self.dataset["M"],
+                "N": self.dataset["N"],
+            },
+        )
+        return template
+
+    @property
+    def array_template_4d(self):
+        template = xr.DataArray(
+            data=da.empty(
+                [
+                    len(self.dataset["time"]),
+                    len(self.dataset["LSEDTOT"]),
+                    len(self.dataset["M"]),
+                    len(self.dataset["N"]),
+                ],
+                chunks=(
+                    CHUNK_SETTINGS_4D["time"],
+                    CHUNK_SETTINGS_4D["LSEDTOT"],
+                    CHUNK_SETTINGS_4D["M"],
+                    CHUNK_SETTINGS_4D["N"],
+                ),
+                dtype=np.float32,
+            ),
+            dims=["time", "LSEDTOT", "M", "N"],
+            coords={
+                "time": self.dataset["time"],
+                "LSEDTOT": self.dataset["LSEDTOT"],
+                "M": self.dataset["M"],
+                "N": self.dataset["N"],
+            },
+        )
+        return template
 
     @classmethod
     def from_folder(
@@ -101,9 +168,9 @@ class ModelResult:
 
         if use_copied_trim_file:
             shutil.copyfile(trimfile, folder / "temp.nc")
-            dataset = xr.open_dataset(folder / "temp.nc")
+            dataset = xr.open_dataset(folder / "temp.nc").chunk(CHUNK_SETTINGS_4D)
         else:
-            dataset = xr.open_dataset(trimfile)
+            dataset = xr.open_dataset(trimfile).chunk(CHUNK_SETTINGS_4D)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
@@ -131,13 +198,24 @@ class ModelResult:
             self.dataset.N.values,
             self.dataset.M.values,
         )
-        self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
-        subsidence = np.append(
-            self.dataset["SDU"].values,
-            self.dataset["SDU"].values[-1, :, :][np.newaxis, ...],
-            axis=0,
+        self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10)
+        self.subsidence = xr.DataArray(
+            np.diff(
+                np.append(
+                    self.dataset["SDU"].values,
+                    self.dataset["SDU"].values[-1, :, :][np.newaxis, ...],
+                    axis=0,
+                ),
+                axis=0,
+            ),
+            dims=("time", "M", "N"),
+            coords={
+                "time": np.arange(self.dataset["SDU"].shape[0]),
+                "M": self.dataset["SDU"].coords["M"],
+                "N": self.dataset["SDU"].coords["N"],
+            },
         )
-        self.subsidence = np.diff(subsidence, axis=0)
+
         self.deposit_height = np.zeros_like(self.dataset["MEAN_H1"])
         self.deposit_height[1:, :, :] = -(
             (
@@ -147,6 +225,15 @@ class ModelResult:
             + self.subsidence[1:, :, :]
         )
         self.deposit_height[np.abs(self.deposit_height) < 1e-5] = 0
+        self.deposit_height = xr.DataArray(
+            self.deposit_height,
+            dims=("time", "M", "N"),
+            coords={
+                "time": self.dataset["time"],
+                "M": self.dataset["M"],
+                "N": self.dataset["N"],
+            },
+        )
 
     def complete_init_for_postprocess(self):
         """
@@ -324,28 +411,74 @@ class ModelResult:
         -------
         None (but the above attributes are added to the instance)
         """
-        percentage2cal = [50]
-        self.dmsedcum_final = self.dataset["DMSEDCUM"].values
-        # FUTURE DASK SOLUTION HERE
-        # self.dmsedcum_final.map_blocks(
-        #     sediment.calculate_fraction,
-        # )
+        percentage2cal = [5, 10, 16, 50, 84, 90]
+        self.dmsedcum_final = self.dataset["DMSEDCUM"]
+        self.zcor = -self.dataset["DPS"]
+        self.sdu = self.dataset["SDU"]
         # Only the incoming sediment flux determines the composition of potential
         # deposits, so remove fluxes of sediment classes that are negative.
-        self.dmsedcum_final[self.dmsedcum_final < 0] = 0
-        self.vfraction = sediment.calculate_fraction(self.rho_db, self.dmsedcum_final)
+        self.dmsedcum_final = self.dmsedcum_final.where(self.dmsedcum_final >= 0, 0)
 
-        self.zcor = -self.dataset["DPS"].values
-        self.preserved_thickness, self.deposition_age = layering.preservation(
-            self.zcor, self.dataset["SDU"].values, self.deposit_height
+        # calculate volume fractions
+        self.vfraction = xr.apply_ufunc(
+            sediment.calculate_fraction,
+            self.dmsedcum_final,
+            xr.DataArray(
+                self.rho_db,
+                dims=["LSEDTOT"],
+                coords={"LSEDTOT": self.dataset["LSEDTOT"]},
+            ),
+            dask="parallelized",
+            output_core_dims=[[]],
+            output_dtypes=[np.float32],
         )
 
-        self.diameters, _, _ = sediment.calculate_diameter(
-            np.asarray(self.d50_input, dtype=np.float32),
-            np.asarray(percentage2cal, dtype=np.float32),
+        self.preserved_thickness, self.deposition_age = xr.apply_ufunc(
+            layering.preservation,
+            self.zcor,
+            self.sdu,
+            self.deposit_height,
+            dask="parallelized",
+            output_core_dims=[[], []],
+            output_dtypes=[np.float32, np.float32],
+        )
+
+        self.diameters, self.porosity, self.permeability = xr.apply_ufunc(
+            sediment.calculate_diameter,
+            xr.DataArray(
+                np.asarray(self.d50_input, dtype=np.float32),
+                dims=["LSEDTOT"],
+                coords={"LSEDTOT": self.dataset["LSEDTOT"]},
+            ),
             self.vfraction,
+            dask="parallelized",
+            input_core_dims=[["LSEDTOT"], ["LSEDTOT"]],
+            output_core_dims=[
+                ["dnumber"],
+                [],
+                [],
+            ],
+            exclude_dims=set(("LSEDTOT",)),
+            dask_gufunc_kwargs={"output_sizes": {"dnumber": 6}},
+            output_dtypes=[np.float32, np.float32, np.float32],
         )
-        self.d50 = self.diameters[:, :, :, 0]
+
+        self.sorting = xr.apply_ufunc(
+            sediment.calculate_sorting,
+            self.diameters,
+            xr.DataArray(
+                np.asarray(percentage2cal, dtype=np.int32),
+                dims=["dnumber"],
+                coords={"dnumber": percentage2cal},
+            ),
+            dask="parallelized",
+            input_core_dims=[["dnumber"], ["dnumber"]],
+            exclude_dims=set(("dnumber",)),
+            output_core_dims=[[]],
+            output_dtypes=[np.float32],
+        )
+
+        self.d50 = self.diameters[:, :, :, 3]
 
     def statistics_summary(self):
         """
@@ -431,7 +564,7 @@ class ModelResult:
         - Detect subenvironments
         - Detect architectural elements
         """
-        self.compute_sediment_parameters_postprocessing()
+        self.compute_sediment_parameters_processing()
         self.detect_subenvironments()
         self.detect_channel_network()
         self.detect_architectural_elements()

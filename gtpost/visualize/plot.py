@@ -160,9 +160,9 @@ class PlotBase:
             subsidence_left = (self.dsub[timestep, i - 1] + self.dsub[timestep, i]) / 2
             subsidence_middle = self.dsub[timestep, i]
             subsidence_right = (self.dsub[timestep, i] + self.dsub[timestep, i + 1]) / 2
-            bed_chg_left = max((self.dh[timestep, i - 1] + self.dh[timestep, i]) / 2, 0)
-            bed_chg_middle = max(self.dh[timestep, i], 0)
-            bed_chg_right = max(
+            bed_chg_left = np.max((self.dh[timestep, i - 1] + self.dh[timestep, i]) / 2, 0)
+            bed_chg_middle = np.max(self.dh[timestep, i], 0)
+            bed_chg_right = np.max(
                 (self.dh[timestep, i] + self.dh[timestep, i + 1]) / 2, 0
             )
             surface_left = (
@@ -456,7 +456,7 @@ class CrossSectionPlot(PlotBase):
         timeline_start=5,
         only_last_timestep=False,
     ):
-        data_xsect = self.model.__dict__[variable_xsect][:, self.xc, self.yc]
+        data_xsect = self.model.__dict__[variable_xsect][:, self.xc, self.yc].compute_chunk_sizes()
         data_base = self.model.__dict__[variable_basemap]
         colormap_xsect = self.colormaps[variable_xsect]
         colormap_base = self.colormaps[variable_basemap]

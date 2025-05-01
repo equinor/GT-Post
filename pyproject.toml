@@ -42,6 +42,7 @@ dependencies = [
     "h5netcdf",
     "mako",
     "psutil",
+    "dask",
 ]
 
 [project.urls]
@@ -60,14 +61,14 @@ platforms = ["win-64", "linux-64", "linux-aarch64", "osx-64", "osx-arm64"]
 
 [tool.pixi.dependencies]
 python = ">=3.11"
-numpy = ">=1.26.4,<1.27"
+numpy = "*"
 numba = "*"
-pandas = ">=2.0.1"
+pandas = "*"
 rasterio = "*"
 xarray = "*"
 matplotlib = "*"
 scikit-image = "*"
-shapely = ">=2.0.1"
+shapely = "*"
 h5netcdf = "*"
 mako = "*"
 pyvista = "*"
@@ -77,9 +78,9 @@ pytest-cov = "*"
 ruff = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
-pip = ">=24.0,<25"
-psutil = ">=6.1.1,<7"
-affine = ">=2.4.0,<3"
+pip = "*"
+psutil = "*"
+affine = "*"
 
 [tool.pixi.pypi-dependencies]
 gtpost = { path = ".", editable = true }
