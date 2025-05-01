@@ -145,6 +145,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\archivedprojects\11209074-002-geotool-new-deltas\01_modelling\Roda_058_Reference",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Roda_058_Reference",
+        r"p:\11210835-002-d3d-gt-wave-dominated\gulehornneslen_20250326-run-1\gulehornneslen_20250326-run-1\simulation",
+        r"p:\11210835-002-d3d-gt-wave-dominated\gulehornneslen_20250326-run-1\gulehornneslen_20250326-run-1\postprocess",
     )
