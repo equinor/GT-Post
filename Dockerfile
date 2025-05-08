@@ -11,5 +11,3 @@ RUN mkdir -p ~/.config/matplotlib \
 
 WORKDIR /app
 ENTRYPOINT ["pixi", "run"]
-
-

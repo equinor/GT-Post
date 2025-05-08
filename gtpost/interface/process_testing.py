@@ -173,7 +173,6 @@ def main(
             fpath_input,
             post=False,
             settings_file=settings_file,
-            use_copied_trim_file=False,
         )
     except Exception as e:
         logger.error(f"Failed to initialize model results: {e}")
