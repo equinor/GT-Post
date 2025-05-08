@@ -3,3 +3,6 @@ tests/
 .pixi/
 .pytest_cache/
 .ruff_cache/
+*.nc
+docs
+*.yml
