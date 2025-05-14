@@ -108,6 +108,8 @@ def get_model_bound(mean_depth: np.ndarray) -> Polygon:
     """
     contours = measure.find_contours(mean_depth, -999)
     boundary = Polygon(contours[0]).buffer(-1)
+    if boundary.geom_type == "MultiPolygon":
+        boundary = max(boundary.geoms, key=lambda p: p.area)
     return boundary
 
 
