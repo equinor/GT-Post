@@ -50,7 +50,7 @@ def main(
     )
 
     modelresult = ModelResult.from_folder(
-        fpath_input, post=True, settings_file=settings_file, use_copied_trim_file=True
+        fpath_input, post=True, settings_file=settings_file
     )
     logger.info(
         f"{get_current_time()}: Initialized model results:\n\n{modelresult}\n\n"

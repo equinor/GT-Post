@@ -71,7 +71,6 @@ class ModelResult:
         delft3d_folder: str | Path,
         settings_file: str | Path = default_settings_file,
         post: bool = True,
-        use_copied_trim_file: bool = True,
     ) -> Self:
         """
         Constructor for ModelResult class from Delft3D i/o folder
@@ -98,12 +97,7 @@ class ModelResult:
         sedfile = [f for f in folder.glob("*.sed")][0]
         trimfile = [f for f in folder.glob("*.nc") if "trim" in f.name][0]
         modelname = delft3d_folder.stem + f" - {sedfile.stem}"
-
-        if use_copied_trim_file:
-            shutil.copyfile(trimfile, folder / "temp.nc")
-            dataset = xr.open_dataset(folder / "temp.nc")
-        else:
-            dataset = xr.open_dataset(trimfile)
+        dataset = xr.open_dataset(trimfile)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
