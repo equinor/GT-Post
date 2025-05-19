@@ -85,9 +85,12 @@ def detect_depositional_environments(
         )
         topset_contour = offset_curve(foreset_contour, df_average_width / 2)
         if type(topset_contour) is MultiLineString:
-            topset_contour = [
-                g for g in topset_contour.geoms if g.crosses(model_boundary)
-            ][0]
+            # If none of the geometries cross the model_boundary, take the longest contour
+            crossing_geoms = [g for g in topset_contour.geoms if g.crosses(model_boundary)]
+            if crossing_geoms:
+                topset_contour = crossing_geoms[0]
+            else:
+                topset_contour = max(topset_contour.geoms, key=lambda g: g.length)
 
         environments_t = delta_areas_from_boundaries(
             foreset_contour, topset_contour, model_boundary, environments[t - 1, :, :]
