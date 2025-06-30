@@ -61,7 +61,7 @@ def main(
         f"{get_current_time()}: Processing completed, creating training images..."
     )
 
-    for i in range(0, 101, 1):
+    for i in range(0, 321, 1):
         # masking_img is an image of the bathymetry that will be used to draw the training
         # image segmentation masks.
         fig, ax = plt.subplots()
@@ -88,13 +88,13 @@ def main(
                     255,
                 ]  # Set contour color to white
         plt.imsave(
-            fpath_prediction_images.joinpath(f"seg_image_{i}.png"),
+            fpath_prediction_images.joinpath(f"seg_image_Ret104_{i}.png"),
             rgb_image,
             format="png",
         )
         if i % every_nth_image == 0:
             plt.imsave(
-                fpath_masking_images.joinpath(f"seg_image_{i}.png"),
+                fpath_masking_images.joinpath(f"seg_image_Ret104_{i}.png"),
                 rgb_image,
                 format="png",
             )
@@ -103,6 +103,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_110",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_104",
         r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset",
     )
