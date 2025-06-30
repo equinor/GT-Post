@@ -64,11 +64,11 @@ def constrain_beachridge(modelresult: ModelResult, prediction_result: np.ndarray
 
 
 def constrain_beach(modelresult: ModelResult, prediction_result: np.ndarray):
-    # A beach ridge must lie above the water level for it to be valid
-    # prediction_result[
-    #     (prediction_result == classifications.ArchEl.beach.value)
-    #     & (modelresult.bottom_depth > 0)
-    # ] = classifications.ArchEl.undefined.value
+    # Beach below 1 m water depth should be classified as upper shoreface
+    prediction_result[
+        (prediction_result == classifications.ArchEl.beach.value)
+        & (modelresult.bottom_depth > 1)
+    ] = classifications.ArchEl.ushoreface.value
     return prediction_result
 
 
@@ -115,7 +115,7 @@ prediction_parameters_beachridge = PredictionParams(
         Path(__file__).parent.joinpath("trained_yolo_models/best_beachridge_yolo11l.pt")
     ),
     max_instances=99,
-    min_confidence=0.1,
+    min_confidence=0.16,
     constrain_func=constrain_beachridge,
 )
 
@@ -126,7 +126,7 @@ prediction_parameters_beach = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_beach_yolo11l.pt")
     ),
-    max_instances=30,
+    max_instances=60,
     min_confidence=0.16,
     constrain_func=constrain_beach,
 )
@@ -150,8 +150,8 @@ prediction_parameters_tchannel = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_tchannel_yolo11l.pt")
     ),
-    max_instances=20,
-    min_confidence=0.1,
+    max_instances=10,
+    min_confidence=0.04,
     constrain_func=constrain_tchannel,
 )
 

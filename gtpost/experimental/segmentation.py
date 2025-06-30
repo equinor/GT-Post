@@ -130,7 +130,7 @@ def train(
     model = YOLO(pretrained_yolo_model)
     results = model.train(
         data=yolo_dataset,
-        epochs=100,
+        epochs=200,
         imgsz=imgsz,
         device="cpu",
         lr0=0.00659,
@@ -235,30 +235,30 @@ if __name__ == "__main__":
     # # )
 
     results = train(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel\dataset.yaml",
+        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel\dataset.yaml",
         282,
     )
     results = train(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge\dataset.yaml",
+        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge\dataset.yaml",
         282,
     )
     results = train(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef\dataset.yaml",
+        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef\dataset.yaml",
         282,
     )
     results = train(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beach\dataset.yaml",
+        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beach\dataset.yaml",
         282,
     )
     results = train(
-        r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel\dataset.yaml",
+        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel\dataset.yaml",
         282,
     )
 
-    # image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images"
+    image_folder = r"c:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\prediction_images"
     # # result = None
     # result_beach = predict(image_folder, prediction_parameters_beach, 322)
-    # result_dt = predict(image_folder, prediction_parameters_tchannel, 322)
+    result_dt = predict(image_folder, prediction_parameters_dchannel, 282)
     # # result_df = predict(image_folder, prediction_parameters_delta_front, 282)
     # # result_ch_mb = predict(image_folder, prediction_parameters_ch_mb, 282)
 
@@ -269,4 +269,3 @@ if __name__ == "__main__":
     #     r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_054_test_lastdimr_netcdf",
     #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_054_test_lastdimr_netcdf\segmentation_result",
     # )
-
