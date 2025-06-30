@@ -6,6 +6,6 @@ test:
 names:
     0: dtundef
     1: dchannel
-    2: tchannel
-    3: beachridge
-    4: beach
+    2: beachridge
+    3: beach
+    4: tchannel

@@ -80,18 +80,31 @@ def postprocess_result(
     prediction_result *= modelresult.model_mask.values
     prediction_result[
         (prediction_result == classifications.ArchEl.undefined.value)
-        & (modelresult.bottom_depth > 12)
+        & (modelresult.dataset["UORB"] < 0.2)
+        & (modelresult.bottom_depth > 6)
     ] = classifications.ArchEl.offshore.value
     prediction_result[
         (prediction_result == classifications.ArchEl.undefined.value)
-        & (modelresult.bottom_depth <= 12)
-        & (modelresult.bottom_depth > 4)
+        & (modelresult.dataset["UORB"] < 0.4)
+        & (modelresult.bottom_depth > 2)
     ] = classifications.ArchEl.lshoreface.value
     prediction_result[
         (prediction_result == classifications.ArchEl.undefined.value)
-        & (modelresult.bottom_depth <= 4)
         & (modelresult.bottom_depth > 0)
     ] = classifications.ArchEl.ushoreface.value
+    prediction_result[
+        (prediction_result == classifications.ArchEl.beach.value)
+        & (modelresult.bottom_depth > 0)
+    ] = classifications.ArchEl.ushoreface.value
+    prediction_result[
+        (prediction_result == classifications.ArchEl.undefined.value)
+        & (modelresult.bottom_depth <= 0)
+    ] = classifications.ArchEl.dtundef.value
+    prediction_result[
+        (prediction_result == classifications.ArchEl.dtbayfill.value)
+        & (modelresult.dataset["MAX_UV"] > 0.4)
+    ] = classifications.ArchEl.tchannel.value
+    prediction_result[0, 0, 0] = 0
     return prediction_result
 
 
@@ -214,10 +227,10 @@ def detect(
     modelresult: ModelResult,
     archels_to_detect: list = [
         "dtundef",
-        "beach",
         "dchannel",
         "tchannel",
         "beachridge",
+        "beach",
     ],
 ):
     if not prediction_images_temp_folder.is_dir():
@@ -234,7 +247,6 @@ def detect(
 
     # Stack results and apply final postprocessing
     final_prediction = segmentation_utils.merge_arrays_in_order(results)
-    del results
     final_prediction = postprocess_result(modelresult, final_prediction)
     final_prediction = utils.normalize_numpy_array(final_prediction)
 
