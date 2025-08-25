@@ -1,6 +1,6 @@
 names:
   0: dtundef
-path: C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef
+path: C:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef
 test: null
 train: images/train
 val: images/val

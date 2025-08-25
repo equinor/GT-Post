@@ -1,6 +1,6 @@
 names:
   0: beachridge
-path: C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge
+path: C:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge
 test: null
 train: images/train
 val: images/val

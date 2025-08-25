@@ -35,7 +35,7 @@ class ArchEl(Enum):
             self.dtundef: "yellowgreen",
             self.dtbayfill: "mediumseagreen",
             self.dchannel: "deepskyblue",
-            self.tchannel: "cadetblue",
+            self.tchannel: "coral",
             self.mouthbar: "orange",
             self.deltafront: "paleturquoise",
             self.prodelta: "mediumblue",

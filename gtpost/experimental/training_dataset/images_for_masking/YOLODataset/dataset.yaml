@@ -1,4 +1,4 @@
-path: \\?\C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset
+path: \\?\C:\SnapVolumesTemp\MountPoints\{45c63495-0000-0000-0000-100000000000}\{C48D62D4-5424-480D-BB65-3DFF3B7266AC}\SVROOT\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset
 train: images/train
 val: images/val
 test:

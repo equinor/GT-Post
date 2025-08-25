@@ -19,10 +19,21 @@ prediction_images_temp_folder = Path(__file__).parent.joinpath(
 
 def constrain_dchannel(modelresult: ModelResult, prediction_result: np.ndarray):
     # Water depth must be > 0 m to justify a channel prediction
+    # TODO: add condition for dchannel to become tchannel
     prediction_result[
         (prediction_result == classifications.ArchEl.dchannel.value)
         & (modelresult.bottom_depth < -2)
     ] = classifications.ArchEl.undefined.value
+
+    should_be_tchannel = (
+        np.max(modelresult.dataset["MAX_UV"][:, 1, :].values, axis=1) < 0.3
+    )
+    # Only update dchannel to tchannel where should_be_tchannel is True (on time axis)
+    for t_idx, should_convert in enumerate(should_be_tchannel):
+        if should_convert:
+            mask = prediction_result[t_idx] == classifications.ArchEl.dchannel.value
+            prediction_result[t_idx][mask] = classifications.ArchEl.tchannel.value
+
     return prediction_result
 
 
@@ -64,11 +75,16 @@ def constrain_beachridge(modelresult: ModelResult, prediction_result: np.ndarray
 
 
 def constrain_beach(modelresult: ModelResult, prediction_result: np.ndarray):
-    # Beach below 1 m water depth should be classified as upper shoreface
+    # Beach with more than 1 m water depth should be classified as upper shoreface
+    # Below -2 m water depth, beach is undefined.
     prediction_result[
         (prediction_result == classifications.ArchEl.beach.value)
-        & (modelresult.bottom_depth > 1)
+        & (modelresult.bottom_depth > 1.5)
     ] = classifications.ArchEl.ushoreface.value
+    prediction_result[
+        (prediction_result == classifications.ArchEl.beach.value)
+        & (modelresult.bottom_depth < -1.5)
+    ] = classifications.ArchEl.dtundef.value
     return prediction_result
 
 
@@ -100,10 +116,6 @@ def postprocess_result(
         (prediction_result == classifications.ArchEl.undefined.value)
         & (modelresult.bottom_depth <= 0)
     ] = classifications.ArchEl.dtundef.value
-    prediction_result[
-        (prediction_result == classifications.ArchEl.dtbayfill.value)
-        & (modelresult.dataset["MAX_UV"] > 0.4)
-    ] = classifications.ArchEl.tchannel.value
     prediction_result[0, 0, 0] = 0
     return prediction_result
 
@@ -115,8 +127,8 @@ prediction_parameters_dchannel = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_dchannel_yolo11l.pt")
     ),
-    max_instances=30,
-    min_confidence=0.16,
+    max_instances=99,
+    min_confidence=0.3,
     constrain_func=constrain_dchannel,
 )
 
@@ -128,7 +140,7 @@ prediction_parameters_beachridge = PredictionParams(
         Path(__file__).parent.joinpath("trained_yolo_models/best_beachridge_yolo11l.pt")
     ),
     max_instances=99,
-    min_confidence=0.16,
+    min_confidence=0.3,
     constrain_func=constrain_beachridge,
 )
 
@@ -139,8 +151,8 @@ prediction_parameters_beach = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_beach_yolo11l.pt")
     ),
-    max_instances=60,
-    min_confidence=0.16,
+    max_instances=99,
+    min_confidence=0.2,
     constrain_func=constrain_beach,
 )
 
@@ -151,7 +163,7 @@ prediction_parameters_dtundef = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_dtundef_yolo11l.pt")
     ),
-    min_confidence=0.2,
+    min_confidence=0.3,
     max_instances=1,
     constrain_func=constrain_dtundef,
 )
@@ -163,8 +175,8 @@ prediction_parameters_tchannel = PredictionParams(
     trained_model=YOLO(
         Path(__file__).parent.joinpath("trained_yolo_models/best_tchannel_yolo11l.pt")
     ),
-    max_instances=10,
-    min_confidence=0.04,
+    max_instances=20,
+    min_confidence=0.12,
     constrain_func=constrain_tchannel,
 )
 
