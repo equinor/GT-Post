@@ -103,9 +103,9 @@ class ModelResult:
 
         if use_copied_trim_file:
             shutil.copyfile(trimfile, folder / "temp.nc")
-            dataset = xr.open_dataset(folder / "temp.nc")
+            dataset = xr.open_dataset(folder / "temp.nc", decode_timedelta=False)
         else:
-            dataset = xr.open_dataset(trimfile)
+            dataset = xr.open_dataset(trimfile, decode_timedelta=False)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(

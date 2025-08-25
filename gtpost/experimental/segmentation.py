@@ -22,24 +22,6 @@ default_yolo_model = Path(__file__).parent.joinpath(
 
 matplotlib.use("TkAgg")
 
-# prediction_parameters_wave_dominated = [
-#     PredictionParams(unit_name="delta", encoding=1, max_instances=1),
-#     PredictionParams(unit_name="upper_shoreface", encoding=2, max_instances=1),
-#     PredictionParams(unit_name="main_channel", encoding=3, max_instances=2),
-#     PredictionParams(unit_name="spit", encoding=4, max_instances=4, min_confidence=0.1),
-# ]
-
-# prediction_parameters_sobrarbe = [
-#     PredictionParams(unit_name="Delta area", encoding=1, max_instances=1),
-#     PredictionParams(unit_name="Delta front", encoding=2, max_instances=1),
-#     PredictionParams(
-#         unit_name="Channel", encoding=3, max_instances=99, min_confidence=0.05
-#     ),
-#     PredictionParams(
-#         unit_name="Mouth bar", encoding=4, max_instances=10, min_confidence=0.02
-#     ),
-# ]
-
 prediction_parameters_dchannel = PredictionParams(
     unit_name="distributary channel",
     string_code="dchannel",
@@ -130,7 +112,7 @@ def train(
     model = YOLO(pretrained_yolo_model)
     results = model.train(
         data=yolo_dataset,
-        epochs=300,
+        epochs=400,
         imgsz=imgsz,
         device="cpu",
         lr0=0.00659,
@@ -222,6 +204,37 @@ def prediction_bathymetry_figure(prediction_result, d3d_folder, save_folder):
 
 
 if __name__ == "__main__":
+    results = train(
+        Path(__file__).parent.joinpath(
+            r"training_dataset\images_for_masking\YOLODataset_dchannel\dataset.yaml"
+        ),
+        282,
+    )
+    results = train(
+        Path(__file__).parent.joinpath(
+            r"training_dataset\images_for_masking\YOLODataset_beachridge\dataset.yaml"
+        ),
+        282,
+    )
+    results = train(
+        Path(__file__).parent.joinpath(
+            r"training_dataset\images_for_masking\YOLODataset_dtundef\dataset.yaml"
+        ),
+        282,
+    )
+    results = train(
+        Path(__file__).parent.joinpath(
+            r"training_dataset\images_for_masking\YOLODataset_beach\dataset.yaml"
+        ),
+        282,
+    )
+    results = train(
+        Path(__file__).parent.joinpath(
+            r"training_dataset\images_for_masking\YOLODataset_tchannel\dataset.yaml"
+        ),
+        282,
+    )
+
     # # results = model.tune(
     # #     data=r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\training_images_customrgb_4classes\YOLODataset\dataset.yaml",
     # #     epochs=30,
@@ -233,24 +246,3 @@ if __name__ == "__main__":
     # #     plots=False,
     # #     val=False,
     # # )
-
-    results = train(
-        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dchannel\dataset.yaml",
-        282,
-    )
-    results = train(
-        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beachridge\dataset.yaml",
-        282,
-    )
-    results = train(
-        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_dtundef\dataset.yaml",
-        282,
-    )
-    results = train(
-        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_beach\dataset.yaml",
-        282,
-    )
-    results = train(
-        r"c:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel\dataset.yaml",
-        282,
-    )

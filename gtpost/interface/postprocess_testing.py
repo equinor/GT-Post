@@ -166,6 +166,6 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_110",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_110_high_contrast_training_images_new_ai_model",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_104",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_104_high_contrast_training_images_new_ai",
     )

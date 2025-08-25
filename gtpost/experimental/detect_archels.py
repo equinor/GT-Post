@@ -263,7 +263,7 @@ def detect(
     final_prediction = utils.normalize_numpy_array(final_prediction)
 
     # Remove temporary folder with prediction images
-    # if prediction_images_temp_folder.is_dir():
-    #     prediction_images_temp_folder.rmdir()
+    if prediction_images_temp_folder.is_dir():
+        prediction_images_temp_folder.rmdir()
 
     return final_prediction.astype(np.uint8)
