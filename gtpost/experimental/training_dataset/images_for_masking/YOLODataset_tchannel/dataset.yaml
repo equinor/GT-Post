@@ -1,6 +1,6 @@
 names:
   0: tchannel
-path: C:\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel
+path: C:\Users\onselen\Development\GT-Post\gtpost\experimental\training_dataset\images_for_masking\YOLODataset_tchannel
 test: null
 train: images/train
 val: images/val
