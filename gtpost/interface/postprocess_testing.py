@@ -115,57 +115,57 @@ def main(
         only_last_timestep=False,
     )
 
-    # Cross-section plots
-    position_tags = ["xshore_7000", "xshore_5000", "xshore_9000", "lshore_3500"]
-    xsect_starts = [(30, 140), (30, 100), (30, 180), (70, 20)]
-    xsect_ends = [(140, 140), (140, 100), (140, 180), (70, 260)]
+    # # Cross-section plots
+    # position_tags = ["xshore_7000", "xshore_5000", "xshore_9000", "lshore_3500"]
+    # xsect_starts = [(30, 140), (30, 100), (30, 180), (70, 20)]
+    # xsect_ends = [(140, 140), (140, 100), (140, 180), (70, 260)]
 
-    # position_tags = ["xshore_7000"]
-    # xsect_starts = [(30, 140)]
-    # xsect_ends = [(140, 140)]
+    # for position_tag, xsect_start, xsect_end in zip(
+    #     position_tags, xsect_starts, xsect_ends
+    # ):
+    #     xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
 
-    for position_tag, xsect_start, xsect_end in zip(
-        position_tags, xsect_starts, xsect_ends
-    ):
-        xsect_plotter = plot.CrossSectionPlot(modelresult, xsect_start, xsect_end)
+    #     logger.info(
+    #         f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage()
+    #     )
+    #     xsect_plotter.twopanel_xsection(
+    #         "bottom_depth",
+    #         "d50",
+    #         fpath_output,
+    #         f"xsect_diameter_{position_tag}",
+    #         only_last_timestep=False,
+    #     )
 
-        # logger.info(
-        #     f"{get_current_time()}: Plotting D50 x-sections, " + log_memory_usage()
-        # )
-        # xsect_plotter.twopanel_xsection(
-        #     "bottom_depth",
-        #     "d50",
-        #     fpath_output,
-        #     f"xsect_diameter_{position_tag}",
-        #     only_last_timestep=False,
-        # )
+    #     logger.info(
+    #         f"{get_current_time()}: Plotting archel x-sections, " + log_memory_usage()
+    #     )
+    #     xsect_plotter.twopanel_xsection(
+    #         "bottom_depth",
+    #         "architectural_elements",
+    #         fpath_output,
+    #         f"xsect_archels_{position_tag}",
+    #         only_last_timestep=False,
+    #     )
 
-        logger.info(
-            f"{get_current_time()}: Plotting archel x-sections, " + log_memory_usage()
-        )
-        xsect_plotter.twopanel_xsection(
-            "bottom_depth",
-            "architectural_elements",
-            fpath_output,
-            f"xsect_archels_{position_tag}",
-            only_last_timestep=False,
-        )
-
-        # logger.info(
-        #     f"{get_current_time()}: Plotting deposition age x-sections, "
-        #     + log_memory_usage()
-        # )
-        # xsect_plotter.twopanel_xsection(
-        #     "bottom_depth",
-        #     "deposition_age",
-        #     fpath_output,
-        #     f"xsect_depositionage_{position_tag}",
-        #     only_last_timestep=False,
-        # )
+    #     logger.info(
+    #         f"{get_current_time()}: Plotting deposition age x-sections, "
+    #         + log_memory_usage()
+    #     )
+    #     xsect_plotter.twopanel_xsection(
+    #         "bottom_depth",
+    #         "deposition_age",
+    #         fpath_output,
+    #         f"xsect_depositionage_{position_tag}",
+    #         only_last_timestep=False,
+    #     )
 
 
 if __name__ == "__main__":
+    # main(
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_118",
+    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_118_high_contrast_training_images_new_ai_model",
+    # )
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_104",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_104_high_contrast_training_images_new_ai",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_109",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_109_high_contrast_training_images_new_ai_model",
     )

@@ -4,23 +4,8 @@ from typing import List, NamedTuple
 
 import numpy as np
 from tqdm import tqdm
-from ultralytics import YOLO
 
-
-@dataclass
-class PredictionParams:
-    """
-    A class to hold parameters for the prediction of segmentation masks using a trained
-    YOLO model (.pt file).
-    """
-
-    unit_name: str
-    string_code: str
-    encoding: int
-    trained_model: YOLO
-    min_confidence: float = 0.01
-    max_instances: int = 99
-    constrain_func: callable = None
+from gtpost.experimental.prediction_parameters import PredictionParams
 
 
 def predict_units(
@@ -67,12 +52,16 @@ def predict_units(
             iou=1.0,
             conf=pp.min_confidence,
             max_det=pp.max_instances,
-            show_boxes=False,
             # visualize=True,
+            show_conf=True,
+            show_boxes=False,
+            line_width=1,
+            show_labels=True,
             retina_masks=True,
             augment=False,
             agnostic_nms=True,
             device="cpu",
+            name=pp.string_code,
         )
         mask_array = np.zeros(
             [len(results)] + list(results[0].orig_shape), dtype=np.uint8
