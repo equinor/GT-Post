@@ -161,11 +161,11 @@ def main(
 
 
 if __name__ == "__main__":
-    # main(
-    #     r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_118",
-    #     r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_118_high_contrast_training_images_new_ai_model",
-    # )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_118",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_118_high_contrast_training_images_final_ai_model",
+    )
     main(
         r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_109",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_109_high_contrast_training_images_new_ai_model",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_109_high_contrast_training_images_final_ai_model",
     )

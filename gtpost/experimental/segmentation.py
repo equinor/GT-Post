@@ -36,7 +36,7 @@ def train(
     model = YOLO(pretrained_yolo_model)
     results = model.train(
         data=yolo_dataset,
-        epochs=400,
+        epochs=500,
         imgsz=imgsz,
         device="cpu",
         lr0=0.00659,
