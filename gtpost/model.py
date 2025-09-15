@@ -239,7 +239,7 @@ class ModelResult:
         -------
         None (but the above attributes are added to the instance)
         """
-        percentage2cal = [5, 10, 16, 50, 84, 90]
+        percentage2cal = [10, 16, 50, 84, 90]
         self.dmsedcum_final = self.dataset["DMSEDCUM"].values
         # Only the incoming sediment flux determines the composition of potential
         # deposits, so remove fluxes of sediment classes that are negative.
@@ -258,7 +258,7 @@ class ModelResult:
             self.vfraction,
         )
         self.sorting = sediment.calculate_sorting(self.diameters, percentage2cal)
-        self.d50 = self.diameters[:, :, :, 3]
+        self.d50 = self.diameters[:, :, :, 2]
 
     def compute_sediment_parameters_processing(self):
         """

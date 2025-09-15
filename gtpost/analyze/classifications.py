@@ -108,9 +108,7 @@ class Classifier:
         if all(value < self.max_value) and all(value > self.min_value):
             return self.labels[np.digitize(value, self.bounds) - 1]
         else:
-            raise ValueError(
-                "One or more values are outside of the range of the classifier."
-            )
+            return np.full(value.shape, np.nan, dtype=object)
 
 
 def fraction_classifier(values: list | np.ndarray) -> np.ndarray:

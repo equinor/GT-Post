@@ -87,7 +87,6 @@ def main(
         + log_memory_usage()
     )
 
-    (fpath_input / "temp.nc").unlink(missing_ok=True)
     logger.info(
         f"{get_current_time()}: >>> Processing steps complete, " + log_memory_usage()
     )

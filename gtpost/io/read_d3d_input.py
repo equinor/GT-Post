@@ -25,4 +25,9 @@ def read_sedfile(sedfile):
                 rho_db.append(temp)
 
     d50_input = get_d50input(sedfile, sedtype, rho_p, sedfile_line)
-    return sedtype, np.array(rho_p), np.array(rho_db), np.array(d50_input)
+    return (
+        sedtype,
+        np.array(rho_p, dtype=np.float32),
+        np.array(rho_db, dtype=np.float32),
+        np.array(d50_input, dtype=np.float32),
+    )

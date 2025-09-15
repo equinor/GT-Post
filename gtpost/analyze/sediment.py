@@ -54,7 +54,7 @@ def calculate_fraction(rho_db: np.array, dmsedcum_final: np.array) -> np.array:
     np.array
         Array of volumetric fractions of sediment.
     """
-    vfraction = np.zeros_like(dmsedcum_final)
+    vfraction = np.zeros_like(dmsedcum_final, dtype=np.float32)
     old_err_state = np.seterr(divide="ignore", invalid="ignore")
 
     # derive the volumetric sed flux by dividing by dry bed density
@@ -219,7 +219,7 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
         nt, nlyr, nx, ny = vfraction.shape
 
     diameters = np.zeros((nt, nx, ny, len(percentage2cal)))
-    porosity = np.zeros((nt, nx, ny))
+    porosity = np.zeros((nt, nx, ny), dtype=np.float32)
     permeability = np.zeros_like(porosity)
     diameters[0] = np.nan
     porosity[0] = np.nan

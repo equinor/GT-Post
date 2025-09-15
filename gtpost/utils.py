@@ -1,3 +1,4 @@
+import gc
 from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
@@ -20,6 +21,22 @@ def log_memory_usage():
     mem_info = process.memory_info()
     return f"Memory usage: {mem_info.rss / (1024 ** 2):.2f} MB"
 
+def release_memory(obj):
+    """
+    Releases memory by deleting the specified object.
+
+    Parameters
+    ----------
+    obj : object
+        The object to be deleted.
+
+    Returns
+    -------
+    None
+    """
+    obj = None
+    del obj
+    gc.collect()
 
 def get_current_time():
     time_now = datetime.now()
