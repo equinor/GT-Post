@@ -2,7 +2,7 @@ import numpy as np
 
 from gtpost.analyze import classifications
 
-ModelResult = None
+type ModelResult = None
 
 
 def constrain_dchannel(modelresult: ModelResult, prediction_result: np.ndarray):

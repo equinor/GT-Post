@@ -30,8 +30,8 @@ def train(
 
     Returns
     -------
-    _type_
-        _description_
+    dict
+        Training results
     """
     model = YOLO(pretrained_yolo_model)
     results = model.train(

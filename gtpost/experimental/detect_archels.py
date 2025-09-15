@@ -9,7 +9,7 @@ from gtpost.experimental import prediction_parameters, segmentation_utils
 from gtpost.experimental.prediction_parameters import PredictionParams
 from gtpost.visualize import colormaps
 
-ModelResult = None
+type ModelResult = None
 
 prediction_images_temp_folder = Path(__file__).parent.joinpath(
     "training_dataset/prediction_images_temp"
