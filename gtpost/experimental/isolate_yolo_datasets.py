@@ -75,7 +75,7 @@ def update_label_text_file(label_file, key_to_update, new_key, new_label):
 
 
 if __name__ == "__main__":
-    # Run labelme2yolo in the command line to create the YOLO dataset
+    # Run labelme2yolo in the command line to convert to a YOLO dataset
     subprocess.run(
         [
             "labelme2yolo",

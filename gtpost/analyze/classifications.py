@@ -55,6 +55,25 @@ subenvironment_names = [i.name for i in SubEnv.__iter__()]
 archel_codes = [i.value for i in ArchEl.__iter__()]
 archel_names = [i.name for i in ArchEl.__iter__()]
 
+ae_to_subenvironment = {
+    0: SubEnv.undefined.value,
+    1: SubEnv.deltatop.value,
+    2: SubEnv.deltatop.value,
+    3: SubEnv.deltatop.value,
+    4: SubEnv.deltatop.value,
+    5: SubEnv.deltatop.value,
+    6: SubEnv.deltafront.value,
+    7: SubEnv.prodelta.value,
+    8: SubEnv.deltafront.value,
+    9: SubEnv.prodelta.value,
+    10: SubEnv.prodelta.value,
+    11: SubEnv.deltatop.value,
+    12: SubEnv.deltatop.value,
+    13: SubEnv.deltatop.value,
+    14: SubEnv.deltatop.value,
+    15: SubEnv.deltatop.value,
+}
+
 
 class Classifier:
     def __init__(self, bounds: list | np.ndarray, labels: list | np.ndarray):

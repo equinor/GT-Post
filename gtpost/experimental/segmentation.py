@@ -97,15 +97,3 @@ if __name__ == "__main__":
         ),
         282,
     )
-
-    # # results = model.tune(
-    # #     data=r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_030\training_images_customrgb_4classes\YOLODataset\dataset.yaml",
-    # #     epochs=30,
-    # #     iterations=80,
-    # #     imgsz=282,
-    # #     device="cpu",
-    # #     save=False,
-    # #     optimizer="AdamW",
-    # #     plots=False,
-    # #     val=False,
-    # # )

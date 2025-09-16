@@ -45,7 +45,7 @@ class ModelResult:
         self.modelname = modelname
         self.config = ConfigParser()
         self.config.read(settings_file)
-        self.dataset = dataset  # .isel(time=slice(0, 20))  # time slice for testing
+        self.dataset = dataset  # .isel(time=slice(0, 80))  # time slice for testing
 
         if post:
             self.complete_init_for_postprocess()
@@ -221,7 +221,10 @@ class ModelResult:
         -------
         None (attribute architectural_elements is created)
         """
-        self.architectural_elements = detect_archels.detect(self)
+        self.architectural_elements, self.ae_mapping = detect_archels.detect(self)
+        self.subenvironment = np.vectorize(classifications.ae_to_subenvironment.get)(
+            self.architectural_elements, 0
+        ).astype(np.int32)
 
     def compute_sediment_parameters_postprocessing(self):
         """
@@ -302,7 +305,7 @@ class ModelResult:
             self.architectural_elements,
             self.preserved_thickness,
             self.d50,
-            self.mouth_position[1],
+            10,
         )
 
         (
@@ -317,47 +320,23 @@ class ModelResult:
             self.d50,
             self.sandfraction,
             self.sorting,
-            self.mouth_position[1],
+            10,
         )
-        self.delta_stats = {
-            "delta_volume": delta_volume,
-            "delta_top_aerial_volume": self.archel_volumes[0],
-            "delta_top_aerial_d50": archel_d50s[0],
-            "delta_top_aerial_sandfraction": archel_fractions[0],
-            "delta_top_aerial_sorting": classifications.sorting_classifier(
-                archel_sorting[0]
-            )[0],
-            "delta_top_sub_volume": self.archel_volumes[1],
-            "delta_top_sub_d50": archel_d50s[1],
-            "delta_top_sub_sandfraction": archel_fractions[1],
-            "delta_top_sub_sorting": classifications.sorting_classifier(
-                archel_sorting[1]
-            )[0],
-            "active_channel_volume": self.archel_volumes[2],
-            "active_channel_d50": archel_d50s[2],
-            "active_channel_sandfraction": archel_fractions[2],
-            "active_channel_sorting": classifications.sorting_classifier(
-                archel_sorting[2]
-            )[0],
-            "mouthbar_volume": self.archel_volumes[3],
-            "mouthbar_d50": archel_d50s[3],
-            "mouthbar_sandfraction": archel_fractions[3],
-            "mouthbar_sorting": classifications.sorting_classifier(archel_sorting[3])[
-                0
-            ],
-            "delta_front_volume": self.archel_volumes[4],
-            "delta_front_d50": archel_d50s[4],
-            "delta_front_sandfraction": archel_fractions[4],
-            "delta_front_sorting": classifications.sorting_classifier(
-                archel_sorting[4]
-            )[0],
-            "prodelta_volume": self.archel_volumes[5],
-            "prodelta_d50": archel_d50s[5],
-            "prodelta_sandfraction": archel_fractions[5],
-            "prodelta_sorting": classifications.sorting_classifier(archel_sorting[5])[
-                0
-            ],
-        }
+
+        self.delta_stats = {"delta_volume": delta_volume}
+        for key, ae_id in self.ae_mapping.items():
+            self.delta_stats[f"ae_{classifications.ArchEl(ae_id).name}_volume"] = (
+                self.archel_volumes[key]
+            )
+            self.delta_stats[f"ae_{classifications.ArchEl(ae_id).name}_d50"] = (
+                archel_d50s[key]
+            )
+            self.delta_stats[
+                f"ae_{classifications.ArchEl(ae_id).name}_sandfraction"
+            ] = archel_fractions[key]
+            self.delta_stats[f"ae_{classifications.ArchEl(ae_id).name}_sorting"] = (
+                classifications.sorting_classifier(archel_sorting[key])[0]
+            )
 
     def process(self):
         """
@@ -376,10 +355,8 @@ class ModelResult:
         - Detect architectural elements
         """
         self.compute_sediment_parameters_postprocessing()
-        # self.detect_subenvironments()
-        # self.detect_channel_network()
         self.detect_architectural_elements()
-        # self.statistics_summary()
+        self.statistics_summary()
 
     def export_sediment_and_object_data(self, out_file: str | Path):
         """

@@ -1,4 +1,4 @@
-name: Ribasim Python Tests
+name: GT-Post Python Tests
 on:
   push:
     branches: [main]
@@ -17,7 +17,6 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-latest
           - windows-latest
     steps:
     - uses: actions/checkout@v4

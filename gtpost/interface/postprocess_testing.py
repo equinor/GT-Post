@@ -74,35 +74,35 @@ def main(
         f"{get_current_time()}: Created {modelresult.modelname}_input_postprocessed.ini, "
         + log_memory_usage()
     )
-    # modelresult.export_sediment_and_object_data(
-    #     fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
-    # )
-    # logger.info(
-    #     f"{get_current_time()}: Created {modelresult.modelname}_sed_and_obj_data.nc"
-    #     + log_memory_usage()
-    # )
+    modelresult.export_sediment_and_object_data(
+        fpath_output.joinpath(modelresult.modelname + "_sed_and_obj_data.nc")
+    )
+    logger.info(
+        f"{get_current_time()}: Created {modelresult.modelname}_sed_and_obj_data.nc"
+        + log_memory_usage()
+    )
 
-    # with open(
-    #     fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"
-    # ) as f:
-    #     json.dump(
-    #         modelresult.delta_stats,
-    #         f,
-    #     )
-    # logger.info(
-    #     f"{get_current_time()}: Created {modelresult.modelname}_statistics_summary.json"
-    #     + log_memory_usage()
-    # )
+    with open(
+        fpath_output.joinpath(modelresult.modelname + "_statistics_summary.json"), "w"
+    ) as f:
+        json.dump(
+            modelresult.delta_stats,
+            f,
+        )
+    logger.info(
+        f"{get_current_time()}: Created {modelresult.modelname}_statistics_summary.json"
+        + log_memory_usage()
+    )
 
-    # logger.info(
-    #     f"{get_current_time()}: Created {modelresult.modelname}_architectural_elements.png"
-    #     + log_memory_usage()
-    # )
+    logger.info(
+        f"{get_current_time()}: Created {modelresult.modelname}_architectural_elements.png"
+        + log_memory_usage()
+    )
 
-    # # Summary plot
-    # logger.info(f"{get_current_time()}: Plotting stats, " + log_memory_usage())
-    # stat_plotter = plot.StatPlot(modelresult)
-    # stat_plotter.plot_histograms(fpath_output, "archel_summary")
+    # Summary plot
+    logger.info(f"{get_current_time()}: Plotting stats, " + log_memory_usage())
+    stat_plotter = plot.StatPlot(modelresult)
+    stat_plotter.plot_histograms_wavedominated(fpath_output, "archel_summary")
 
     # Map plots
     logger.info(f"{get_current_time()}: Plotting archel maps, " + log_memory_usage())
@@ -163,7 +163,7 @@ def main(
 if __name__ == "__main__":
     main(
         r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_110",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_110_high_contrast_training_images_final_ai_model",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_110_h7test",
     )
     main(
         r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_104",

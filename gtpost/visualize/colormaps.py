@@ -71,17 +71,21 @@ class ArchelColormap(NamedTuple):
 
 
 class WaveArchelColormap(NamedTuple):
-    alphas = [1, 1, 1, 1, 1, 1]
+    alphas = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     colors = [
-        "snow",
+        "white",
         "yellowgreen",
         "mediumseagreen",
         "deepskyblue",
-        "yellow",
+        "coral",
+        "khaki",
+        "darkkhaki",
         "mediumblue",
+        "gold",
+        "yellow",
     ]
-    labels = ["N/A", "DT-subar", "DT-subaq", "Channel", "Mouth bar", "Prodelta"]
-    ticks = np.arange(0, 6)
+    labels = ["N/A", "DT", "BF", "DC", "TC", "US", "LS", "OS", "BR", "B"]
+    ticks = np.arange(0, 10)
     name = "Architectural elements"
     type = "categorical"
     cmap, mappable, bounds, values, norm = categorical_cmap(alphas, colors, name)

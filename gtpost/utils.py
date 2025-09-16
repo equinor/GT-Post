@@ -19,7 +19,8 @@ def log_memory_usage():
     """
     process = psutil.Process()
     mem_info = process.memory_info()
-    return f"Memory usage: {mem_info.rss / (1024 ** 2):.2f} MB"
+    return f"Memory usage: {mem_info.rss / (1024**2):.2f} MB"
+
 
 def release_memory(obj):
     """
@@ -37,6 +38,7 @@ def release_memory(obj):
     obj = None
     del obj
     gc.collect()
+
 
 def get_current_time():
     time_now = datetime.now()
@@ -96,7 +98,8 @@ def numpy_mode(array: np.ndarray):
 def normalize_numpy_array(array: np.ndarray):
     unique_values = np.unique(array)
     value_to_int = {val: idx for idx, val in enumerate(unique_values)}
-    return np.vectorize(value_to_int.get)(array)
+    ae_mapping = {value: key for key, value in value_to_int.items()}
+    return np.vectorize(value_to_int.get)(array), ae_mapping
 
 
 def describe_data_vars(dataset, output_file="data_vars_description.txt"):

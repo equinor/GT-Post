@@ -218,7 +218,7 @@ def calculate_diameter(d50input, percentage2cal, vfraction):
     if len(vfraction.shape) == 4:
         nt, nlyr, nx, ny = vfraction.shape
 
-    diameters = np.zeros((nt, nx, ny, len(percentage2cal)))
+    diameters = np.zeros((nt, nx, ny, len(percentage2cal)), dtype=np.float32)
     porosity = np.zeros((nt, nx, ny), dtype=np.float32)
     permeability = np.zeros_like(porosity)
     diameters[0] = np.nan

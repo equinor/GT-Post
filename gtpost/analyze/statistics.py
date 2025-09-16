@@ -10,7 +10,7 @@ def get_stats_per_archel(
     fractions: np.ndarray,
     sorting: np.ndarray,
     coastline_y: int,
-) -> (float, np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Derive statistics per architectural element
 
@@ -36,7 +36,7 @@ def get_stats_per_archel(
         Weighted average sand fraction per AE (np.ndarray)
         Weighted average sorting per AE (np.ndarray)
     """
-    array_length = len(classifications.ArchEl) - 1
+    array_length = len(classifications.ArchEl)
     volumes = np.zeros(array_length)
     archel_d50s = np.zeros(array_length)
     archel_fractions = np.zeros(array_length)
@@ -47,18 +47,18 @@ def get_stats_per_archel(
         )
         preserved_thickness_sel = preserved_thickness[:, coastline_y:, :][idxs]
         if len(preserved_thickness_sel) != 0:
-            volumes[i - 1] = np.sum(preserved_thickness_sel)
-            archel_d50s[i - 1] = np.average(
+            volumes[i] = np.sum(preserved_thickness_sel)
+            archel_d50s[i] = np.average(
                 d50[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
             )
-            archel_fractions[i - 1] = np.average(
+            archel_fractions[i] = np.average(
                 fractions[:, coastline_y:, :][idxs], weights=preserved_thickness_sel
             )
-            archel_sorting[i - 1] = np.nanmean(sorting[:, coastline_y:, :][idxs])
+            archel_sorting[i] = np.nanmean(sorting[:, coastline_y:, :][idxs])
         else:
-            archel_d50s[i - 1] = 0
-            archel_fractions[i - 1] = 0
-            archel_sorting[i - 1] = 0
+            archel_d50s[i] = 0
+            archel_fractions[i] = 0
+            archel_sorting[i] = 0
     delta_volume, archel_volumes = volume_stats(volumes)
     return delta_volume, archel_volumes, archel_d50s, archel_fractions, archel_sorting
 
@@ -68,7 +68,7 @@ def get_diameter_distributions(
     preserved_thickness: np.ndarray,
     d50: np.ndarray,
     coastline_y: int,
-) -> (list, list):
+) -> tuple[list, list]:
     """
     Get distribution of grain size classes per architectural element
 
@@ -105,7 +105,7 @@ def get_diameter_distributions(
     return d50_distributions, d50_distribution_weights
 
 
-def volume_stats(volumes: np.array) -> (np.array, np.array):
+def volume_stats(volumes: np.array) -> tuple[np.array, np.array]:
     total_deposited_volume = np.sum(volumes)
     volume_percentages = (volumes / total_deposited_volume) * 100
     return total_deposited_volume, volume_percentages
