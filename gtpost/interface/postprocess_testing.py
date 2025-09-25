@@ -2,9 +2,6 @@ import json
 import logging
 from pathlib import Path
 
-import numpy as np
-
-from gtpost.analyze import classifications
 from gtpost.model import ModelResult
 from gtpost.utils import get_current_time, get_template_name, log_memory_usage
 from gtpost.visualize import plot
@@ -46,6 +43,9 @@ def main(
     fpath_input = Path(fpath_input)
     fpath_output = Path(fpath_output)
     input_ini_file = fpath_input.joinpath("input.ini")
+
+    if fpath_output.exists() is False:
+        fpath_output.mkdir(parents=True, exist_ok=True)
 
     template_name = get_template_name(fpath_input)
     settings_file = (
@@ -162,10 +162,70 @@ def main(
 
 if __name__ == "__main__":
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_110",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_110_h7test",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_117",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_117_h7",
     )
     main(
-        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_104",
-        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_104_high_contrast_training_images_final_ai_model",
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_118",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_118_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_119",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_119_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_120",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_120_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_122",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_122_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_124",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_124_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_126",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_126_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_127",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_127_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Pro_128",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Pro_128_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_108",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_108_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_109",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_109_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_110",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_110_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_111",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_111_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_112",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_112_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_114",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_114_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_115",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_115_h7",
+    )
+    main(
+        r"p:\11210835-002-d3d-gt-wave-dominated\01_modelling\Ret_117",
+        r"p:\11210835-002-d3d-gt-wave-dominated\02_postprocessing\Ret_117_h7",
     )
