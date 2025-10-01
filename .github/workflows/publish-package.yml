@@ -1,0 +1,49 @@
+on:
+ release:
+   types: [created]
+
+name: Publish image to registry
+
+jobs:
+    get-dir-name-tag:
+      outputs:
+        workdir: ${{ steps.get-working-directory.outputs.workdir }}
+        package-name: ${{ steps.get-package-name.outputs.package-name }}
+        tag: ${{ steps.get-tag.outputs.tag }}
+      runs-on: ubuntu-latest
+      steps:
+        - id: get-working-directory
+          run: |
+              WORK_DIR="."
+              echo "workdir=$WORK_DIR" >> "$GITHUB_OUTPUT"
+          shell: bash
+        - id: get-package-name
+          env:
+            RELEASE_NAME: ${{ github.event.release.name }}
+          run: |
+            echo $RELEASE_NAME
+            PACKAGE_NAME=${RELEASE_NAME%:*}
+            echo $PACKAGE_NAME
+            echo "package-name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          shell: bash
+        - id: get-tag
+          env: 
+            FULL_TAG: ${{ github.event.release.tag_name }}
+          run: |
+            echo $FULL_TAG
+            TAG=${FULL_TAG##*-}
+            echo $TAG
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          shell: bash
+    
+    
+    build-and-publish-release:
+        name: Build and publish containers for test
+        uses: ./.github/workflows/build-and-publish.yml
+        needs: get-dir-name-tag
+        with:
+          Registry: ghcr.io
+          ImageName: ${{ github.repository }}/${{ needs.get-dir-name-tag.outputs.package-name }}
+          Tag: ${{ needs.get-dir-name-tag.outputs.tag }}
+          WorkingDir: ./pepm-jobs/${{ needs.get-dir-name-tag.outputs.workdir }}
+        secrets: inherit
