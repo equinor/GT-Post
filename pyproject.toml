@@ -59,7 +59,7 @@ channels = ["conda-forge"]
 platforms = ["win-64", "linux-64", "linux-aarch64", "osx-64", "osx-arm64"]
 
 [tool.pixi.dependencies]
-python = ">=3.11"
+python = ">=3.12"
 numpy = ">=1.26.4,<1.27"
 numba = "*"
 pandas = ">=2.0.1"
@@ -93,15 +93,11 @@ docs = "sphinx-build -b html docs ./docs/build"
 format = "black ."
 lint = "ruff check --fix ./gtpost"
 
-[tool.pixi.feature.py311.dependencies]
-python = "3.11.*"
-
 [tool.pixi.feature.py312.dependencies]
 python = "3.12.*"
 
 [tool.pixi.environments]
-default = { features = ["py311"], solve-group = "py311" }
-py311 = { features = ["py311"], solve-group = "py311" }
+default = { features = ["py312"], solve-group = "py311" }
 py312 = { features = ["py312"], solve-group = "py312" }
 
 [tool.pytest.ini_options]
