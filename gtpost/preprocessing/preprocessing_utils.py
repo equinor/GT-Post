@@ -1,6 +1,6 @@
 import json
 import os
-from configparser import ConfigParser
+from configparser import ConfigParser, SafeConfigParser
 from pathlib import Path
 
 import numpy as np
@@ -127,8 +127,7 @@ def write_ini(root: str | Path = "/data/input"):
     folders = ["simulation", "preprocess", "process", "postprocess", "export"]
 
     # Create ini file for containers
-    # SafeConfigParser was removed in Python 3.12; use ConfigParser instead
-    config = ConfigParser(interpolation=None)
+    config = SafeConfigParser(interpolation=None)
     for section in parameters:
         if not config.has_section(section):
             config.add_section(section)
