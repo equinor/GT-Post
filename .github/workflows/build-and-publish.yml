@@ -40,14 +40,6 @@ jobs:
         with:
           images: ${{ inputs.Registry }}/${{ inputs.ImageName }}
 
-      - name: downcase IMAGENAME
-        id: toLowerCase
-        run: |
-          "::set-output name=IMAGENAME::${UPPERCASE_VAR,,}"
-        env:
-          UPPERCASE_VAR: ${{ inputs.ImageName }}
-
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -55,6 +47,6 @@ jobs:
           file: ${{ inputs.WorkingDir }}/Dockerfile
           push: true
           tags: |
-            ${{ inputs.Registry }}/${{steps.toLowerCase.outputs.IMAGENAME}}:${{ inputs.Tag }}
-            ${{ inputs.Registry }}/${{steps.toLowerCase.outputs.IMAGENAME}}:latest
+            ${{ inputs.Registry }}/${{ inputs.ImageName }}:${{ inputs.Tag }}
+            ${{ inputs.Registry }}/${{ inputs.ImageName }}:latest
           labels: ${{ steps.meta.outputs.labels }}

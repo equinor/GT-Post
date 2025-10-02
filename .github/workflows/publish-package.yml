@@ -21,10 +21,28 @@ jobs:
           env:
             RELEASE_NAME: ${{ github.event.release.name }}
           run: |
-            echo $RELEASE_NAME
-            PACKAGE_NAME=${RELEASE_NAME%:*}
-            echo $PACKAGE_NAME
-            echo "package-name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+            echo "RELEASE_NAME='${RELEASE_NAME}'"
+
+            # If release.name contains a colon, assume "package: version" and take the part before the colon
+            if [[ -n "${RELEASE_NAME}" && "${RELEASE_NAME}" == *:* ]]; then
+              PACKAGE_NAME="${RELEASE_NAME%%:*}"
+              echo "Parsed package-name from release.name: ${PACKAGE_NAME}"
+            else
+              PACKAGE_NAME="${GITHUB_REPOSITORY##*/}"
+              echo "Fallback package-name to repo name: ${PACKAGE_NAME}"
+            fi
+            
+            # Trim leading/trailing whitespace and convert to lowercase for container image names
+            ORIGINAL_PACKAGE_NAME="${PACKAGE_NAME}"
+            # remove leading/trailing whitespace
+            PACKAGE_NAME="$(echo -n "${PACKAGE_NAME}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            # convert to lowercase in a portable way
+            PACKAGE_NAME="$(echo "${PACKAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
+
+            echo "Original package-name: '${ORIGINAL_PACKAGE_NAME}'"
+            echo "Normalized package-name: '${PACKAGE_NAME}'"
+
+            echo "package-name=${PACKAGE_NAME}" >> "$GITHUB_OUTPUT"
           shell: bash
         - id: get-tag
           env: 
@@ -43,7 +61,7 @@ jobs:
         needs: get-dir-name-tag
         with:
           Registry: ghcr.io
-          ImageName: ${{ github.repository }}/${{ needs.get-dir-name-tag.outputs.package-name }}
+          ImageName: ${{ needs.get-dir-name-tag.outputs.package-name }}
           Tag: ${{ needs.get-dir-name-tag.outputs.tag }}
-          WorkingDir: ./pepm-jobs/${{ needs.get-dir-name-tag.outputs.workdir }}
+          WorkingDir: ${{ needs.get-dir-name-tag.outputs.workdir }}
         secrets: inherit
