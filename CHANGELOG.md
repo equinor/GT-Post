@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/equinor/GT-Post/compare/v0.1.2...v0.1.3) (2025-10-02)
+
+
+### Bug Fixes
+
+* added owner to image name ([03614ff](https://github.com/equinor/GT-Post/commit/03614ff60bb169f61a5c9ffbea57391d4f54ef36))
+
 ## [0.1.2](https://github.com/equinor/GT-Post/compare/v0.1.1...v0.1.2) (2025-10-02)
 
 
