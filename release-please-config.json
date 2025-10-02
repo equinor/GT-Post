@@ -1,6 +1,5 @@
 {
     "release-type": "python",
-    "pull-request-title-pattern": "release${scope}: release ${scope} ${version}",
     "changelog-sections": [
         {"type":"release", "section":"📦 Release package","hidden":false},
         {"type":"chore", "section":"🧹 Chores","hidden":false},
