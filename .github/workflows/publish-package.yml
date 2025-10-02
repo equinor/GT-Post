@@ -31,7 +31,7 @@ jobs:
               PACKAGE_NAME="${GITHUB_REPOSITORY##*/}"
               echo "Fallback package-name to repo name: ${PACKAGE_NAME}"
             fi
-            
+
             # Trim leading/trailing whitespace and convert to lowercase for container image names
             ORIGINAL_PACKAGE_NAME="${PACKAGE_NAME}"
             # remove leading/trailing whitespace
@@ -61,7 +61,7 @@ jobs:
         needs: get-dir-name-tag
         with:
           Registry: ghcr.io
-          ImageName: ${{ needs.get-dir-name-tag.outputs.package-name }}
+          ImageName: equinor/${{ needs.get-dir-name-tag.outputs.package-name }}
           Tag: ${{ needs.get-dir-name-tag.outputs.tag }}
           WorkingDir: ${{ needs.get-dir-name-tag.outputs.workdir }}
         secrets: inherit
