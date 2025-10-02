@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/equinor/GT-Post/compare/v0.1.1...v0.1.2) (2025-10-02)
+
+
+### Bug Fixes
+
+* changed name generation for package ([21daf0e](https://github.com/equinor/GT-Post/commit/21daf0eb9ef7f15fcd7b09fab742f1c08d0c8136))
+
 ## [0.1.1](https://github.com/equinor/GT-Post/compare/v0.1.0...v0.1.1) (2025-10-02)
 
 
