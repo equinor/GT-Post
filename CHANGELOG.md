@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/equinor/GT-Post/compare/v0.1.0...v0.1.1) (2025-10-02)
+
+
+### Bug Fixes
+
+* updated release-please config and publish action ([63ca892](https://github.com/equinor/GT-Post/commit/63ca89271ad6c8e2fffb6bfa5084df1b7c0ba595))
+
 ## 0.1.0 (2025-10-02)
 
 
