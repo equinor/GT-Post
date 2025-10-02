@@ -81,10 +81,6 @@ pip = ">=24.0,<25"
 psutil = ">=6.1.1,<7"
 affine = ">=2.4.0,<3"
 
-[tool.setuptools]
-[tool.setuptools.packages.find]
-where = ["gtpost"]
-
 [tool.pixi.pypi-dependencies]
 gtpost = { path = ".", editable = true }
 
