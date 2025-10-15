@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/equinor/GT-Post/compare/v0.1.3...v0.2.0) (2025-10-15)
+
+
+### Features
+
+* added entrypoint.sh for container setup ([6a515dc](https://github.com/equinor/GT-Post/commit/6a515dc60b7476a2bbdcfcdb44f9bca749700d58))
+
 ## [0.1.3](https://github.com/equinor/GT-Post/compare/v0.1.2...v0.1.3) (2025-10-02)
 
 
