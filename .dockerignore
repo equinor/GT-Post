@@ -1,8 +1,36 @@
-tests/
-.github/
-.pixi/
+# Ignore local/personal environment directories and common development artefacts
+.pixi
+.venv
+venv/
+env/
+__pycache__/
 .pytest_cache/
+.mypy_cache/
+.tox/
+.cache/
 .ruff_cache/
-*.nc
-docs
-*.yml
+.DS_Store
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE/editor metadata
+.vscode/
+.idea/
+
+# Git and build artifacts
+.git/
+build/
+dist/
+*.egg-info
+
+# Temp and system files
+tmp_test/
+.env
+.env.*
+
+# Other large directories to ignore
+node_modules/
+
+

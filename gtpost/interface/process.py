@@ -93,4 +93,12 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    argv = sys.argv[1:]
+    if len(argv) >= 2:
+        main(argv[0], argv[1])
+    elif len(argv) == 1:
+        main(argv[0])
+    else:
+        main()

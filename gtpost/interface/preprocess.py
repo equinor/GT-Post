@@ -23,13 +23,22 @@ def main(
     fpath_output : str | Path, optional
         Relative path within the container folder structure to write results to.
     """
-    write_ini()
+    # write_ini()
     pp = PreProcess(inifile, fpath_output)
     pp.preprocess()
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    # Accept optional positional args: <inifile> <fpath_output>
+    argv = sys.argv[1:]
+    if len(argv) >= 2:
+        main(argv[0], argv[1])
+    elif len(argv) == 1:
+        main(argv[0])
+    else:
+        main()
 
     # for template in [
     #     "River_dominated_1",

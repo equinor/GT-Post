@@ -129,3 +129,9 @@ ENV/
 .ruff_cache/
 runs/
 data/
+
+# Local AI assistant guidance (do not commit local edits)
+.github/copilot-instructions.md
+
+# Local temp folders
+tmp/

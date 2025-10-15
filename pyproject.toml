@@ -59,7 +59,7 @@ channels = ["conda-forge"]
 platforms = ["win-64", "linux-64", "linux-aarch64", "osx-64", "osx-arm64"]
 
 [tool.pixi.dependencies]
-python = ">=3.11"
+python = ">=3.11.14,<3.12"
 numpy = ">=1.26.4,<1.27"
 numba = ">=0.59.0"
 pandas = ">=2.0.1"

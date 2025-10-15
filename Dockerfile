@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ghcr.io/prefix-dev/pixi:0.40.3
+FROM ghcr.io/prefix-dev/pixi:0.40.3
 
 COPY . /app
 WORKDIR /app
@@ -9,4 +9,7 @@ RUN mkdir -p ~/.config/matplotlib \
     && echo "backend : Agg" > ~/.config/matplotlib/matplotlibrc
 
 WORKDIR /app
-ENTRYPOINT ["pixi", "run"]
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
