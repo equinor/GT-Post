@@ -12,6 +12,8 @@ WORKDIR /app
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+RUN apt-get update \
+    && apt-get install -y adduser
 RUN addgroup --gid 1001 radix-non-root-group
 RUN adduser --uid 1001 --gid 1001 radix-non-root-user
 
