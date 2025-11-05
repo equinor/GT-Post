@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/equinor/GT-Post/compare/v0.2.1...v0.2.2) (2025-11-05)
+
+
+### Bug Fixes
+
+* added adduser to dockerfile ([910ecc4](https://github.com/equinor/GT-Post/commit/910ecc4d8ed6ab6ed37afd65baadf6e2258afb7a))
+
 ## [0.2.1](https://github.com/equinor/GT-Post/compare/v0.2.0...v0.2.1) (2025-11-05)
 
 
