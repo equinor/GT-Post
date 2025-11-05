@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/equinor/GT-Post/compare/v0.2.0...v0.2.1) (2025-11-05)
+
+
+### Bug Fixes
+
+* added radix group user ([6bb5c26](https://github.com/equinor/GT-Post/commit/6bb5c26f3ab29b018b547a9f3e972dac1c8db3b4))
+
 ## [0.2.0](https://github.com/equinor/GT-Post/compare/v0.1.3...v0.2.0) (2025-10-15)
 
 
