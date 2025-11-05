@@ -12,4 +12,9 @@ WORKDIR /app
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+RUN addgroup --gid 1001 radix-non-root-group
+RUN adduser --uid 1001 --gid 1001 radix-non-root-user
+
+USER 1001
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
