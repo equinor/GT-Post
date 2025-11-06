@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/equinor/GT-Post/compare/v0.2.2...v0.2.3) (2025-11-06)
+
+
+### Bug Fixes
+
+* fixed path for workdir ([5990fb7](https://github.com/equinor/GT-Post/commit/5990fb79c14008a2f0a93cff97511f322c79bb74))
+
 ## [0.2.2](https://github.com/equinor/GT-Post/compare/v0.2.1...v0.2.2) (2025-11-05)
 
 
