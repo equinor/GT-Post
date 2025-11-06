@@ -97,7 +97,9 @@ class PreProcess:
             parser.read(self.inifile)
             self.inidata = parser.as_dict
         else:
-            logger.warning(f'inifile "{self.inifile}" not found, nothing to read')
+            error_msg = f'inifile "{self.inifile}" not found, cannot proceed'
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
 
     def load_ini_parameters(self) -> None:
         # Template name

@@ -135,3 +135,4 @@ data/
 
 # Local temp folders
 tmp/
+.agents/memory.instruction.md
