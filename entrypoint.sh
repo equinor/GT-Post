@@ -14,7 +14,7 @@ fi
 JOB_MODE="${JOB_MODE:-postprocess}"    # 'preprocess' or 'postprocess' or 'process'
 WORK_DIR="${WORK_DIR:-./tmp/work}"
 MAIN_DIR="${MAIN_DIR:-./tmp/main}"      # If preprocess/process/postprocess scripts succeed, results will be moved from WORK_DIR to MAIN_DIR
-ARGS_DIR="${ARGS_DIR:-./tmp/args}"
+ARGS_FOLDER="${ARGS_FOLDER:-./tmp/args}"
 
 # Initialize variables that may be referenced later to avoid errors with 'set -u'
 # can run even when no payload is provided.
@@ -28,7 +28,7 @@ MAIN_OUTPUT_DIR="${MAIN_DIR%/}/output"
 JOB_RC=""
 
 ## Radix payload placement
-PAYLOAD_FILE="${ARGS_DIR}/payload"
+PAYLOAD_FILE="${ARGS_FOLDER}/payload"
 
 if [ -f "${PAYLOAD_FILE}" ]; then
   echo "Found payload JSON: ${PAYLOAD_FILE}"
