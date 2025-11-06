@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/equinor/GT-Post/compare/v0.2.3...v0.2.4) (2025-11-06)
+
+
+### Bug Fixes
+
+* fixed env variable name ([c675ef1](https://github.com/equinor/GT-Post/commit/c675ef1cdf129bc87feddbc813f18da23d7cbab5))
+
 ## [0.2.3](https://github.com/equinor/GT-Post/compare/v0.2.2...v0.2.3) (2025-11-06)
 
 
