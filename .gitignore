@@ -132,6 +132,7 @@ data/
 
 # Local AI assistant guidance (do not commit local edits)
 .github/copilot-instructions.md
+.agents
 
 # Local temp folders
 tmp/

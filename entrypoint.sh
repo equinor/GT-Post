@@ -2,7 +2,7 @@
 # Enable Bash 'strict' mode for safety in container entrypoints:
 #  -u : treat unset variables as an error and exit
 #  -o pipefail : cause a pipeline to fail if any command in it fails
-set -u -o pipefail
+set -u pipefail
 
 # Source pixi shell hook if present so pixi-managed environment is available
 if [ -f /shell-hook ]; then

@@ -1,4 +1,4 @@
-name: Ribasim Python Tests
+name: GT-Post Python Tests
 on:
   push:
     branches: [main]
