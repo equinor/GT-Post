@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/equinor/GT-Post/compare/v0.2.4...v0.3.0) (2025-11-13)
+
+
+### Features
+
+* simplified pipeline and added docs ([308605c](https://github.com/equinor/GT-Post/commit/308605c1568e9fb77df8c0ec5964eea212524798))
+
+
+### Bug Fixes
+
+* fixed input data for failing tests ([1618f92](https://github.com/equinor/GT-Post/commit/1618f92214053089b66bd8a2a9d99e278687087f))
+
 ## [0.2.4](https://github.com/equinor/GT-Post/compare/v0.2.3...v0.2.4) (2025-11-06)
 
 
