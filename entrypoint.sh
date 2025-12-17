@@ -6,7 +6,7 @@
 # -----------------------------------------------------------------------------
 # Configuration
 # -----------------------------------------------------------------------------
-JOB_MODE="${JOB_MODE:-postprocess}"       # 'preprocess', 'process', or 'postprocess'
+JOB_MODE="${JOB_MODE:-postprocess}"       # 'preprocess', 'process', 'postprocess'
 WORK_DIR="${WORK_DIR:-./tmp/work}"
 MAIN_DIR="${MAIN_DIR:-./tmp/main}"        # Final storage location
 ARGS_FOLDER="${ARGS_FOLDER:-./tmp/args}"
