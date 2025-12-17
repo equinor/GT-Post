@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/equinor/gt-post/compare/v0.3.0...v0.4.0) (2025-12-17)
+
+
+### Features
+
+* add postprocessing and update readme ([#14](https://github.com/equinor/gt-post/issues/14)) ([a057d96](https://github.com/equinor/gt-post/commit/a057d96c33b6996845deb4a52d891664b1191c5e))
+
 ## [0.3.0](https://github.com/equinor/GT-Post/compare/v0.2.4...v0.3.0) (2025-11-13)
 
 
