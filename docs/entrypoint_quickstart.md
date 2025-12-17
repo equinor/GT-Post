@@ -10,7 +10,7 @@ This page documents the container entrypoint (`entrypoint.sh`) and the local qui
 
 ### High-level behavior (entrypoint)
 - Looks for a scheduler payload file at `${ARGS_DIR:-/args}/payload`.
-- If present, extracts `simulation_id` and `run_id` using `scripts/extract_ids.py` and computes per-run folders under `WORK_DIR` (defaults to `/tmp/work`).
+- If present, extracts `orchestration_id` and `run_id` using `scripts/extract_ids.py` and computes per-run folders under `WORK_DIR` (defaults to `/tmp/work`).
 - Calls `scripts/payload_handler.py <payload.json> <save_dir>` to write a run-specific `input.ini` into the run `input` folder (the handler also prints an `export INPUT='...'` line for debugging).
 - Runs one of the pipeline modes depending on `JOB_MODE`:
   - `preprocess` → `pixi run -- python -m gtpost.interface.preprocess <input.ini> <output_dir>`
@@ -65,7 +65,7 @@ The entrypoint expects a JSON file at `${ARGS_DIR}/payload`. Common keys:
 ```json
 {
 
-"simulation_id": "S123",
+"orchestration_id": "S123",
 
 "run_id": "R001",
 
@@ -222,7 +222,7 @@ The entrypoint expects a JSON file at `${ARGS_DIR}/payload`. Common keys:
 }
 ```
 
-- `simulation_id` / `simulationId` and `run_id` / `runId` are used to compute per-run folders.
+- `orchestration_id` / `orchestrationId` and `run_id` / `runId` are used to compute per-run folders.
 - `ini_parameters` (or `iniParameters`) is a dict of INI sections and values; `payload_handler.py` converts this into a `input.ini` under the run `input` folder.
 
 ---
@@ -258,7 +258,7 @@ If you mount the repository into the container (for development) mount it somewh
 ### Troubleshooting (common errors)
 - Error: "The environment directory seems have to moved! Environments are non-relocatable" — Cause: host `.pixi` was copied into the image or you mounted a host `.pixi` at `/app/.pixi`. Fix: ensure `.pixi` is excluded from build context (`.dockerignore`) and rebuild the image; do not mount `/app` at runtime.
 - Error: "python3: command not found" — Fix: rebuild the image so `pixi install` runs during `docker build`; for local quickstart, ensure a Python 3.11 interpreter is available on PATH.
-- Error: `input.ini` not found / `PreProcess` missing `inidata` — Means payload had no `ini_parameters` or `payload_handler.py` failed to write `input.ini`. Check `/args/payload` and inspect `/tmp/work/<sim>/<run>/input/input.ini` on the host.
+- Error: `input.ini` not found / `PreProcess` missing `inidata` — Means payload had no `ini_parameters` or `payload_handler.py` failed to write `input.ini`. Check `/args/payload` and inspect `/tmp/work/<orch>/<run>/input/input.ini` on the host.
 
 ---
 
