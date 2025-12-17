@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Extract simulation_id and run_id from a JSON payload file.
+"""Extract orchestration_id and run_id from a JSON payload file.
 
 Usage: ./scripts/extract_ids.py /path/to/payload.json
 
-Prints two whitespace-separated tokens: SIM_ID RUN_ID
+Prints two whitespace-separated tokens: ORCH_ID RUN_ID
 If a key is missing, an empty string is printed in its place.
 """
 import json
@@ -30,12 +30,12 @@ def main(argv):
         print("")
         return 0
 
-    sim = data.get("simulation_id") or data.get("simulationId") or ""
+    orch = data.get("orchestration_id") or data.get("orchestrationId") or ""
     run = data.get("run_id") or data.get("runId") or ""
     # Ensure no newlines in output
-    sim = str(sim).replace("\n", " ")
+    orch = str(orch).replace("\n", " ")
     run = str(run).replace("\n", " ")
-    print(f"{sim} {run}")
+    print(f"{orch} {run}")
     return 0
 
 
