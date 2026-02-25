@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/equinor/gt-post/compare/v0.4.0...v0.5.0) (2026-02-25)
+
+
+### Features
+
+* Added blackhawk and cliff house supplied by PO ([#17](https://github.com/equinor/gt-post/issues/17)) ([8846a93](https://github.com/equinor/gt-post/commit/8846a93d3940cb1ef6f6a97a25d0a39d10e36a6a))
+
 ## [0.4.0](https://github.com/equinor/gt-post/compare/v0.3.0...v0.4.0) (2025-12-17)
 
 
