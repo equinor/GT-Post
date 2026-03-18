@@ -210,7 +210,7 @@ class PreProcess:
         channelwidths_to_remove = [
             x for x in channel_width_options if self.channel_width != x
         ]
-        if self.template_name not in ("Roda", "Sobrarbe"):
+        if self.template_name not in ("Roda", "Sobrarbe", "Blackhawk", "Cliff_House"):
             for channelwidth_to_remove in channelwidths_to_remove:
                 for file in self.fpath_output.glob("*.dep"):
                     width_in_filename = file.name.split("_")[-1].split(".")[0]
