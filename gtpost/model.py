@@ -97,7 +97,7 @@ class ModelResult:
         sedfile = [f for f in folder.glob("*.sed")][0]
         trimfile = [f for f in folder.glob("*.nc") if "trim" in f.name][0]
         modelname = delft3d_folder.stem + f" - {sedfile.stem}"
-        dataset = xr.open_dataset(trimfile)
+        dataset = xr.open_dataset(trimfile, decode_timedelta=False)
 
         if "flow2d3d" in dataset.attrs["source"].lower():
             return cls(
@@ -119,6 +119,10 @@ class ModelResult:
         Derive additional attributes from the trimfile (self.dataset) for postprocessing
         the final model results. These are:
         """
+        if len(self.dataset.time) < 2:
+            raise ValueError(
+                f"Need at least 2 timesteps for processing, got {len(self.dataset.time)}"
+            )
         self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
         self.mouth_position = utils.get_mouth_midpoint(
             self.dataset["MEAN_H1"][1, :, :].values,
