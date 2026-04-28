@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/equinor/gt-post/compare/v0.5.0...v0.5.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* Updated function ([#20](https://github.com/equinor/gt-post/issues/20)) ([ef00a66](https://github.com/equinor/gt-post/commit/ef00a661e68e7a809598cd2857613f75c1ca3893))
+
 ## [0.5.0](https://github.com/equinor/gt-post/compare/v0.4.0...v0.5.0) (2026-02-25)
 
 
