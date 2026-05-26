@@ -56,7 +56,7 @@ only-include = ["gtpost", "tests"]
 
 [tool.pixi.project]
 channels = ["conda-forge"]
-platforms = ["win-64", "linux-64"]
+platforms = ["win-64"]
 
 [tool.pixi.dependencies]
 python = ">=3.12"
@@ -97,7 +97,7 @@ torchvision = "*"
 ultralytics = "*"
 gtpost = { path = ".", editable = true }
 
-[tool.pixi.pypi-options]
+[pixi.tool.pypi-options]
 extra-index-urls = ["https://download.pytorch.org/whl/cu121"]
 
 [tool.pixi.system-requirements]
