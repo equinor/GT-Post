@@ -1,0 +1,5 @@
+[TransportFormulaFileInformation]
+  FileVersion = 01.00
+[TransportFormula]
+  Number = -2	# Van Rijn (2007): TRANSPOR2004
+  Wform  =  2

@@ -44,6 +44,8 @@ class TestPreprocess:
             "River_dominated_delta",
             "Roda",
             "Sobrarbe",
+            "Retrograding",
+            "Prograding",
         ),
     )
     def test_preprocessing(self, template):

@@ -15,7 +15,7 @@ for folder in folders:
             raise
 
 # Create ini file for containers
-config = configparser.SafeConfigParser()
+config = configparser.ConfigParser()
 for section in parameters:
     if not config.has_section(section):
         config.add_section(section)
