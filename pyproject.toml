@@ -97,7 +97,7 @@ torchvision = "*"
 ultralytics = "*"
 gtpost = { path = ".", editable = true }
 
-[pixi.tool.pypi-options]
+[tool.pixi.pypi-options]
 extra-index-urls = ["https://download.pytorch.org/whl/cu121"]
 
 [tool.pixi.system-requirements]
