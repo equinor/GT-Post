@@ -2,6 +2,7 @@ FROM ghcr.io/prefix-dev/pixi:0.69.0
 
 COPY . /app
 WORKDIR /app
+ENV CONDA_OVERRIDE_CUDA=12.1
 RUN pixi install
 RUN pixi shell-hook > /shell-hook
 RUN chmod +x /shell-hook
