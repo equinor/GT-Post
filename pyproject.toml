@@ -54,7 +54,7 @@ path = "gtpost/__init__.py"
 [tool.hatch.build.targets.sdist]
 only-include = ["gtpost", "tests"]
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["win-64", "linux-64"]
 
