@@ -99,6 +99,7 @@ gtpost = { path = ".", editable = true }
 
 [tool.pixi.pypi-options]
 extra-index-urls = ["https://download.pytorch.org/whl/cu121"]
+no-build-isolation = []
 
 [tool.pixi.system-requirements]
 linux = "5.4"
