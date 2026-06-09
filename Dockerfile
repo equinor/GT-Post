@@ -1,9 +1,13 @@
-FROM ghcr.io/prefix-dev/pixi:0.67.2
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://pixi.sh/install.sh | PIXI_VERSION=v0.67.2 bash && \
+    rm -rf /var/lib/apt/lists/*
+ENV PATH="/root/.pixi/bin:${PATH}"
 
 COPY . /app
 WORKDIR /app
 ENV CONDA_OVERRIDE_CUDA=12.1
-ENV CONDA_OVERRIDE_GLIBC=2.35
 RUN pixi install
 RUN pixi shell-hook > /shell-hook
 RUN chmod +x /shell-hook
