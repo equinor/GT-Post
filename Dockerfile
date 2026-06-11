@@ -8,7 +8,7 @@ ENV PATH="/root/.pixi/bin:${PATH}"
 COPY . /app
 WORKDIR /app
 ENV CONDA_OVERRIDE_CUDA=12.1
-ENV CONDA_OVERRIDE_GLIBC=2.35
+ENV CONDA_OVERRIDE_GLIBC=2.17
 RUN pixi install
 RUN pixi shell-hook > /shell-hook
 RUN chmod +x /shell-hook
