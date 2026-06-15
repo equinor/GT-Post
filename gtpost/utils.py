@@ -77,6 +77,38 @@ def get_template_name(input_path: str | Path) -> str:
     return template_name
 
 
+def get_mouth_midpoint(
+    mean_water_depth: np.ndarray, dimension_n: np.ndarray, dimension_m: np.ndarray
+) -> list[int, int]:
+    """
+    Get x and y position of the river mouth.
+
+    Parameters
+    ----------
+    mean_water_depth : np.ndarray
+        Array of mean water depth at the first timestep (MEAN_H1 data var in trim file).
+    dimension_n : np.ndarray
+        Array of n-dimension cells (N data var in trim file).
+    dimension_m : np.ndarray
+        Array of m-dimension cells (M data var in trim file).
+
+    Returns
+    -------
+    list
+        list with mouth midpoint x-position and mouth y-position.
+    """
+    x_mouth = int(np.ceil(np.mean(np.where(mean_water_depth[1, :] == -999.0))))
+    y_values = np.array(
+        [
+            np.count_nonzero(mean_water_depth[i, :] == -999.0)
+            for i in range(len(dimension_m))
+        ]
+    )
+    y_values[y_values == len(dimension_n)] = 0
+    y_mouth = len(dimension_m) - np.argmax(y_values[::-1]) - 1
+    return [x_mouth, y_mouth]
+
+
 def get_dx_dy(xvalues: np.ndarray) -> tuple[int, int]:
     """
     Get grid spacing. Assumes spacing is the same along x and y dimensions.

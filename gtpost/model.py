@@ -132,6 +132,11 @@ class ModelResult:
         deposit_height     :       np.ndarray: array (time, x, y) height of deposits
         """
         self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
+        self.mouth_position = utils.get_mouth_midpoint(
+            self.dataset["MEAN_H1"][1, :, :].values,
+            self.dataset.N.values,
+            self.dataset.M.values,
+        )
         self.bottom_depth = self.dataset["DPS"].where(self.dataset["DPS"] > -10).values
         subsidence = np.append(
             self.dataset["SDU"].values,
@@ -164,6 +169,11 @@ class ModelResult:
                                     of the foreset.
         """
         self.dx, self.dy = utils.get_dx_dy(self.dataset.XZ[:, 0].values)
+        self.mouth_position = utils.get_mouth_midpoint(
+            self.dataset["MEAN_H1"][1, :, :].values,
+            self.dataset.N.values,
+            self.dataset.M.values,
+        )
         self.model_mask = self.dataset["KCS"] >= 1
         subsidence = np.append(
             self.dataset["SDU"].values,
