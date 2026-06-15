@@ -1,4 +1,5 @@
 import logging
+import sys
 from pathlib import Path
 
 from gtpost.model import ModelResult
@@ -93,4 +94,10 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    args = sys.argv[1:]
+    kwargs = {}
+    if len(args) >= 1:
+        kwargs["fpath_input"] = args[0]
+    if len(args) >= 2:
+        kwargs["fpath_output"] = args[1]
+    main(**kwargs)

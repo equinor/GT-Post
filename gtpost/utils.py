@@ -64,7 +64,13 @@ def get_template_name(input_path: str | Path) -> str:
         Name of the D3D-GT template.
     """
     input_ini = ConfigParser(interpolation=None)
-    input_ini.read(Path(input_path).joinpath("input.ini"))
+    ini_path = Path(input_path).joinpath("input.ini")
+    if not ini_path.is_file():
+        raise FileNotFoundError(
+            f"input.ini not found at {ini_path}. Ensure the preprocessing output "
+            f"(including input.ini) is present in the simulation directory."
+        )
+    input_ini.read(ini_path)    
     template_name = (
         input_ini["template"]["value"].lower().replace(" ", "_").replace("/", "_")
     )
