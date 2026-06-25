@@ -45,7 +45,7 @@ class TestPreprocess:
             "Roda",
             "Sobrarbe",
             "Retrograding",
-            "Prograding",
+            "Blackhawk",
         ),
     )
     def test_preprocessing(self, template):
