@@ -24,6 +24,9 @@ RUN apt-get update \
 RUN addgroup --gid 1001 radix-non-root-group
 RUN adduser --uid 1001 --gid 1001 radix-non-root-user
 
+# Allow non-root user to access pixi and the shell-hook environment
+RUN chmod -R o+rX /root && chmod -R o+rX /root/.pixi
+
 USER 1001
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
