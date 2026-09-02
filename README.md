@@ -1,3 +1,5 @@
+[![SCM Compliance](https://scm-compliance-api.radix.equinor.com/repos/equinor/88107a7f-e19e-4ec7-8478-c38c9eaf1ca3/badge)](https://scm-compliance-api.radix.equinor.com/repos/equinor/88107a7f-e19e-4ec7-8478-c38c9eaf1ca3/badge)
+
 # GT-post - Postprocessing of Delft3D-Geotool models
 
 ## Overview
